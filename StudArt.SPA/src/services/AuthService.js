@@ -20,7 +20,7 @@ class AuthService {
 			})
 			.then((response) => {
 				if (response.data.token) {
-					localStorage.setItem('user', JSON.stringify(response.data));
+					localStorage.setItem('userData', JSON.stringify(response.data));
 				}
 
 				return response.data;
@@ -28,11 +28,20 @@ class AuthService {
 	};
 
 	logout = () => {
-		localStorage.removeItem('user');
+		localStorage.removeItem('userData');
 	};
 
+	getCurrentUserData() {
+		return JSON.parse(localStorage.getItem('userData'));
+	}
+
 	getCurrentUser() {
-		return JSON.parse(localStorage.getItem('user'));
+		let data = this.getCurrentUserData();
+		if (data != null) {
+			return data.user;
+		}
+
+		return null;
 	}
 }
 
