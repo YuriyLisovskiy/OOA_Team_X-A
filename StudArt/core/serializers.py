@@ -5,9 +5,11 @@ from core.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+	id = serializers.IntegerField(read_only=True)
+
 	class Meta:
 		model = User
-		fields = ('first_name', 'last_name', 'username', 'email', 'avatar',)
+		fields = ('id', 'first_name', 'last_name', 'username', 'email', 'avatar',)
 
 
 class UserWithTokenSerializer(serializers.ModelSerializer):
@@ -16,6 +18,7 @@ class UserWithTokenSerializer(serializers.ModelSerializer):
 	first_name = serializers.CharField(read_only=True)
 	last_name = serializers.CharField(read_only=True)
 	avatar = serializers.ImageField(read_only=True)
+	id = serializers.IntegerField(read_only=True)
 
 	def get_token(self, obj):
 		jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -35,4 +38,4 @@ class UserWithTokenSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
-		fields = ('token', 'username', 'email', 'password', 'first_name', 'last_name', 'avatar')
+		fields = ('token', 'id', 'username', 'email', 'password', 'first_name', 'last_name', 'avatar')
