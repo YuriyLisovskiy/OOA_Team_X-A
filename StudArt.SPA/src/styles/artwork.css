@@ -1,0 +1,16 @@
+.w-95 {
+	width: 95%;
+}
+
+.artwork-details {
+	position: relative;
+}
+
+.top-minus-30 {
+	top: -30px;
+}
+
+.comment-border {
+	border-left: 1px solid lightgray;
+	margin-left: -6px;
+}

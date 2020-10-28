@@ -1,0 +1,53 @@
+.select-none {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.artwork-card {
+	width: 30%;
+}
+
+.artwork-description {
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	width: 90%;
+}
+
+.avatar-image-mask {
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	overflow: hidden;
+}
+
+.avatar-picture {
+	max-width: 100%;
+}
+
+.profile-photo img {
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border: 1px solid #aaa;
+	width: 30px;
+	height: 30px;
+}
+
+.profile-photo {
+	display: flex;
+	align-items: center
+}
+
+.read-more-btn {
+	vertical-align: top;
+	padding-top: 5px;
+}
+
+.underline-on-hover:hover {
+	text-decoration: underline;
+}

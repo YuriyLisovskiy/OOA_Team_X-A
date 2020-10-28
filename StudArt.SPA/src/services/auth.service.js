@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/v1';
+const API_URL = 'http://localhost:8000/api/v1/auth';
 
 class AuthService {
 
@@ -14,7 +14,7 @@ class AuthService {
 
 	login = (username, password) => {
 		return axios
-			.post(API_URL + '/auth', {
+			.post(API_URL + '/login', {
 				username,
 				password,
 			})
@@ -30,6 +30,17 @@ class AuthService {
 	logout = () => {
 		localStorage.removeItem('userData');
 	};
+
+	checkUserExistsBy = (data) => {
+		let params = [];
+		for (let p in data) {
+			if (data.hasOwnProperty(p)) {
+				params.push(encodeURIComponent(p) + "=" + encodeURIComponent(data[p]));
+			}
+		}
+
+		return axios.get(API_URL + '/userExists?' + params.join("&"));
+	}
 
 	getCurrentUserData() {
 		return JSON.parse(localStorage.getItem('userData'));

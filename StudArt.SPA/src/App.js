@@ -2,19 +2,22 @@ import React, {Component} from 'react';
 import {Link, Route, Switch} from 'react-router-dom';
 
 import './App.css';
-import AuthService from "./services/AuthService";
+import AuthService from "./services/auth.service";
 import Login from "./components/login";
+import Management from "./components/management";
+import Register from "./components/register";
+import Profile from "./components/profile";
+import Home from "./components/home";
+import Artwork from "./components/artwork";
 
 export default class App extends Component {
 
 	constructor(props) {
 		super(props);
-		this.logOut = this.logOut.bind(this);
+		this.handleLogOut = this.handleLogOut.bind(this);
 
 		this.state = {
-			// showModeratorBoard: false,
-			// showAdminBoard: false,
-			currentUser: undefined,
+			currentUser: undefined
 		};
 	}
 
@@ -22,39 +25,45 @@ export default class App extends Component {
 		const user = AuthService.getCurrentUser();
 		if (user) {
 			this.setState({
-				currentUser: user,
-				// showModeratorBoard: user.roles.includes("ROLE_MODERATOR"),
-				// showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+				currentUser: user
 			});
 		}
 	}
 
-	logOut() {
+	handleLogOut() {
 		AuthService.logout();
 		window.location = '/';
 	}
 
 	render() {
-		// const {currentUser, showModeratorBoard, showAdminBoard} = this.state;
-		const {currentUser} = this.state;
+		const currentUser = this.state.currentUser;
 		return (
 			<div>
-				<nav className="navbar navbar-expand-md bg-dark navbar-dark">
-					<Link className="navbar-brand" to='/'>StudArt</Link>
+				<nav className="navbar navbar-expand-md bg-light navbar-light">
+					<Link className="navbar-brand" to='/'>
+						<img height={50} src={process.env.PUBLIC_URL + '/logo225.png'} alt="LOGO"/> StudArt
+					</Link>
 					<button className="navbar-toggler" type="button" data-toggle="collapse"
 					        data-target="#collapsibleNavbar">
 						<span className="navbar-toggler-icon"/>
 					</button>
 					<div className="collapse navbar-collapse" id="collapsibleNavbar">
+						{currentUser && currentUser.is_superuser &&
+							<ul className="navbar-nav mr-auto">
+								<li className="nav-item">
+									<Link to='/management' className='btn nav-link'>Management</Link>
+								</li>
+							</ul>
+						}
 						{currentUser ? (
 							<ul className="navbar-nav ml-auto">
 								<li className="nav-item">
 									<Link className='nav-link'
-									      to={'/user/' + currentUser.id}>{currentUser.username}
+									      to={'/profile/' + currentUser.id}>{currentUser.username}
 									</Link>
 								</li>
 								<li className="nav-item">
-									<Link to='/' className='btn nav-link' onClick={this.logOut}>Sign Out</Link>
+									<Link to='/' className='btn nav-link' onClick={this.handleLogOut}>Sign Out</Link>
 								</li>
 							</ul>
 						) : (
@@ -72,7 +81,11 @@ export default class App extends Component {
 				<div className='container mt-3'>
 					<Switch>
 						<Route path='/login' component={Login}/>
-						{/*<Route path='/register' component={SignupForm} />*/}
+						<Route path='/management' component={Management}/>
+						<Route path='/register' component={Register} />
+						<Route path='/profile/:id' component={Profile} />
+						<Route path='/artwork/:id' component={Artwork} />
+						<Route path={['/', '/home']} component={Home} />
 					</Switch>
 				</div>
 			</div>

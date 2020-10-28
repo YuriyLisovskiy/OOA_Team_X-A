@@ -16,3 +16,12 @@ class SimpleUserSerializer(UserSerializer):
 	email = serializers.EmailField(read_only=True)
 	is_superuser = serializers.BooleanField(read_only=True)
 	rating = serializers.FloatField(read_only=True)
+
+
+class SelfEditUserSerializer(SimpleUserSerializer):
+	avatar = serializers.ImageField(read_only=True)
+
+
+class UploadAvatarUserSerializer(SimpleUserSerializer):
+	first_name = serializers.CharField(read_only=True)
+	last_name = serializers.CharField(read_only=True)

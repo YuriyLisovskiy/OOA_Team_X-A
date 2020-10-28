@@ -1,18 +1,9 @@
 import React, {Component} from "react";
-import AuthService from "../services/AuthService";
+import AuthService from "../services/auth.service";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
-
-const required = value => {
-	if (!value) {
-		return (
-			<div className="alert alert-danger" role="alert">
-				This field is required!
-			</div>
-		);
-	}
-};
+import {required_field} from "./utils";
 
 export default class Login extends Component {
 	constructor(props) {
@@ -94,7 +85,7 @@ export default class Login extends Component {
 								name="username"
 								value={this.state.username}
 								onChange={e => this.onChangeUsername(e)}
-								validations={[required]}
+								validations={[required_field]}
 								placeholder="Type text..."
 							/>
 						</div>
@@ -106,7 +97,7 @@ export default class Login extends Component {
 								name="password"
 								value={this.state.password}
 								onChange={e => this.onChangePassword(e)}
-								validations={[required]}
+								validations={[required_field]}
 								placeholder="Type text..."
 							/>
 						</div>

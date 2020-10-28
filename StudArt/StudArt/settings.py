@@ -26,6 +26,7 @@ INSTALLED_APPS = [
 	'rest_framework',
 	'corsheaders',
 	'api_v1',
+	'artwork',
 	'core'
 ]
 
@@ -111,6 +112,9 @@ STATICFILES_DIRS = [
 	BASE_DIR / 'static'
 ]
 
+MEDIA_ROOT = BASE_DIR / 'media-root'
+MEDIA_URL = '/media/'
+
 AUTH_USER_MODEL = 'core.User'
 
 REST_FRAMEWORK = {
@@ -132,6 +136,8 @@ CORS_ORIGIN_WHITELIST = (
 	'http://127.0.0.1:3000',
 	'http://localhost:3000',
 )
+
+DEFAULT_NO_IMAGE_URL = 'https://www.englishfastpass.com/wp-content/plugins/learnpress/assets/images/no-image.png'
 
 try:
 	from CryptoForecast.local_settings import *
