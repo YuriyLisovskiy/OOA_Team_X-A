@@ -14,3 +14,9 @@
 	border-left: 1px solid lightgray;
 	margin-left: -6px;
 }
+
+.artwork-image {
+	max-width: 100%;
+	height: auto;
+	object-fit: contain;
+}

@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -129,7 +130,8 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-	'JWT_RESPONSE_PAYLOAD_HANDLER': 'StudArt.utils.jwt_response_handler'
+	'JWT_RESPONSE_PAYLOAD_HANDLER': 'StudArt.utils.jwt_response_handler',
+	'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
 }
 
 CORS_ORIGIN_WHITELIST = (
@@ -139,7 +141,10 @@ CORS_ORIGIN_WHITELIST = (
 
 DEFAULT_NO_IMAGE_URL = 'https://www.englishfastpass.com/wp-content/plugins/learnpress/assets/images/no-image.png'
 
+TIME_FORMAT = '%H:%M'
+DATE_FORMAT = '%d/%m/%Y'
+
 try:
-	from CryptoForecast.local_settings import *
+	from StudArt.local_settings import *
 except ImportError:
 	pass

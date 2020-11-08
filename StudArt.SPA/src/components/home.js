@@ -7,11 +7,58 @@ import {getResponseMessage} from "./utils";
 export default class Home extends Component {
 	constructor(props) {
 		super(props);
-		// this.handleRegister = this.handleRegister.bind(this);
 		this.state = {
-			artworks: undefined,
-			loading: true
+			artworks: {
+				first: undefined,
+				second: undefined,
+				third: undefined,
+			},
+			artworksFirstCol: undefined,
+			artworksSecondCol: undefined,
+			artworksThird: undefined,
+			loading: true,
+			lastLoadedPage: undefined
 		}
+
+		this.handleScroll = this.handleScroll.bind(this);
+		this.makeColFromResp = this.makeColFromResp.bind(this);
+		this.loadArtworks = this.loadArtworks.bind(this);
+	}
+
+	makeColFromResp(resp, i) {
+		return resp.data.results[i].map(
+			(artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>
+		);
+	}
+
+	loadArtworks(page) {
+		ArtworkService.getArtworks(page).then(
+			resp => {
+				// let newState = {
+				// 	artworksFirstCol: this.makeColFromResp(resp, 0),
+				// 	artworksSecondCol: this.makeColFromResp(resp, 1),
+				// 	artworksThirdCol: this.makeColFromResp(resp, 2),
+				// 	loading: false,
+				// 	lastLoadedPage: resp.data.next
+				// };
+				let newFirst = this.makeColFromResp(resp, 0);
+				let newSecond = this.makeColFromResp(resp, 1);
+				let newThird = this.makeColFromResp(resp, 2);
+				this.setState({
+					artworks: {
+						first: this.state.artworks.first ? this.state.artworks.first.concat(newFirst) : newFirst,
+						second: this.state.artworks.second ? this.state.artworks.second.concat(newSecond) : newSecond,
+						third: this.state.artworks.third ? this.state.artworks.third.concat(newThird) : newThird
+					},
+					loading: false,
+					lastLoadedPage: resp.data.next
+				});
+			},
+			err => {
+				// TODO:
+				alert(getResponseMessage(err));
+			}
+		);
 	}
 
 	componentDidMount() {
@@ -50,21 +97,31 @@ export default class Home extends Component {
 		// 	}
 		// ];
 
-		ArtworkService.getArtworks().then(
-			resp => {
-				console.log(resp.data);
+		window.addEventListener("scroll", this.handleScroll);
+		this.loadArtworks();
+	}
+
+	handleScroll() {
+		if (this.state.lastLoadedPage) {
+			const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+			const body = document.body;
+			const html = document.documentElement;
+			const docHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+			const windowBottom = windowHeight + window.pageYOffset;
+			if (windowBottom >= docHeight - 1) {
+				let parts = this.state.lastLoadedPage.split('=');
+				let page = parts[parts.length - 1];
 				this.setState({
-					artworks: resp.data.map(
-						(artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>
-					),
-					loading: false
+					loading: true,
+					lastLoadedPage: undefined
 				});
-			},
-			err => {
-				// TODO:
-				alert(getResponseMessage(err));
+				this.loadArtworks(page);
 			}
-		);
+		}
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener("scroll", this.handleScroll);
 	}
 
 	// handleExplorePost(id) {
@@ -140,26 +197,38 @@ export default class Home extends Component {
 	// 	}
 	// }
 
+	colHasPosts = (colName) => {
+		return this.state.artworks[colName] && this.state.artworks[colName].length > 0;
+	}
+
+	makePostsCol = (colName) => {
+		return <div className="col-md-4">
+			{this.colHasPosts(colName) && this.state.artworks[colName]}
+		</div>;
+	}
+
 	render() {
+		let hasPosts = this.colHasPosts('first') || this.colHasPosts('second') || this.colHasPosts('third');
 		return (
 			<div>
-				{this.state.loading ? (
-					<div className="row">
+				{hasPosts ? (
+					<div>
+						<div className="row">
+							{this.makePostsCol('first')}
+							{this.makePostsCol('second')}
+							{this.makePostsCol('third')}
+						</div>
+					</div>
+				) : (
+					!this.state.loading && <h2>No posts added yet</h2>
+				)}
+				{
+					this.state.loading && <div className="row mb-2">
 						<div className="col-md-12 text-center">
 							<div className="spinner-grow text-secondary"/>
 						</div>
 					</div>
-				) : (
-					<div>
-						{this.state.artworks && this.state.artworks.length > 0 ? (
-							<div>
-								<div className="card-columns">{this.state.artworks}</div>
-							</div>
-						) : (
-							<h2>No posts added yet</h2>
-						)}
-					</div>
-				)}
+				}
 			</div>
 		);
 	}

@@ -34,9 +34,19 @@ class ReadOnlyCommentSerializer(serializers.ModelSerializer):
 	id = serializers.IntegerField(read_only=True)
 	answers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 	author = serializers.SerializerMethodField(read_only=True)
+	creation_date = serializers.SerializerMethodField(read_only=True)
+	creation_time = serializers.SerializerMethodField(read_only=True)
 
 	def get_author(self, obj):
 		return ReadOnlyUserLinkSerializer(obj.author, context=self.context).data
+
+	@staticmethod
+	def get_creation_date(obj):
+		return obj.creation_date.strftime(settings.DATE_FORMAT)
+
+	@staticmethod
+	def get_creation_time(obj):
+		return obj.creation_time.strftime(settings.TIME_FORMAT)
 
 	class Meta:
 		model = Comment
@@ -50,6 +60,8 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 	discussions_ids = serializers.SerializerMethodField(read_only=True)
 	author = serializers.SerializerMethodField(read_only=True)
 	image = serializers.SerializerMethodField(read_only=True)
+	creation_date = serializers.SerializerMethodField(read_only=True)
+	creation_time = serializers.SerializerMethodField(read_only=True)
 
 	@staticmethod
 	def get_tags(obj):
@@ -57,7 +69,8 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 
 	def get_voted(self, obj):
 		request = self.context.get('request')
-		return request.user.is_authenticated and request.user.artworks.filter(pk=obj.id).exists()
+		# return request.user.is_authenticated and request.user.artworks.filter(pk=obj.id).exists()
+		return request.user.is_authenticated and obj.voters.filter(pk=request.user.id).exists()
 
 	@staticmethod
 	def get_discussions_ids(obj):
@@ -72,6 +85,14 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 			return request.build_absolute_uri(obj.image.url)
 
 		return settings.DEFAULT_NO_IMAGE_URL
+
+	@staticmethod
+	def get_creation_date(obj):
+		return obj.creation_date.strftime(settings.DATE_FORMAT)
+
+	@staticmethod
+	def get_creation_time(obj):
+		return obj.creation_time.strftime(settings.TIME_FORMAT)
 
 	class Meta:
 		model = Artwork

@@ -1,7 +1,6 @@
 import React, {Component} from "react";
 
 import "../styles/artwork_preview.css"
-import Artwork from "./artwork";
 import {Link} from "react-router-dom";
 import ArtworkService from "../services/artwork.service";
 import {getResponseMessage} from "./utils";
@@ -36,15 +35,17 @@ export default class ArtworkPreview extends Component {
 	render() {
 		let post = this.props.post;
 		let postVoting = this.state.postVoting;
+		if (!postVoting) {
+			postVoting = {
+				points: post.points,
+				isVoted: post.voted
+			}
+		}
+
 		return (
-			<div className="card artwork-card">
-				{this.state.showModal && <Artwork id={post.id} onHide={() => {
-					this.setState({
-						showModal: false
-					})
-				}}/>}
+			<div className="card artwork-card mb-4">
 				<Link to={'/artwork/' + post.id}>
-					<img className="card-img-top" src={post.image} alt="Artwork"/>
+					<img className="card-img img-fluid" src={post.image} alt="Artwork"/>
 				</Link>
 				<div className="card-body">
 					<div className="card-text pb-2">
@@ -53,17 +54,21 @@ export default class ArtworkPreview extends Component {
 							<Link to={'/artwork/' + post.id} className="text-muted">more</Link>
 						</small>
 					</div>
-					<div className="d-inline">
-						<i role="button" className={"select-none fa fa-lg fa-star" + (postVoting && postVoting.isVoted ? "" : "-o")}
-						   aria-hidden="true" onClick={this.handleVote(post.id)}
-						   data-voted={postVoting && postVoting.isVoted ? "voted" : ""}> {postVoting ? postVoting.points : 0}</i>
+					<div>
+						{
+							postVoting && postVoting.isVoted && <div className="d-inline">
+								<span className="badge badge-success">
+									<i className="fa fa-check-circle-o" aria-hidden="true"> Rated</i>
+								</span>
+							</div>
+						}
+						<Link to={'/artwork/' + post.id} className="text-muted d-inline">
+							<div className={(postVoting && postVoting.isVoted ? "ml-3 " : "") + "d-inline select-none"}>
+								<i className="fa fa-comments fa-lg"
+								   aria-hidden="true"/> {post.discussions_ids.length} Discussion{post.discussions_ids.length > 1 || post.discussions_ids.length === 0 ? 's' : ''}
+							</div>
+						</Link>
 					</div>
-					<Link to={'/artwork/' + post.id} className="text-muted">
-						<div className="d-inline ml-3 select-none">
-							<i className="fa fa-comments fa-lg"
-							   aria-hidden="true"/> {post.discussions_ids.length} Discussion{post.discussions_ids.length > 1 ? 's' : ''}
-						</div>
-					</Link>
 					<div className="card-text mt-3 pb-3 select-none">
 						<Link to={'/profile/' + post.author.id} className="text-muted">
 							<div className="float-left profile-photo">
@@ -71,7 +76,7 @@ export default class ArtworkPreview extends Component {
 								<small className="underline-on-hover">{post.author.username}</small>
 							</div>
 						</Link>
-						<small className="text-muted float-right">{post.creation_date} at {post.creation_time}</small>
+						<small className="text-muted float-right mt-1">{post.creation_date} at {post.creation_time}</small>
 					</div>
 				</div>
 			</div>

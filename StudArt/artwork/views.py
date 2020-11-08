@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions
 
 from artwork.models import Artwork, Comment
+from artwork.pagination import ArtworkSetPagination
 from artwork.serializers import ReadOnlyArtworkSerializer, ReadOnlyCommentSerializer, VoteForArtworkSerializer, \
 	VoteForCommentSerializer
 
@@ -10,8 +11,9 @@ from artwork.serializers import ReadOnlyArtworkSerializer, ReadOnlyCommentSerial
 #   - get
 class ArtworksAPIView(generics.ListAPIView):
 	permission_classes = (permissions.AllowAny,)
-	queryset = Artwork.objects.all()
+	queryset = Artwork.objects.all().order_by('-creation_date_time')
 	serializer_class = ReadOnlyArtworkSerializer
+	pagination_class = ArtworkSetPagination
 
 
 # /api/v1/artworks/<pk>

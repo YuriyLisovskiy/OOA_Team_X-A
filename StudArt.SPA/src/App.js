@@ -38,7 +38,7 @@ export default class App extends Component {
 	render() {
 		const currentUser = this.state.currentUser;
 		return (
-			<div>
+			<div id="body">
 				<nav className="navbar navbar-expand-md bg-light navbar-light">
 					<Link className="navbar-brand" to='/'>
 						<img height={50} src={process.env.PUBLIC_URL + '/logo225.png'} alt="LOGO"/> StudArt

@@ -13,6 +13,7 @@ class Artwork(models.Model):
 	points = models.PositiveIntegerField(default=0)
 	creation_date = models.DateField(auto_now=True)
 	creation_time = models.TimeField(auto_now=True)
+	creation_date_time = models.DateTimeField(auto_now=True)
 	image = models.ImageField()
 	author = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='artworks')
 	voters = models.ManyToManyField(to=User, related_name='voted_artworks', blank=True)
