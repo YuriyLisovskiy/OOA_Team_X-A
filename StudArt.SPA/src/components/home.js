@@ -4,6 +4,8 @@ import ArtworkPreview from "./artwork_preview";
 import ArtworkService from "../services/artwork.service";
 import {getResponseMessage} from "./utils";
 
+let HOMEPAGE_COLUMNS = 3;
+
 export default class Home extends Component {
 	constructor(props) {
 		super(props);
@@ -31,8 +33,8 @@ export default class Home extends Component {
 		);
 	}
 
-	loadArtworks(page) {
-		ArtworkService.getArtworks(page).then(
+	loadArtworks(page, columns) {
+		ArtworkService.getArtworks(page, columns).then(
 			resp => {
 				// let newState = {
 				// 	artworksFirstCol: this.makeColFromResp(resp, 0),
@@ -98,7 +100,7 @@ export default class Home extends Component {
 		// ];
 
 		window.addEventListener("scroll", this.handleScroll);
-		this.loadArtworks();
+		this.loadArtworks(null, HOMEPAGE_COLUMNS);
 	}
 
 	handleScroll() {
@@ -115,7 +117,7 @@ export default class Home extends Component {
 					loading: true,
 					lastLoadedPage: undefined
 				});
-				this.loadArtworks(page);
+				this.loadArtworks(page, HOMEPAGE_COLUMNS);
 			}
 		}
 	}

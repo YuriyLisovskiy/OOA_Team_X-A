@@ -4,13 +4,22 @@ import authHeader from './auth-header';
 const API_URL = 'http://localhost:8000/api/v1/artworks';
 
 class ArtworkService {
-	getArtworks = (page) => {
+	getArtworks = (page, columns) => {
 		let pageParam = '';
+		let columnsParam = '';
+		let connector = '?';
 		if (page) {
 			pageParam = '?page=' + page.toString();
 		}
-
-		return axios.get(API_URL + pageParam, { headers: authHeader() });
+		if(page&&columns)
+		{
+			connector='&';
+		}
+		if(columns)
+		{
+			columnsParam = 'columns=' + columns.toString();
+		}
+		return axios.get(API_URL + pageParam +connector+ columnsParam, { headers: authHeader() });
 	}
 
 	getArtwork = (id) => {

@@ -28,16 +28,20 @@ export default class Profile extends Component {
 			}
 		)
 		//TODO: get artworks by user id
+		//todo: make easily scalable to fit artworks in 2/3/... columns
 		//ArtworkService.getArtworks(this.props.match.params.id).then(
 		ArtworkService.getArtworks().then(
 			resp => {
+				console.log("resp.data");
 				console.log(resp.data);
-				this.setState({
-					artworks: resp.data.map(
-						(artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>
-					),
-					loading: false
-				});
+				if(resp.data){
+					this.setState({
+						artworks: resp.data.map(
+							(artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>
+						),
+						loading: false
+					});
+				}
 			},
 			err => {
 				// TODO:
