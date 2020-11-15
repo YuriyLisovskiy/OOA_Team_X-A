@@ -7,51 +7,55 @@ import {getResponseMessage} from "./utils";
 let HOMEPAGE_COLUMNS = 3;
 
 export default class Home extends Component {
-	constructor(props) {
+	constructor (props) {
 		super(props);
-		this.state = {
-			artworks: {
-				first: undefined,
-				second: undefined,
-				third: undefined,
-			},
-			artworksFirstCol: undefined,
-			artworksSecondCol: undefined,
-			artworksThird: undefined,
-			loading: true,
-			lastLoadedPage: undefined
+		console.log(this.props.columnsCount)
+		let cc=HOMEPAGE_COLUMNS;
+		if(this.props.columnsCount) {
+			cc = this.props.columnsCount
 		}
-
+		console.log(cc)
+		this.state = {
+			artworks: undefined,
+			artworksColList: undefined,
+			loading: true,
+			lastLoadedPage: undefined,
+			columnsCount: cc
+		}
+		
+		console.log(this.state.columnsCount)
+		
 		this.handleScroll = this.handleScroll.bind(this);
-		this.makeColFromResp = this.makeColFromResp.bind(this);
+		this.makeColsFromResp = this.makeColsFromResp.bind(this);
 		this.loadArtworks = this.loadArtworks.bind(this);
+		this.setArtworksState = this.setArtworksState.bind(this);
 	}
-
-	makeColFromResp(resp, i) {
-		return resp.data.results[i].map(
-			(artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>
-		);
+	
+	makeColsFromResp (resp) {
+		let newList = [];
+		for (let i = 0; i < this.state.columnsCount; i++) {
+			newList.push(resp.data.results[i].map((artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>))
+		}
+		return newList;
 	}
-
-	loadArtworks(page, columns) {
+	
+	setArtworksState (currArtworks, newArtworks) {
+		if (currArtworks) {
+			let newState = [];
+			for (let i = 0; i < this.state.columnsCount; i++) {
+				newState[i] = currArtworks[i] ? currArtworks[i].concat(newArtworks[i]) : newArtworks[i];
+			}
+			return newState;
+		}
+		return newArtworks;
+	}
+	
+	loadArtworks (page, columns) {
 		ArtworkService.getArtworks(page, columns).then(
 			resp => {
-				// let newState = {
-				// 	artworksFirstCol: this.makeColFromResp(resp, 0),
-				// 	artworksSecondCol: this.makeColFromResp(resp, 1),
-				// 	artworksThirdCol: this.makeColFromResp(resp, 2),
-				// 	loading: false,
-				// 	lastLoadedPage: resp.data.next
-				// };
-				let newFirst = this.makeColFromResp(resp, 0);
-				let newSecond = this.makeColFromResp(resp, 1);
-				let newThird = this.makeColFromResp(resp, 2);
+				let newArtworksList = this.makeColsFromResp(resp);
 				this.setState({
-					artworks: {
-						first: this.state.artworks.first ? this.state.artworks.first.concat(newFirst) : newFirst,
-						second: this.state.artworks.second ? this.state.artworks.second.concat(newSecond) : newSecond,
-						third: this.state.artworks.third ? this.state.artworks.third.concat(newThird) : newThird
-					},
+					artworks: this.setArtworksState(this.state.artworks, newArtworksList),
 					loading: false,
 					lastLoadedPage: resp.data.next
 				});
@@ -62,48 +66,13 @@ export default class Home extends Component {
 			}
 		);
 	}
-
-	componentDidMount() {
-		// let posts = [
-		// 	{
-		// 		id: 1,
-		// 		description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-		// 		tags: ["tag1", "tag2", "tag3"],
-		// 		points: 7,
-		// 		creation_date: "13/10/2020",
-		// 		creation_time: "9:07",
-		// 		voted: true,
-		// 		discussions_count: 35,
-		// 		image: 'https://cdn.pixabay.com/photo/2015/02/24/15/41/dog-647528__340.jpg',
-		// 		author: {
-		// 			id: 1,
-		// 			username: "admin",
-		// 			avatar: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
-		// 		}
-		// 	},
-		// 	{
-		// 		id: 2,
-		// 		description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-		// 		tags: ["tag1", "tag2", "tag3", "tag5", "tag6"],
-		// 		points: 256,
-		// 		creation_date: "27/10/2020",
-		// 		creation_time: "16:47",
-		// 		voted: false,
-		// 		discussions_count: 2,
-		// 		image: 'https://images.pexels.com/photos/1819650/pexels-photo-1819650.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-		// 		author: {
-		// 			id: 1,
-		// 			username: "admin",
-		// 			avatar: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
-		// 		}
-		// 	}
-		// ];
-
+	
+	componentDidMount () {
 		window.addEventListener("scroll", this.handleScroll);
-		this.loadArtworks(null, HOMEPAGE_COLUMNS);
+		this.loadArtworks(null, this.state.columnsCount);
 	}
-
-	handleScroll() {
+	
+	handleScroll () {
 		if (this.state.lastLoadedPage) {
 			const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
 			const body = document.body;
@@ -117,15 +86,15 @@ export default class Home extends Component {
 					loading: true,
 					lastLoadedPage: undefined
 				});
-				this.loadArtworks(page, HOMEPAGE_COLUMNS);
+				this.loadArtworks(page, this.state.columnsCount);
 			}
 		}
 	}
-
-	componentWillUnmount() {
+	
+	componentWillUnmount () {
 		window.removeEventListener("scroll", this.handleScroll);
 	}
-
+	
 	// handleExplorePost(id) {
 	// 	let comments = [
 	// 		{
@@ -151,7 +120,7 @@ export default class Home extends Component {
 	// 		console.log(comments);
 	// 	}
 	// }
-
+	
 	// handleVote(id) {
 	// 	return e => {
 	// 		let newVoted = !(e.target.getAttribute("data-voted") === "voted");
@@ -189,7 +158,7 @@ export default class Home extends Component {
 	// 		</div>
 	// 	);
 	// }
-
+	
 	// handleExploreArtwork(id) {
 	// 	return e => {
 	// 		this.setState({
@@ -198,28 +167,47 @@ export default class Home extends Component {
 	// 		})
 	// 	}
 	// }
-
-	colHasPosts = (colName) => {
-		return this.state.artworks[colName] && this.state.artworks[colName].length > 0;
+	
+	colHasPosts = (colNum) => {
+		return this.state.artworks[colNum] && this.state.artworks[colNum].length > 0;
 	}
-
-	makePostsCol = (colName) => {
-		return <div className="col-md-4">
-			{this.colHasPosts(colName) && this.state.artworks[colName]}
+	
+	colsHavePosts = () => {
+		if (this.state.artworks) {
+			for (let i = 0; i < this.state.columnsCount; i++) {
+				if (this.state.artworks[i] && this.state.artworks[i].length > 0) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	makePostsCol = (colNum) => {
+		let cn = "col-md-" + (12 / this.state.columnsCount);
+		return <div key={colNum} className={cn}>
+			{this.colHasPosts(colNum) && this.state.artworks[colNum]}
 		</div>;
 	}
-
-	render() {
-		let hasPosts = this.colHasPosts('first') || this.colHasPosts('second') || this.colHasPosts('third');
+	
+	makeAllColumns = () => {
+		let resultCols = [];
+		for (let i=0; i< this.state.columnsCount; i++)
+		{
+			resultCols.push(this.makePostsCol(i));
+		}
+		return <div className="row">
+			{resultCols}
+		</div>
+	}
+	
+	render () {
+		let hasPosts = this.colsHavePosts();
 		return (
 			<div>
 				{hasPosts ? (
 					<div>
-						<div className="row">
-							{this.makePostsCol('first')}
-							{this.makePostsCol('second')}
-							{this.makePostsCol('third')}
-						</div>
+						{this.makeAllColumns()}
 					</div>
 				) : (
 					!this.state.loading && <h2>No posts added yet</h2>

@@ -1,24 +1,19 @@
 import React, {Component} from "react";
 import UserService from "../services/user.service";
-import ArtworkService from "../services/artwork.service";
-import ArtworkPreview from "./artwork_preview";
-import {getResponseMessage} from "./utils";
-import {forEach} from "react-bootstrap/ElementChildren";
+import Home from "./home";
 
 export default class Profile extends Component {
 	constructor(props) {
 		super(props);
 		// this.handleRegister = this.handleRegister.bind(this);
 		this.state = {
-			user: undefined,
-			artworks: undefined
+			user: undefined
 		}
 	}
 
 	componentDidMount() {
 		UserService.getUser(this.props.match.params.id).then(
 			resp => {
-				console.log(resp);
 				this.setState({
 					user: resp.data
 				})
@@ -28,35 +23,13 @@ export default class Profile extends Component {
 			}
 		)
 		//TODO: get artworks by user id
-		//todo: make easily scalable to fit artworks in 2/3/... columns
-		//ArtworkService.getArtworks(this.props.match.params.id).then(
-		ArtworkService.getArtworks().then(
-			resp => {
-				console.log("resp.data");
-				console.log(resp.data);
-				if(resp.data){
-					this.setState({
-						artworks: resp.data.map(
-							(artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>
-						),
-						loading: false
-					});
-				}
-			},
-			err => {
-				// TODO:
-				alert(getResponseMessage(err));
-			}
-		);
-		console.log(this.state.user)
 	}
 
 	render() {
 		return (
 			<div>
 				<div className="col-8 flex-column">
-					<img src="https://i.pinimg.com/564x/04/e7/ba/04e7bafeb76ed96a59fd95e9804b951e.jpg" className="w-100"/>
-					<div className="card-columns">{this.state.artworks}</div>
+					<Home columnsCount={2}/>
 				</div>
 				<div className="col-3 flex-column ">
 					<div className=" rounded bg-white h-25 w-100 pt-2 align-content-center">
