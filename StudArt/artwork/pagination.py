@@ -7,15 +7,15 @@ class ArtworkSetPagination(PageNumberPagination):
 	max_page_size = 6
 
 	def get_paginated_response(self, data):
-		first = []
-		second = []
-		third = []
-		for idx, item in enumerate(data):
-			if idx % 3 == 0:
-				first.append(item)
-			elif idx % 3 == 1:
-				second.append(item)
-			elif idx % 3 == 2:
-				third.append(item)
+		list_of_lists = []
+		if self.request.query_params:
+			columns = int(self.request.query_params['columns'])
+			for i in range(0, columns):
+				list_of_lists.append([])
+			for idx, item in enumerate(data):
+				for i in range(0, columns):
+					if idx % columns == i:
+						list_of_lists[i].append(item)
+						break
 
-		return super().get_paginated_response([first, second, third])
+		return super().get_paginated_response(list_of_lists)
