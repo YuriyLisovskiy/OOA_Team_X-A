@@ -20,6 +20,15 @@ class ArtworkService {
 	vote = (id) => {
 		return axios.put(API_URL + '/' + id.toString() + '/vote', {}, { headers: authHeader() });
 	}
+
+	createArtwork = (description, tags, images) => {
+		// TODO: send creation request!
+		console.log({
+			description: description,
+			tags: tags,
+			images: images
+		});
+	}
 }
 
 export default new ArtworkService();
