@@ -9,6 +9,7 @@ import Register from "./components/register";
 import Profile from "./components/profile";
 import Home from "./components/home";
 import Artwork from "./components/artwork";
+import CreateArtwork from "./components/create_artwork";
 
 export default class App extends Component {
 
@@ -48,13 +49,18 @@ export default class App extends Component {
 						<span className="navbar-toggler-icon"/>
 					</button>
 					<div className="collapse navbar-collapse" id="collapsibleNavbar">
-						{currentUser && currentUser.is_superuser &&
-							<ul className="navbar-nav mr-auto">
+						<ul className="navbar-nav mr-auto">
+							<li>
+								<Link className='nav-link' to='/artwork/new'>
+									<i className="fa fa-plus" aria-hidden="true"/> New Post
+								</Link>
+							</li>
+							{currentUser && currentUser.is_superuser &&
 								<li className="nav-item">
 									<Link to='/management' className='btn nav-link'>Management</Link>
 								</li>
-							</ul>
-						}
+							}
+						</ul>
 						{currentUser ? (
 							<ul className="navbar-nav ml-auto">
 								<li className="nav-item">
@@ -84,6 +90,7 @@ export default class App extends Component {
 						<Route path='/management' component={Management}/>
 						<Route path='/register' component={Register} />
 						<Route path='/profile/:id' component={Profile} />
+						<Route path='/artwork/new' component={CreateArtwork} />
 						<Route path='/artwork/:id' component={Artwork} />
 						<Route path={['/', '/home']} component={Home} />
 					</Switch>
