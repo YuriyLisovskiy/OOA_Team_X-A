@@ -1,15 +1,16 @@
 from django.conf import settings
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from artwork.models import Tag, Artwork, Comment
-from core.models import User
+from artwork.models import TagModel, ArtworkModel, CommentModel
+from core.models import UserModel
 
 
 class TagSerializer(serializers.ModelSerializer):
 	id = serializers.IntegerField(read_only=True)
 
 	class Meta:
-		model = Tag
+		model = TagModel
 		fields = ('id', 'text')
 
 
@@ -26,8 +27,25 @@ class ReadOnlyUserLinkSerializer(serializers.ModelSerializer):
 		return settings.DEFAULT_NO_IMAGE_URL
 
 	class Meta:
-		model = User
+		model = UserModel
 		fields = ('id', 'username', 'avatar')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = CommentModel
+		fields = (
+			'text', 'author', 'artwork'
+		)
+
+
+class CommentReplySerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = CommentModel
+		fields = (
+			'text', 'author', 'comment'
+		)
 
 
 class ReadOnlyCommentSerializer(serializers.ModelSerializer):
@@ -49,8 +67,11 @@ class ReadOnlyCommentSerializer(serializers.ModelSerializer):
 		return obj.creation_time.strftime(settings.TIME_FORMAT)
 
 	class Meta:
-		model = Comment
-		fields = ('id', 'text', 'points', 'author', 'creation_date', 'creation_time', 'answers')
+		model = CommentModel
+		fields = (
+			'id', 'text', 'points', 'author',
+			'creation_date', 'creation_time', 'answers'
+		)
 
 
 class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
@@ -59,7 +80,7 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 	voted = serializers.SerializerMethodField(read_only=True)
 	discussions_ids = serializers.SerializerMethodField(read_only=True)
 	author = serializers.SerializerMethodField(read_only=True)
-	image = serializers.SerializerMethodField(read_only=True)
+	images = serializers.SerializerMethodField(read_only=True)
 	creation_date = serializers.SerializerMethodField(read_only=True)
 	creation_time = serializers.SerializerMethodField(read_only=True)
 
@@ -79,12 +100,17 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 	def get_author(self, obj):
 		return ReadOnlyUserLinkSerializer(obj.author, context=self.context).data
 
-	def get_image(self, obj):
+	def get_images(self, obj):
 		request = self.context.get('request')
-		if obj.image:
-			return request.build_absolute_uri(obj.image.url)
+		links = []
+		images = obj.images.all()
+		for image in images:
+			links.append(request.build_absolute_uri(image.url))
 
-		return settings.DEFAULT_NO_IMAGE_URL
+		if len(links) == 0:
+			links.append(settings.DEFAULT_NO_IMAGE_URL)
+
+		return links
 
 	@staticmethod
 	def get_creation_date(obj):
@@ -95,7 +121,7 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 		return obj.creation_time.strftime(settings.TIME_FORMAT)
 
 	class Meta:
-		model = Artwork
+		model = ArtworkModel
 		fields = (
 			'id', 'description', 'tags', 'points', 'creation_date', 'creation_time',
 			'image', 'author', 'voted', 'discussions_ids'
@@ -104,37 +130,51 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 
 # Requires instance fields:
 #   - voters: ForeignKey
-#   - points: Integer
+#   - points: Float
 class VoteSerializer(serializers.ModelSerializer):
 	id = serializers.ReadOnlyField()
-	is_voted = serializers.SerializerMethodField()
+	mark = serializers.IntegerField(required=True)
 
-	def get_is_voted(self, obj):
-		return self.context.get('is_voted_result')
+	def calc_points(self, curr_points, curr_voters_count, mark):
+		return curr_points
 
 	def update(self, instance, validated_data):
 		request = self.context.get('request')
-		user_exists = instance.voters.filter(pk=request.user.id).exists()
-		if user_exists:
-			instance.voters.remove(request.user)
-		else:
-			instance.voters.add(request.user)
+		if instance.voters.filter(pk=request.user.id).exists():
+			raise ValidationError('re-voting is forbidden')
 
-		self.context['is_voted_result'] = not user_exists
-		instance.points += (-1 if user_exists else 1)
+		mark = validated_data['mark']
+		if mark not in self.Meta.mark_range:
+			raise ValidationError('mark is out of range')
+
+		instance.voters.add(request.user)
+		instance.points = self.calc_points(
+			instance.points, instance.voters.count(), mark
+		)
 		instance.save()
 		return instance
+
+	class Meta:
+		mark_range = range(0)
 
 
 class VoteForArtworkSerializer(VoteSerializer):
 
+	def calc_points(self, curr_points, curr_voters_count, mark):
+		return ((curr_points * curr_voters_count) + mark) / (curr_voters_count + 1)
+
 	class Meta:
-		model = Artwork
-		fields = ('id', 'points', 'is_voted')
+		model = ArtworkModel
+		fields = ('id', 'mark')
+		mark_range = range(-10, 12)
 
 
 class VoteForCommentSerializer(VoteSerializer):
 
+	def calc_points(self, curr_points, curr_voters_count, mark):
+		return curr_points + mark
+
 	class Meta:
-		model = Comment
-		fields = ('id', 'points', 'is_voted')
+		model = CommentModel
+		fields = ('id', 'mark')
+		mark_range = range(-1, 2)

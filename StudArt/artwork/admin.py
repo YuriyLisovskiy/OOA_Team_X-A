@@ -1,5 +1,5 @@
 from django.contrib import admin
-from artwork.models import Tag, Artwork
+from artwork.models import TagModel, ArtworkModel
 
-admin.site.register(Tag)
-admin.site.register(Artwork)
+admin.site.register(TagModel)
+admin.site.register(ArtworkModel)

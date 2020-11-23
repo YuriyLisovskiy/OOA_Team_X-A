@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-from core.models import User
+from core.models import UserModel
 
 
 class UserWithTokenSerializer(serializers.ModelSerializer):
@@ -30,7 +30,7 @@ class UserWithTokenSerializer(serializers.ModelSerializer):
 		return instance
 
 	class Meta:
-		model = User
+		model = UserModel
 		fields = (
 			'token', 'id', 'username', 'email', 'password',
 			'first_name', 'last_name', 'avatar', 'is_superuser',

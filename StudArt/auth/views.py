@@ -8,7 +8,7 @@ from auth.serializers import UserWithTokenSerializer
 # /api/v1/auth/register
 # methods:
 #   - post: username, email, password
-from core.models import User
+from core.models import UserModel
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
@@ -16,7 +16,7 @@ class RegisterUserAPIView(generics.CreateAPIView):
 	serializer_class = UserWithTokenSerializer
 
 
-# /api/v1/auth/userExists
+# /api/v1/auth/user/exists
 # methods:
 #   - get: username, email
 class UserExistsAPIView(generics.RetrieveAPIView):
@@ -38,7 +38,7 @@ class UserExistsAPIView(generics.RetrieveAPIView):
 
 		data = dict()
 		if q:
-			exists = User.objects.filter(q).exists()
+			exists = UserModel.objects.filter(q).exists()
 			data['exists'] = exists
 			if exists:
 				data['message'] = 'User with this username and(or) email address already exists'

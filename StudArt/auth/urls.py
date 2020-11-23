@@ -8,5 +8,5 @@ app_name = 'auth'
 urlpatterns = [
     re_path(r'^login/?', obtain_jwt_token),
     re_path(r'^register/?', RegisterUserAPIView.as_view()),
-    re_path(r'^userExists/?', UserExistsAPIView.as_view())
+    re_path(r'^user/exists/?', UserExistsAPIView.as_view())
 ]
