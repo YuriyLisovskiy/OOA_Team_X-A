@@ -57,7 +57,7 @@ class UploadAvatarUserSerializer(SimpleUserSerializer):
 
 
 class _UserBlacklistSerializer(serializers.ModelSerializer):
-	user_pk = serializers.SerializerMethodField(required=True)
+	user_pk = serializers.IntegerField(required=True)
 
 	def _negate(self, bool_res):
 		return bool_res if self.Meta.exists else not bool_res
@@ -100,7 +100,7 @@ class UnblockUserSerializer(_UserBlacklistSerializer):
 
 
 class _AuthorSubscriptionSerializer(serializers.ModelSerializer):
-	user_pk = serializers.SerializerMethodField(required=True)
+	user_pk = serializers.IntegerField(required=True)
 
 	def _negate(self, bool_res):
 		return bool_res if self.Meta.exists else not bool_res

@@ -6,5 +6,5 @@ class UserModel(AbstractUser):
 
 	avatar = models.ImageField(null=True, blank=True, upload_to='media')
 	rating = models.FloatField(default=0)
-	blocked_users = models.ManyToManyField('core.models.UserModel', 'blocked_users')
-	subscriptions = models.ManyToManyField('core.models.UserModel', 'subscriptions')
+	blocked_users = models.ManyToManyField(to='core.UserModel', related_name='blacklist')
+	subscriptions = models.ManyToManyField(to='core.UserModel', related_name='subs')

@@ -116,7 +116,7 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = BASE_DIR / 'media-root'
 MEDIA_URL = '/media/'
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'core.UserModel'
 
 REST_FRAMEWORK = {
 	'DEFAULT_PERMISSION_CLASSES': (
@@ -127,7 +127,8 @@ REST_FRAMEWORK = {
 		'rest_framework.authentication.SessionAuthentication',
 		'rest_framework.authentication.BasicAuthentication',
 	),
-	'PAGE_SIZE': 50
+	'PAGE_SIZE': 50,
+	'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination'
 }
 
 JWT_AUTH = {
