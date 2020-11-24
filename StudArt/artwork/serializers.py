@@ -2,16 +2,23 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from artwork.models import TagModel, ArtworkModel, CommentModel
+from artwork.models import TagModel, ArtworkModel, CommentModel, ImageModel
 from core.models import UserModel
 
 
-class TagSerializer(serializers.ModelSerializer):
-	id = serializers.IntegerField(read_only=True)
+class TagModelSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = TagModel
-		fields = ('id', 'text')
+		fields = ('text',)
+
+
+class ImageModelSerializer(serializers.ModelSerializer):
+	id = serializers.IntegerField(read_only=True)
+
+	class Meta:
+		model = ImageModel
+		fields = ('id', 'image', 'artwork')
 
 
 class ReadOnlyUserLinkSerializer(serializers.ModelSerializer):
@@ -74,10 +81,31 @@ class ReadOnlyCommentSerializer(serializers.ModelSerializer):
 		)
 
 
+class CreateArtworkSerializer(serializers.ModelSerializer):
+	id = serializers.IntegerField(read_only=True)
+
+	class Meta:
+		model = ArtworkModel
+		fields = (
+			'id', 'description', 'tags', 'images', 'author'
+		)
+
+
+class EditArtworkSerializer(serializers.ModelSerializer):
+	id = serializers.IntegerField(read_only=True)
+
+	class Meta:
+		model = ArtworkModel
+		fields = (
+			'id', 'description', 'tags'
+		)
+
+
 class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 	id = serializers.IntegerField(read_only=True)
 	tags = serializers.SerializerMethodField(read_only=True)
 	voted = serializers.SerializerMethodField(read_only=True)
+	can_vote = serializers.SerializerMethodField(read_only=True)
 	discussions_ids = serializers.SerializerMethodField(read_only=True)
 	author = serializers.SerializerMethodField(read_only=True)
 	images = serializers.SerializerMethodField(read_only=True)
@@ -92,6 +120,9 @@ class ReadOnlyArtworkSerializer(serializers.ModelSerializer):
 		request = self.context.get('request')
 		# return request.user.is_authenticated and request.user.artworks.filter(pk=obj.id).exists()
 		return request.user.is_authenticated and obj.voters.filter(pk=request.user.id).exists()
+
+	def get_can_vote(self, obj):
+		return obj.author.pk != self.context.get('request').user.pk
 
 	@staticmethod
 	def get_discussions_ids(obj):

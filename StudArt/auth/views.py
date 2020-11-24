@@ -3,17 +3,16 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 from auth.serializers import UserWithTokenSerializer
+from core.models import UserModel
 
 
 # /api/v1/auth/register
 # methods:
 #   - post: username, email, password
-from core.models import UserModel
-
-
 class RegisterUserAPIView(generics.CreateAPIView):
 	permission_classes = (permissions.AllowAny,)
 	serializer_class = UserWithTokenSerializer
+	queryset = UserModel.objects.all()
 
 
 # /api/v1/auth/user/exists

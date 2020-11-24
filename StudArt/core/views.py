@@ -13,6 +13,8 @@ from core.serializers import (
 
 
 # /api/v1/core/users/<pk>
+# path args:
+#   - pk: primary key of user object
 # methods:
 #   - get
 class UserDetailsAPIView(generics.RetrieveAPIView):
@@ -89,6 +91,8 @@ class UnsubscribeFromAuthorAPIView(generics.UpdateAPIView, RequestUserViewMixin,
 
 
 # /api/v1/core/users/<pk>/subscriptions
+# path args:
+#   - pk: primary key of user object
 # methods:
 #   - get
 class SubscriptionsAPIView(generics.ListAPIView):
@@ -104,6 +108,8 @@ class SubscriptionsAPIView(generics.ListAPIView):
 
 
 # /api/v1/core/users/<pk>/blacklist
+# path args:
+#   - pk: primary key of user object
 # methods:
 #   - get
 class BlacklistAPIView(generics.ListAPIView):
