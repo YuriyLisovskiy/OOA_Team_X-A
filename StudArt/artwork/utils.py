@@ -1,5 +1,5 @@
 from artwork.models import TagModel
-from artwork.serializers import TagModelSerializer
+from artwork.serializers.tag_model import CreateTagModelSerializer
 
 
 def ensure_tags_exist(tags):
@@ -8,7 +8,7 @@ def ensure_tags_exist(tags):
 
 	for req_tag in tags:
 		if not TagModel.objects.filter(text=req_tag).exists():
-			serializer = TagModelSerializer(data={
+			serializer = CreateTagModelSerializer(data={
 				'text': req_tag
 			})
 			serializer.is_valid(raise_exception=True)

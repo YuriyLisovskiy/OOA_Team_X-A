@@ -1,10 +1,12 @@
 from django.urls import re_path
 
-from artwork.views import (
-	ArtworksAPIView, ArtworkAPIView, VoteForArtworkAPIView,
-	VoteForCommentAPIView, CommentAPIView, CommentsAPIView,
-	ReplyToCommentAPIView, CreateCommentAPIView, CreateArtworkAPIView,
-	DeleteArtworkAPIView, EditArtworkAPIView
+from artwork.views.artwork import (
+	CreateArtworkAPIView, DeleteArtworkAPIView, EditArtworkAPIView,
+	VoteForArtworkAPIView, ArtworkAPIView, ArtworksAPIView
+)
+from artwork.views.comment import (
+	ReplyToCommentAPIView, VoteForCommentAPIView, CommentAPIView,
+	CreateCommentAPIView, CommentsAPIView
 )
 
 app_name = 'artwork'

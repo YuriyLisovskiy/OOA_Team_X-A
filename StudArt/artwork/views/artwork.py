@@ -1,27 +1,55 @@
 from django.db.models import Q
+from django.http import QueryDict
 from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from artwork.models import ArtworkModel, CommentModel
+from artwork.models import ArtworkModel
 from artwork.pagination import ArtworkSetPagination
 from artwork.permissions import ModifyArtworkPermission
-from artwork.serializers import (
-	ReadOnlyArtworkSerializer, ReadOnlyCommentSerializer, VoteForArtworkSerializer,
-	VoteForCommentSerializer, CommentSerializer, CommentReplySerializer,
-	CreateArtworkSerializer, ImageModelSerializer, EditArtworkSerializer
+from artwork.serializers.artwork_model import (
+	ArtworkDetailsSerializer, CreateArtworkSerializer, EditArtworkSerializer,
+	VoteForArtworkSerializer
 )
+from artwork.serializers.image_model import CreateImageModelSerializer
 from artwork.utils import ensure_tags_exist
 from core.models import UserModel
 
 
 # /api/v1/artworks
 # methods:
-#   - get
+#   - get:
+#       - columns: int
+#       - page: int (page to load)
+#       - filter_by_subscriptions: bool (optional)
+#       - tag: string (can be of array type; optional)
+#       - author: string (username of an author; can be of array type; optional)
+# returns (success status - 200):
+#   {
+#       "count": <int (total pages quantity)>,
+#       "next": <string (link to load next page)>,
+#       "previous": <string (link to load previous page)>,
+#       "results": [
+# 	        {
+# 	            "id": <int>,
+# 	            "description": <string>,
+# 	            "tags": <array ont strings>,
+# 	            "points": <float>,
+# 	            "creation_date": <string>,
+# 	            "creation_time": <string>,
+# 	            "images": <array of full urls of images>,
+# 	            "author": <int (user pk)>,
+# 	            "voted": <bool (shows if current user voted ot not)>,
+# 	            "can_vote": <bool (shows if current user can vote this post)>,
+# 	            "comments": <array of primary keys of comments>
+# 	        },
+# 	        ...
+# 	    ]
+#   }
 class ArtworksAPIView(generics.ListAPIView):
 	permission_classes = (permissions.AllowAny,)
 	queryset = ArtworkModel.objects.all()
-	serializer_class = ReadOnlyArtworkSerializer
+	serializer_class = ArtworkDetailsSerializer
 	pagination_class = ArtworkSetPagination
 
 	@staticmethod
@@ -64,10 +92,24 @@ class ArtworksAPIView(generics.ListAPIView):
 #   - pk: primary key of an artwork
 # methods:
 #   - get
+# returns (success status - 200):
+#   {
+#       "id": <int>,
+# 	    "description": <string>,
+# 	    "tags": <array ont strings>,
+# 	    "points": <float>,
+# 	    "creation_date": <string>,
+# 	    "creation_time": <string>,
+# 	    "images": <array of full urls of images>,
+# 	    "author": <int (user pk)>,
+# 	    "voted": <bool (shows if current user voted ot not)>,
+# 	    "can_vote": <bool (shows if current user can vote this post)>,
+# 	    "comments": <array of primary keys of comments>
+#   }
 class ArtworkAPIView(generics.RetrieveAPIView):
 	permission_classes = (permissions.AllowAny,)
 	queryset = ArtworkModel.objects.all()
-	serializer_class = ReadOnlyArtworkSerializer
+	serializer_class = ArtworkDetailsSerializer
 
 
 # /api/v1/artworks/create
@@ -76,10 +118,13 @@ class ArtworkAPIView(generics.RetrieveAPIView):
 #       - description: string
 #       - tags: array of strings
 #       - images: array of images
+# returns (success status - 201):
+#   {
+#       "id": <int (pk of created artwork)>
+#   }
 class CreateArtworkAPIView(generics.CreateAPIView):
 	queryset = ArtworkModel.objects.all()
 	serializer_class = CreateArtworkSerializer
-
 	required_keys = (
 		'description', 'tags', 'images',
 	)
@@ -88,7 +133,7 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 	def ensure_images_exist(images, artwork_pk):
 		res = []
 		for img in images:
-			serializer = ImageModelSerializer(data={
+			serializer = CreateImageModelSerializer(data={
 				'image': img,
 				'artwork': artwork_pk
 			})
@@ -103,19 +148,21 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 		return Response(data={'message': msg}, status=400)
 
 	def create(self, request, *args, **kwargs):
-		full_data = request.data
+		data = request.data.dict()
 		for key in self.required_keys:
-			if key not in full_data:
+			if key not in data:
 				return self._bad_request('missing `{}` field'.format(key))
 
-		images = full_data.pop('images')
+		images = data.pop('images')
 		if len(images) == 0:
 			return self._bad_request('at least one image is required')
 
-		if not ensure_tags_exist(full_data.getlist('tags', [])):
+		if not ensure_tags_exist(data.getlist('tags', [])):
 			return self._bad_request('at least one tag is required')
 
-		full_data['author'] = request.user.pk
+		data['author'] = request.user.pk
+		full_data = QueryDict(mutable=True)
+		full_data.update(**data)
 		request._full_data = full_data
 		resp = super(CreateArtworkAPIView, self).create(request, *args, **kwargs)
 		images = self.ensure_images_exist(images, resp.data['id'])
@@ -128,6 +175,8 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 #   - pk: primary key of artwork to delete
 # methods:
 #   - delete
+# returns (success status - 204):
+#   {}
 class DeleteArtworkAPIView(generics.DestroyAPIView):
 	queryset = ArtworkModel.objects.all()
 	permission_classes = (
@@ -140,8 +189,10 @@ class DeleteArtworkAPIView(generics.DestroyAPIView):
 #   - pk: primary key of artwork to delete
 # methods:
 #   - put:
-#       - description: string
-#       - tags: array of strings
+#       - description: string (optional)
+#       - tags: array of strings (optional)
+# returns (success status - 200):
+#   {}
 class EditArtworkAPIView(generics.UpdateAPIView):
 	queryset = ArtworkModel.objects.all()
 	serializer_class = EditArtworkSerializer
@@ -163,71 +214,12 @@ class EditArtworkAPIView(generics.UpdateAPIView):
 # path args:
 #   - pk: primary key of artwork to vote for
 # methods:
-#   - put
+#   - put:
+#       - mark: int (value in range from -10 to 10)
+# returns (success status - 200):
+#   {
+#       "points": <float>
+#   }
 class VoteForArtworkAPIView(generics.UpdateAPIView):
 	queryset = ArtworkModel.objects.all()
 	serializer_class = VoteForArtworkSerializer
-
-
-# /api/v1/artworks/<pk>/comments
-# path args:
-#   - pk: primary key of parent artwork
-# methods:
-#   - get
-class CommentsAPIView(generics.ListAPIView):
-	serializer_class = ReadOnlyCommentSerializer
-	queryset = CommentModel.objects.all()
-
-	def get_queryset(self):
-		artwork_pk = self.kwargs['pk']
-		return self.queryset.filter(artwork_id=artwork_pk)
-
-
-# /api/v1/artworks/comments/<pk>
-# path args:
-#   - pk: primary key of comment
-# methods:
-#   - get
-class CommentAPIView(generics.RetrieveAPIView):
-	queryset = CommentModel.objects.all()
-	serializer_class = ReadOnlyCommentSerializer
-
-
-# /api/v1/artworks/<pk>/comments/create
-# path args:
-#   - pk: primary key of parent artwork
-# methods:
-#   - post
-class CreateCommentAPIView(generics.CreateAPIView):
-	queryset = CommentModel.objects.all()
-	serializer_class = CommentSerializer
-
-	def create(self, request, *args, **kwargs):
-		full_data = request.data
-		full_data.update(**{'artwork': self.kwargs['pk']})
-		request._full_data = full_data
-		return super(CreateCommentAPIView, self).create(request, *args, **kwargs)
-
-
-# /api/v1/artworks/comments/<pk>/reply
-# path args:
-#   - pk: primary key of parent comment
-# methods:
-#   - post
-class ReplyToCommentAPIView(generics.CreateAPIView):
-	queryset = CommentModel.objects.all()
-	serializer_class = CommentReplySerializer
-
-	def create(self, request, *args, **kwargs):
-		full_data = request.data
-		full_data.update(**{'comment': self.kwargs['pk']})
-		request._full_data = full_data
-		return super(ReplyToCommentAPIView, self).create(request, *args, **kwargs)
-
-
-# /api/v1/artworks/comments/<pk>/vote
-# methods:
-#   - put
-class VoteForCommentAPIView(generics.UpdateAPIView):
-	queryset = CommentModel.objects.all()
-	serializer_class = VoteForCommentSerializer
