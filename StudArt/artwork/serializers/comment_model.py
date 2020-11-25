@@ -75,6 +75,19 @@ class CreateCommentReplySerializer(serializers.ModelSerializer):
 		]
 
 
+class EditCommentSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = CommentModel
+		fields = ('text',)
+		extra_kwargs = {
+			'text': {'write_only': True}
+		}
+		validators = [
+			RequiredValidator(fields=('text',))
+		]
+
+
 class VoteForCommentSerializer(VoteSerializer):
 
 	def calc_points(self, curr_points, curr_voters_count, mark):

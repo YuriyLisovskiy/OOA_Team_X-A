@@ -1,7 +1,14 @@
 from rest_framework import permissions
 
 
-class ModifyArtworkPermission(permissions.BasePermission):
+# `has_object_permission` returns True if user is superuser
+#   or object was created less than 1 hour and user is an
+#   author of this object and `additional_checks` returns True.
+#   `additional_checks` can be overwritten and will affect on
+#   the result if user is not superuser.
+#
+# ATTENTION: Requires `author` attribute of type `UserModel`
+class BaseModifyPermission(permissions.BasePermission):
 
 	@staticmethod
 	def _1h_passed(obj):
@@ -11,13 +18,32 @@ class ModifyArtworkPermission(permissions.BasePermission):
 	def _is_owner(request, obj):
 		return obj.author.pk == request.user.pk
 
-	@staticmethod
-	def _has_comments(obj):
-		return obj.comments.exists()
+	def additional_checks(self, obj):
+		return True
 
 	def has_object_permission(self, request, view, obj):
 		superuser = request.user.is_superuser
 		is_owner = self._is_owner(request, obj)
-		has_comments = self._has_comments(obj)
+		more_checks = self.additional_checks(obj)
 		time_passed = self._1h_passed(obj)
-		return superuser or (is_owner and not time_passed and not has_comments)
+		return superuser or (is_owner and not time_passed and more_checks)
+
+
+class ModifyArtworkPermission(BaseModifyPermission):
+
+	@staticmethod
+	def _has_comments(obj):
+		return obj.comments.exists()
+
+	def additional_checks(self, obj):
+		return not self._has_comments(obj)
+
+
+class ModifyCommentPermission(BaseModifyPermission):
+
+	@staticmethod
+	def _has_answers(obj):
+		return obj.answers.exists()
+
+	def additional_checks(self, obj):
+		return not self._has_answers(obj)

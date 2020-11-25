@@ -1,8 +1,13 @@
+from itertools import chain
+
+from django.db.models import QuerySet
 from rest_framework import generics, permissions
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 
+from artwork.models import ArtworkModel, TagModel
+from artwork.serializers.tag_model import TagDetailsSerializer
 from core.mixins import UpdateUserModelMixin
 from core.models import UserModel
 from core.serializers.user_model import (
@@ -158,4 +163,26 @@ class UserBlacklistAPIView(generics.ListAPIView):
 		return self.request.user.blocked_users.all()
 
 
-# TODO: add `BanUserAPIView` (only for superuser)
+# /api/v1/core/users/<pk>/tags/top
+# methods:
+#   - get:
+#       - limit: int (count of top most used tags to load)
+# returns (success status - 200):
+#   [
+#       {
+#           "text": <string>
+#       },
+#       ...
+#   ]
+class TopNMostUsedTagsForUser(generics.ListAPIView):
+	serializer_class = TagDetailsSerializer
+	default_limit = 5
+
+	def get_queryset(self):
+		request = self.request
+		try:
+			limit = int(request.data.get('limit', self.default_limit))
+		except ValueError:
+			limit = self.default_limit
+
+		return request.user.last_used_tags.all().order_by('-pk').distinct('text')[:limit]

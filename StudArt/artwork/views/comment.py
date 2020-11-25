@@ -1,11 +1,13 @@
 from django.http import QueryDict
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 
 from artwork.models import CommentModel
+from artwork.permissions import ModifyCommentPermission
 from artwork.serializers.comment_model import (
 	CommentDetailsSerializer, CreateCommentSerializer, CreateCommentReplySerializer,
-	VoteForCommentSerializer
+	VoteForCommentSerializer, EditCommentSerializer
 )
 
 
@@ -98,10 +100,32 @@ class CreateCommentAPIView(generics.CreateAPIView):
 		return super(CreateCommentAPIView, self).create(request, *args, **kwargs)
 
 
-# TODO: add `EditCommentAPIView`
+# /api/v1/artworks/comments/<pk>/edit
+# path args:
+#   - pk: primary key of comment to edit
+# methods:
+#   - put:
+#       - text: string
+# returns (success status - 200):
+#   {}
+class EditCommentAPIView(generics.UpdateAPIView):
+	permission_classes = [IsAuthenticated & ModifyCommentPermission]
+	queryset = CommentModel.objects.all()
+	serializer_class = EditCommentSerializer
 
 
-# TODO: add `DeleteCommentAPIView`
+# /api/v1/artworks/comments/<pk>/delete
+# path args:
+#   - pk: primary key of comment to delete
+# methods:
+#   - delete
+# returns (success status - 204):
+#   {}
+class DeleteCommentAPIView(generics.DestroyAPIView):
+	queryset = CommentModel.objects.all()
+	permission_classes = (
+		IsAuthenticated & ModifyCommentPermission,
+	)
 
 
 # /api/v1/artworks/comments/<pk>/reply

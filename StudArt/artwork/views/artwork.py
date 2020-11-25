@@ -4,7 +4,7 @@ from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from artwork.models import ArtworkModel
+from artwork.models import ArtworkModel, TagModel
 from artwork.pagination import ArtworkSetPagination
 from artwork.permissions import ModifyArtworkPermission
 from artwork.serializers.artwork_model import (
@@ -157,7 +157,8 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 		if len(images) == 0:
 			return self._bad_request('at least one image is required')
 
-		if not ensure_tags_exist(data.getlist('tags', [])):
+		tags_pks = data.getlist('tags', [])
+		if not ensure_tags_exist(tags_pks):
 			return self._bad_request('at least one tag is required')
 
 		data['author'] = request.user.pk
@@ -167,6 +168,12 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 		resp = super(CreateArtworkAPIView, self).create(request, *args, **kwargs)
 		images = self.ensure_images_exist(images, resp.data['id'])
 		resp.data['images'] = images
+
+		last_used_tags = TagModel.objects.filter(pk__in=tags_pks)
+		if last_used_tags.exists():
+			request.user.last_used_tags.add(*last_used_tags)
+			request.user.save()
+
 		return resp
 
 
