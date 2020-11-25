@@ -64,7 +64,8 @@ class ArtworksAPIView(generics.ListAPIView):
 	def get_queryset(self):
 		request = self.request
 		user = request.user
-		required_q = ~Q(author__blocked_users__user=user)
+
+		required_q = ~Q(author__blocked_users__pk=user.pk)
 		filter_by_subscriptions = request.GET.get(
 			'filter_by_subscriptions', 'false'
 		).lower() == 'true'
