@@ -1,37 +1,48 @@
 import axios from 'axios';
+import {axiosRequest} from "./common";
 
 const API_URL = 'http://localhost:8000/api/v1/auth';
 
+const USER_DATA_KEY = "user_data";
+
+// Urls
+const URL_REGISTER = API_URL +    "/register";
+const URL_LOGIN = API_URL +       "/login";
+const URL_USER_EXISTS = API_URL + "/user/exists";
+
+// `handler` receives `json` and `err` args.
 class AuthService {
 
-	register = (username, email, password) => {
-		return axios.post(API_URL + '/register', {
-			username,
-			email,
-			password,
+	register = (username, email, password, handler) => {
+		let data = {
+			username: username,
+			email: email,
+			password: password
+		};
+		axiosRequest(axios.post(URL_REGISTER, data), handler);
+	};
+
+	login = (username, password, handler) => {
+		let data = {
+			username: username,
+			password: password
+		}
+		axiosRequest(axios.post(URL_LOGIN, data), (data, err) => {
+			if (!err) {
+				if (data.token) {
+					localStorage.setItem(USER_DATA_KEY, JSON.stringify(data));
+				}
+			}
+
+			handler(data, err);
 		});
 	};
 
-	login = (username, password) => {
-		return axios
-			.post(API_URL + '/login', {
-				username,
-				password,
-			})
-			.then((response) => {
-				if (response.data.token) {
-					localStorage.setItem('userData', JSON.stringify(response.data));
-				}
-
-				return response.data;
-			});
-	};
-
 	logout = () => {
-		localStorage.removeItem('userData');
+		localStorage.removeItem(USER_DATA_KEY);
 	};
 
-	checkUserExistsBy = (data) => {
+	checkUserExistsBy = (data, handler) => {
 		let params = [];
 		for (let p in data) {
 			if (data.hasOwnProperty(p)) {
@@ -39,11 +50,11 @@ class AuthService {
 			}
 		}
 
-		return axios.get(API_URL + '/userExists?' + params.join("&"));
+		axiosRequest(axios.get(URL_USER_EXISTS + '?' + params.join("&")), handler);
 	}
 
 	getCurrentUserData() {
-		return JSON.parse(localStorage.getItem('userData'));
+		return JSON.parse(localStorage.getItem(USER_DATA_KEY));
 	}
 
 	getCurrentUser() {

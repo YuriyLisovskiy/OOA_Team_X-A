@@ -1,5 +1,5 @@
 import axios from 'axios';
-import authHeader from './auth-header';
+import {authHeader} from './common';
 
 const API_URL = 'http://localhost:8000/api/v1/artworks/comments';
 

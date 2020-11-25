@@ -46,8 +46,12 @@ export default class Register extends Component {
 		}
 	}
 
-	getMessage = (r) => {
-		return (r.response && r.response.data && r.response.data.message) || r.message || r.data.message || r.toString();
+	getMessage = (data) => {
+		if (data.hasOwnProperty('message')) {
+			return data.message;
+		}
+
+		return data.toString();
 	}
 
 	setError = (err) => {
@@ -66,32 +70,37 @@ export default class Register extends Component {
 
 		this.form.validateAll();
 		if (this.checkBtn.context._errors.length === 0) {
-			AuthService.checkUserExistsBy({
+			let input = {
 				username: this.state.username,
 				email: this.state.email
-			}).then(
-				(resp) => {
-					if (resp.data && resp.data.exists) {
+			}
+			AuthService.checkUserExistsBy(input, (data, err) => {
+				if (err) {
+					this.setError(err);
+				}
+				else {
+					if (data.exists) {
 						this.setState({
-							user_exists_error: this.getMessage(resp),
+							user_exists_error: this.getMessage(data),
 							loading: false
 						});
 					}
 					else {
-						AuthService.register(
-							this.state.username, this.state.email, this.state.password
-						).then(
-							() => {
-								this.props.history.push("/");
-								window.location.reload();
-							},
-							error => this.setError(error)
+						AuthService.register(this.state.username, this.state.email, this.state.password,
+							(data, err) => {
+								if (err) {
+									this.setError(err);
+								} else {
+									this.props.history.push("/");
+									window.location.reload();
+								}
+							}
 						);
 					}
-				},
-				error => this.setError(error)
-			)
-		} else {
+				}
+			});
+		}
+		else {
 			this.setState({
 				loading: false
 			});

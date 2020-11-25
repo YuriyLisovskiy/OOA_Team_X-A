@@ -9,9 +9,6 @@ export default class Login extends Component {
 	constructor(props) {
 		super(props);
 		this.handleLogin = this.handleLogin.bind(this);
-		// this.onChangeUsername = this.onChangeUsername.bind(this);
-		// this.onChangePassword = this.onChangePassword.bind(this);
-
 		this.state = {
 			username: "",
 			password: "",
@@ -34,35 +31,26 @@ export default class Login extends Component {
 
 	handleLogin(e) {
 		e.preventDefault();
-
 		this.setState({
 			message: "",
 			loading: true
 		});
-
 		this.form.validateAll();
-
 		if (this.checkBtn.context._errors.length === 0) {
-			AuthService.login(this.state.username, this.state.password).then(
-				(resp) => {
-					this.props.history.push("/");
-					window.location.reload();
-				},
-				error => {
-					const resMessage =
-						(error.response &&
-							error.response.data &&
-							error.response.data.message) ||
-						error.message ||
-						error.toString();
-
+			AuthService.login(this.state.username, this.state.password, (data, err) => {
+				if (err) {
 					this.setState({
 						loading: false,
-						message: resMessage
+						message: err
 					});
 				}
-			);
-		} else {
+				else {
+					this.props.history.push("/");
+					window.location.reload();
+				}
+			});
+		}
+		else {
 			this.setState({
 				loading: false
 			});
