@@ -6,9 +6,10 @@ import CheckButton from "react-validation/build/button";
 import {required_field} from "./utils";
 import TagBadge from "./tag_badge";
 import ImagePreview from "./image_preview";
-import ArtworkService from "../services/artwork.service";
+import ArtworkService from "../services/artwork";
 
 export default class CreateArtwork extends Component {
+
 	constructor(props) {
 		super(props);
 		this.addImageRef = React.createRef();

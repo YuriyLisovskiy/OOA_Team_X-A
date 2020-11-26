@@ -1,5 +1,4 @@
-import axios from 'axios';
-import {axiosRequest} from "./common";
+import BaseService from "./base";
 
 const API_URL = 'http://localhost:8000/api/v1/auth';
 
@@ -11,15 +10,18 @@ const URL_LOGIN = API_URL +       "/login";
 const URL_USER_EXISTS = API_URL + "/user/exists";
 
 // `handler` receives `json` and `err` args.
-class AuthService {
+class AuthService extends BaseService {
+
+	constructor() {
+		super(false);
+	}
 
 	register = (username, email, password, handler) => {
-		let data = {
+		this.post({url: URL_REGISTER, data: {
 			username: username,
 			email: email,
 			password: password
-		};
-		axiosRequest(axios.post(URL_REGISTER, data), handler);
+		}}, handler);
 	};
 
 	login = (username, password, handler) => {
@@ -27,7 +29,7 @@ class AuthService {
 			username: username,
 			password: password
 		}
-		axiosRequest(axios.post(URL_LOGIN, data), (data, err) => {
+		this.post({url: URL_LOGIN, data: data}, (data, err) => {
 			if (!err) {
 				if (data.token) {
 					localStorage.setItem(USER_DATA_KEY, JSON.stringify(data));
@@ -50,7 +52,7 @@ class AuthService {
 			}
 		}
 
-		axiosRequest(axios.get(URL_USER_EXISTS + '?' + params.join("&")), handler);
+		this.get({url: URL_USER_EXISTS + '?' + params.join("&")}, handler);
 	}
 
 	getCurrentUserData() {

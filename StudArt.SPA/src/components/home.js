@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 
 import ArtworkPreview from "./artwork_preview";
-import ArtworkService from "../services/artwork.service";
+import ArtworkService from "../services/artwork";
 import {getResponseMessage} from "./utils";
 
 let HOMEPAGE_COLUMNS = 3;
@@ -31,10 +31,10 @@ export default class Home extends Component {
 		this.setArtworksState = this.setArtworksState.bind(this);
 	}
 	
-	makeColsFromResp (resp) {
+	makeColsFromResp (data) {
 		let newList = [];
 		for (let i = 0; i < this.state.columnsCount; i++) {
-			newList.push(resp.data.results[i].map((artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>))
+			newList.push(data.results[i].map((artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>))
 		}
 		return newList;
 	}
@@ -51,20 +51,20 @@ export default class Home extends Component {
 	}
 	
 	loadArtworks (page, columns) {
-		ArtworkService.getArtworks(page, columns).then(
-			resp => {
-				let newArtworksList = this.makeColsFromResp(resp);
-				this.setState({
-					artworks: this.setArtworksState(this.state.artworks, newArtworksList),
-					loading: false,
-					lastLoadedPage: resp.data.next
-				});
-			},
-			err => {
+		ArtworkService.getArtworks(page, columns, (data, err) => {
+			if (err) {
 				// TODO:
 				alert(getResponseMessage(err));
 			}
-		);
+			else {
+				let newArtworksList = this.makeColsFromResp(data);
+				this.setState({
+					artworks: this.setArtworksState(this.state.artworks, newArtworksList),
+					loading: false,
+					lastLoadedPage: data.next
+				});
+			}
+		});
 	}
 	
 	componentDidMount () {

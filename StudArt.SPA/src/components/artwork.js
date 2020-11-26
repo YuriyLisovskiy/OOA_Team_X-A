@@ -2,10 +2,11 @@ import React, {Component} from "react";
 import "../styles/artwork.css"
 import {Link} from "react-router-dom";
 import Discussion from "./discussion";
-import ArtworkService from "../services/artwork.service";
+import ArtworkService from "../services/artwork";
 import {getResponseMessage} from "./utils";
 
 export default class Artwork extends Component {
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -15,96 +16,38 @@ export default class Artwork extends Component {
 	}
 
 	componentDidMount() {
-		ArtworkService.getArtwork(this.props.match.params.id).then(
-			resp => {
-				this.setState({
-					artwork: resp.data,
-					postVoting: {
-						points: resp.data.points,
-						isVoted: resp.data.voted
-					}
-				});
-			},
-			err => {
+		ArtworkService.getArtwork(this.props.match.params.id, (data, err) => {
+			if (err) {
 				alert(getResponseMessage(err));
 			}
-		);
-
-		// this.setState({
-		// 	artwork: {
-		// 		description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-		// 		tags: ["tag1", "tag2", "tag3", "tag5", "tag6"],
-		// 		creation_date: "27/10/2020",
-		// 		creation_time: "16:47",
-		// 		author: {
-		// 			id: 1,
-		// 			username: "dimon",
-		// 			avatar: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80"
-		// 		},
-		// 		discussions_ids: [],
-		// 		image: 'https://cdn.pixabay.com/photo/2015/02/24/15/41/dog-647528__340.jpg',
-		// 		// image: 'https://images.pexels.com/photos/1819650/pexels-photo-1819650.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-		// 	},
-		// 	postVoting: {
-		// 		points: 256,
-		// 		isVoted: false
-		// 	},
-		// 	discussions: [
-		// 		{
-		// 			id: 1,
-		// 			text: 'So unnecessary comment',
-		// 			points: 3,
-		// 			voted: true,
-		// 			author: {
-		// 				id: 1,
-		// 				username: 'yuralisovskiy',
-		// 				avatar: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80'
-		// 			},
-		// 			answers: [
-		// 				{
-		// 					id: 3,
-		// 					text: 'So unnecessary answer',
-		// 					points: 7,
-		// 					voted: false,
-		// 					author: {
-		// 						id: 1,
-		// 						username: 'admin',
-		// 						avatar: 'https://cdn.pixabay.com/photo/2015/02/24/15/41/dog-647528__340.jpg'
-		// 					},
-		// 				}
-		// 			]
-		// 		},
-		// 		{
-		// 			id: 4,
-		// 			text: 'Hello, World!',
-		// 			points: -5,
-		// 			voted: false,
-		// 			author: {
-		// 				id: 2,
-		// 				username: 'dimon',
-		// 				avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ2Tte0mvD9fj--zkJGrAwtpGg80FR5h46RHQ&usqp=CAU'
-		// 			}
-		// 		}
-		// 	]
-		// })
+			else {
+				this.setState({
+					artwork: data,
+					postVoting: {
+						points: data.points,
+						isVoted: data.voted
+					}
+				});
+			}
+		});
 	}
 
 	handleVote = (id) => {
 		return e => {
-			ArtworkService.vote(id).then(
-				resp => {
-					this.setState({
-						postVoting: {
-							points: resp.data.points,
-							isVoted: resp.data.is_voted
-						}
-					})
-				},
-				err => {
+			ArtworkService.vote(id, (data, err) => {
+				if (err) {
 					// TODO:
 					alert(getResponseMessage(err));
 				}
-			)
+				else {
+					this.setState({
+						postVoting: {
+							points: data.points,
+							isVoted: data.is_voted
+						}
+					});
+				}
+			});
 		}
 	}
 

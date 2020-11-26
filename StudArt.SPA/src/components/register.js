@@ -1,11 +1,12 @@
 import React, {Component} from "react";
-import AuthService from "../services/auth.service";
+import AuthService from "../services/auth";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 import {required_field} from "./utils";
 
 export default class Register extends Component {
+
 	constructor(props) {
 		super(props);
 		this.handleRegister = this.handleRegister.bind(this);

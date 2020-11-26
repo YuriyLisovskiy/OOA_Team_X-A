@@ -1,33 +1,34 @@
-import axios from 'axios';
-import {authHeader} from './common';
+import BaseService from './base';
 
 const API_URL = 'http://localhost:8000/api/v1/artworks';
 
-class ArtworkService {
-	getArtworks = (page, columns) => {
+class ArtworkService extends BaseService {
+
+	getArtworks = (page, columns, handler) => {
 		let pageParam = '';
 		let columnsParam = '';
 		let connector = '?';
 		if (page) {
 			pageParam = '?page=' + page.toString();
 		}
-		if(page&&columns)
-		{
+
+		if (page && columns) {
 			connector='&';
 		}
-		if(columns)
-		{
+
+		if (columns) {
 			columnsParam = 'columns=' + columns.toString();
 		}
-		return axios.get(API_URL + pageParam +connector+ columnsParam, { headers: authHeader() });
+
+		this.get({url: API_URL + pageParam + connector + columnsParam}, handler);
 	}
 
-	getArtwork = (id) => {
-		return axios.get(API_URL + '/' + id.toString(), { headers: authHeader() });
+	getArtwork = (id, handler) => {
+		this.get({url: API_URL + '/' + id.toString()}, handler);
 	}
 
-	vote = (id) => {
-		return axios.put(API_URL + '/' + id.toString() + '/vote', {}, { headers: authHeader() });
+	vote = (id, handler) => {
+		this.put({url: API_URL + '/' + id.toString() + '/vote'}, handler);
 	}
 
 	createArtwork = (description, tags, images) => {

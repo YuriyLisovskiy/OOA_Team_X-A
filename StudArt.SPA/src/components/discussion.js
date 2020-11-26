@@ -1,9 +1,10 @@
 import React, {Component} from "react";
 
-import CommentService from "../services/comment.service";
+import CommentService from "../services/comment";
 import {getResponseMessage} from "./utils";
 
 export default class Discussion extends Component {
+
 	constructor(props) {
 		super(props);
 		this.handleVote = this.handleVote.bind(this);
@@ -13,15 +14,15 @@ export default class Discussion extends Component {
 	}
 
 	componentDidMount() {
-		CommentService.getComment(this.props.discussion_id).then(
-			resp => {
-				console.log(resp);
-			},
-			err => {
+		CommentService.getComment(this.props.discussion_id, (data, err) => {
+			if (err) {
 				// TODO:
 				alert(getResponseMessage(err));
 			}
-		);
+			else {
+				console.log(data);
+			}
+		});
 	}
 
 	handleVote(id) {

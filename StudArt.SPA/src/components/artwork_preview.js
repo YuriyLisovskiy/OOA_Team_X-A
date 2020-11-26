@@ -2,10 +2,11 @@ import React, {Component} from "react";
 
 import "../styles/artwork_preview.css"
 import {Link} from "react-router-dom";
-import ArtworkService from "../services/artwork.service";
+import ArtworkService from "../services/artwork";
 import {getResponseMessage} from "./utils";
 
 export default class ArtworkPreview extends Component {
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -15,20 +16,20 @@ export default class ArtworkPreview extends Component {
 
 	handleVote = (id) => {
 		return e => {
-			ArtworkService.vote(id).then(
-				resp => {
-					this.setState({
-						postVoting: {
-							points: resp.data.points,
-							isVoted: resp.data.is_voted
-						}
-					});
-				},
-				err => {
+			ArtworkService.vote(id, (data, err) => {
+				if (err) {
 					// TODO:
 					alert(getResponseMessage(err));
 				}
-			);
+				else {
+					this.setState({
+						postVoting: {
+							points: data.points,
+							isVoted: data.is_voted
+						}
+					});
+				}
+			});
 		}
 	}
 

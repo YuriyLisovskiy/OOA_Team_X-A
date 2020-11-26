@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Link, Route, Switch} from 'react-router-dom';
 
 import './App.css';
-import AuthService from "./services/auth.service";
+import AuthService from "./services/auth";
 import Login from "./components/login";
 import Management from "./components/management";
 import Register from "./components/register";

@@ -1,8 +1,9 @@
 import React, {Component} from "react";
-import UserService from "../services/user.service";
+import UserService from "../services/user";
 import Home from "./home";
 
 export default class Profile extends Component {
+
 	constructor(props) {
 		super(props);
 		// this.handleRegister = this.handleRegister.bind(this);
@@ -12,16 +13,16 @@ export default class Profile extends Component {
 	}
 
 	componentDidMount() {
-		UserService.getUser(this.props.match.params.id).then(
-			resp => {
-				this.setState({
-					user: resp.data
-				})
-			},
-			err => {
-				console.log(err)
+		UserService.getUser(this.props.match.params.id, (data, err) => {
+			if (err) {
+				console.log(err);
 			}
-		)
+			else {
+				this.setState({
+					user: data
+				});
+			}
+		});
 		//TODO: get artworks by user id
 	}
 
@@ -64,4 +65,3 @@ export default class Profile extends Component {
 		);
 	}
 }
-
