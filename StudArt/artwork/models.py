@@ -30,6 +30,6 @@ class CommentModel(models.Model):
 	creation_date = models.DateField(auto_now=True)
 	creation_time = models.TimeField(auto_now=True)
 	is_discussion = models.BooleanField(default=False)
-	artwork = models.ForeignKey(to=ArtworkModel, on_delete=models.CASCADE, related_name='comments', blank=True)
-	comment = models.ForeignKey(to='self', on_delete=models.CASCADE, related_name='answers', blank=True)
+	artwork = models.ForeignKey(to=ArtworkModel, on_delete=models.CASCADE, related_name='comments', blank=True, null=True)
+	comment = models.ForeignKey(to='self', on_delete=models.CASCADE, related_name='answers', blank=True, null=True)
 	voters = models.ManyToManyField(to=UserModel, related_name='voted_comments', blank=True)

@@ -1,17 +1,14 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
 from core.models import UserModel
+from core.validators import RequiredValidator
 
 
 class UserWithTokenSerializer(serializers.ModelSerializer):
 	token = serializers.SerializerMethodField()
-	id = serializers.IntegerField(read_only=True)
-	password = serializers.CharField(write_only=True)
-	first_name = serializers.CharField(read_only=True)
-	last_name = serializers.CharField(read_only=True)
-	avatar = serializers.ImageField(read_only=True)
-	rating = serializers.FloatField(read_only=True)
+	avatar = serializers.SerializerMethodField()
 
 	def get_token(self, obj):
 		jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -19,6 +16,13 @@ class UserWithTokenSerializer(serializers.ModelSerializer):
 		payload = jwt_payload_handler(obj)
 		token = jwt_encode_handler(payload)
 		return token
+
+	def get_avatar(self, obj):
+		request = self.context.get('request', None)
+		if request and obj.avatar:
+			return request.build_absolute_uri(obj.avatar.url)
+
+		return settings.DEFAULT_NO_IMAGE_URL
 
 	def create(self, validated_data):
 		password = validated_data.pop('password', None)
@@ -33,6 +37,14 @@ class UserWithTokenSerializer(serializers.ModelSerializer):
 		model = UserModel
 		fields = (
 			'token', 'id', 'username', 'email', 'password',
-			'first_name', 'last_name', 'avatar', 'is_superuser',
-			'rating'
+			'first_name', 'last_name', 'avatar', 'is_superuser', 'rating'
 		)
+		read_only_fields = (
+			'id', 'token', 'first_name', 'last_name', 'avatar', 'rating', 'is_superuser'
+		)
+		extra_kwargs = {
+			'password': {'write_only': True},
+		}
+		validators = [
+			RequiredValidator(fields=('username', 'email', 'password'))
+		]
