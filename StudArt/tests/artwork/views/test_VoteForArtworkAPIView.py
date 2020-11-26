@@ -1,28 +1,53 @@
 from django.urls import reverse
-from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 from rest_framework import status
 from rest_framework_jwt.serializers import User
+from rest_framework.test import force_authenticate
 
-from artwork.views import VoteForArtworkAPIView
-from tests.factories import ArtworkFactory
+from artwork.views.artwork import VoteForArtworkAPIView
+from tests.common import APIFactoryTestCase
 
 
-class VoteForArtwork(APITestCase):
+class VoteForArtworkTestCase(APIFactoryTestCase):
+	def setUp(self) -> None:
+		super(VoteForArtworkTestCase, self).setUp()
+		self.view = VoteForArtworkAPIView.as_view()
 
 	def test_voteUnauthenticated(self):
-		factory = APIRequestFactory()
-		request = factory.put('/api/v1/artworks/1/vote')
-		view = VoteForArtworkAPIView.as_view()
-		response = view(request)
+		# url = reverse('api_v1:artwork:vote', args=[1])
+		request = self.request_factory.put('/api/v1/artworks/1/vote')
+		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 	def test_voteAuthenticated(self):
-		#artworks = ArtworkFactory.create()
-		factory = APIRequestFactory()
-		#url = reverse('api_v1:artwork:vote_on_artwork', args=[1])
-		request = factory.put('/api/v1/artworks/1/vote')
+		request = self.request_factory.put('/api/v1/artworks/1/vote', {'mark': 3})
 		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 		force_authenticate(request, user=user)
-		view = VoteForArtworkAPIView.as_view()
-		response = view(request, pk=1)
+		response = self.view(request, pk=1)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+	def test_voteNonexistent(self):
+		request = self.request_factory.put('/api/v1/artworks/-1/vote', {'mark': 0})
+		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
+		force_authenticate(request, user=user)
+		response = self.view(request, pk=-1)
+		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+	def test_voteAddOnePoint(self):
+		request = self.request_factory.put('/api/v1/artworks/1/vote', {'mark': 5})
+		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
+		force_authenticate(request, user=user)
+		response = self.view(request, pk=1)
+		self.assertEqual(response.data['points'], 2.5)
+
+	def test_voteSeveralPeople(self):
+		request = self.request_factory.put('/api/v1/artworks/1/vote', {'mark': 5})
+		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
+		user2 = User.objects.create_user(username='olivia2', password='StrongPassword12345')
+		user3 = User.objects.create_user(username='olivia3', password='StrongPassword12345')
+		force_authenticate(request, user=user)
+		self.view(request, pk=1)
+		force_authenticate(request, user=user2)
+		self.view(request, pk=1)
+		force_authenticate(request, user=user3)
+		response = self.view(request, pk=1)
+		self.assertEqual(response.data['points'], 15/4)
