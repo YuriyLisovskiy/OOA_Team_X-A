@@ -1,9 +1,15 @@
 import axios from 'axios';
 
+const USER_DATA_KEY = 'user_data';
+const BASE_URL = 'http://localhost:8000/api/v1';
+
+// `handler` receives `json` and `err` args.
 export default class BaseService {
 
 	constructor(useAuth = true) {
 		this._useAuth = useAuth;
+		this._BASE_URL = BASE_URL;
+		this._USER_DATA_KEY = USER_DATA_KEY;
 	}
 
 	_authHeader = () => {
@@ -35,7 +41,7 @@ export default class BaseService {
 		);
 	}
 
-	request = (method, params, handler) => {
+	_setAuth = (params) => {
 		if (this._useAuth) {
 			let authHeader = this._authHeader();
 			if (authHeader.Authorization) {
@@ -51,26 +57,57 @@ export default class BaseService {
 			}
 		}
 
+		return params;
+	}
+
+	_sendRequest = (method, params, handler) => {
+		params = this._setAuth(params);
 		if (method === axios.get) {
 			return this._axiosRequest(method(params.url, params.config), handler);
 		}
 
-		return this._axiosRequest(method(params.url, params.data, params.config), handler);
+		this._axiosRequest(method(params.url, params.data, params.config), handler);
+	}
+
+	_tryToAuth = (handler) => {
+		// TODO: try to refresh JWT token!
+		if (handler) {
+			handler(null, {error: "401 Unauthorized"});
+		}
+	}
+
+	_ensureAuth = (method, params, handler) => {
+		this._sendRequest(method, params, (data, err) => {
+			if (err.response.status === 401) {
+				this._tryToAuth((data, err) => {
+					if (!err) {
+						this._sendRequest(method, params, handler);
+					}
+				});
+			}
+			else if (handler) {
+				handler(data, err);
+			}
+		});
+	}
+
+	request = (method, params, handler) => {
+		this._ensureAuth(method, params, handler);
 	}
 
 	get = (params, handler) => {
-		return this.request(axios.get, params, handler);
+		this.request(axios.get, params, handler);
 	}
 
 	post = (params, handler) => {
-		return this.request(axios.post, params, handler);
+		this.request(axios.post, params, handler);
 	}
 
 	put = (params, handler) => {
-		return this.request(axios.put, params, handler);
+		this.request(axios.put, params, handler);
 	}
 
 	delete_ = (params, handler) => {
-		return this.request(axios.delete, params, handler);
+		this.request(axios.delete, params, handler);
 	}
 }

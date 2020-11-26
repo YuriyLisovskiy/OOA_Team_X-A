@@ -16,7 +16,8 @@ export default class ArtworkPreview extends Component {
 
 	handleVote = (id) => {
 		return e => {
-			ArtworkService.vote(id, (data, err) => {
+			// TODO: set mark from UI
+			ArtworkService.vote(id, 10, (data, err) => {
 				if (err) {
 					// TODO:
 					alert(getResponseMessage(err));

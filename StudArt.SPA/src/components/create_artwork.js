@@ -39,12 +39,14 @@ export default class CreateArtwork extends Component {
 				this.setState({
 					tags: tags
 				});
-			} else {
+			}
+			else {
 				this.setState({
 					invalidTagMsg: "Tag already exists."
 				});
 			}
-		} else {
+		}
+		else {
 			this.setState({
 				invalidTagMsg: "Tag contains forbidden characters."
 			});
@@ -127,15 +129,24 @@ export default class CreateArtwork extends Component {
 		});
 
 		let hasErrors = false;
-		if (hasErrors) {
+		if (!hasErrors) {
 			// TODO: handle response!
 			ArtworkService.createArtwork(
 				this.state.description.value,
 				this.state.tags,
-				this.state.images.map((image) => image.file)
+				this.state.images.map((image) => image.file),
+				(data, err) => {
+					if (err) {
+						// TODO: print error!
+						alert(err);
+					}
+					else {
+						this.props.history.push('/artwork/1');
+					}
+				}
 			);
-			this.props.history.push('/artwork/1');
-		} else {
+		}
+		else {
 			this.setState({
 				loading: false
 			});
@@ -156,7 +167,7 @@ export default class CreateArtwork extends Component {
 								{
 									this.state.images.length > 0 && <div className="d-inline">
 										{this.state.images.map((image) =>
-											<ImagePreview id={image.url} src={image.url}
+											<ImagePreview key={image.url} src={image.url}
 											              onClick={this.handlePreviewImageClick}
 											              isSelected={image.url === this.state.selectedImage}/>
 										)}
@@ -208,7 +219,7 @@ export default class CreateArtwork extends Component {
 								<div className="col-sm-12">
 									<span>Tags: </span>
 									{this.state.tags.map((tag) =>
-										<TagBadge className="mx-1" id={tag} text={tag}
+										<TagBadge className="mx-1" key={tag} text={tag}
 										          onClickRemove={this.handleRemoveTag}/>)}
 								</div>
 							</div>

@@ -16,7 +16,7 @@ export default class Artwork extends Component {
 	}
 
 	componentDidMount() {
-		ArtworkService.getArtwork(this.props.match.params.id, (data, err) => {
+		ArtworkService.get(this.props.match.params.id, (data, err) => {
 			if (err) {
 				alert(getResponseMessage(err));
 			}
@@ -34,7 +34,8 @@ export default class Artwork extends Component {
 
 	handleVote = (id) => {
 		return e => {
-			ArtworkService.vote(id, (data, err) => {
+			// TODO: set mark from UI
+			ArtworkService.voteForArtwork(id, 10, (data, err) => {
 				if (err) {
 					// TODO:
 					alert(getResponseMessage(err));

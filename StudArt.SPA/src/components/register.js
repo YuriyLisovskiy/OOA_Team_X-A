@@ -75,7 +75,7 @@ export default class Register extends Component {
 				username: this.state.username,
 				email: this.state.email
 			}
-			AuthService.checkUserExistsBy(input, (data, err) => {
+			AuthService.userExists(input, (data, err) => {
 				if (err) {
 					this.setError(err);
 				}

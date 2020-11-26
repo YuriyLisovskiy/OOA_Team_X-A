@@ -1,23 +1,16 @@
 import BaseService from "./base";
 
-const API_URL = 'http://localhost:8000/api/v1/auth';
-
-const USER_DATA_KEY = "user_data";
-
-// Urls
-const URL_REGISTER = API_URL +    "/register";
-const URL_LOGIN = API_URL +       "/login";
-const URL_USER_EXISTS = API_URL + "/user/exists";
-
-// `handler` receives `json` and `err` args.
 class AuthService extends BaseService {
 
 	constructor() {
 		super(false);
+		this._URL_REGISTER = this._BASE_URL + '/auth/register';
+		this._URL_LOGIN = this._BASE_URL + '/auth/login';
+		this._URL_USER_EXISTS = this._BASE_URL + '/auth/user/exists';
 	}
 
 	register = (username, email, password, handler) => {
-		this.post({url: URL_REGISTER, data: {
+		this.post({url: this._URL_REGISTER, data: {
 			username: username,
 			email: email,
 			password: password
@@ -29,10 +22,10 @@ class AuthService extends BaseService {
 			username: username,
 			password: password
 		}
-		this.post({url: URL_LOGIN, data: data}, (data, err) => {
+		this.post({url: this._URL_LOGIN, data: data}, (data, err) => {
 			if (!err) {
 				if (data.token) {
-					localStorage.setItem(USER_DATA_KEY, JSON.stringify(data));
+					localStorage.setItem(this._USER_DATA_KEY, JSON.stringify(data));
 				}
 			}
 
@@ -40,11 +33,15 @@ class AuthService extends BaseService {
 		});
 	};
 
+	refresh = () => {
+
+	}
+
 	logout = () => {
-		localStorage.removeItem(USER_DATA_KEY);
+		localStorage.removeItem(this._USER_DATA_KEY);
 	};
 
-	checkUserExistsBy = (data, handler) => {
+	userExists = (data, handler) => {
 		let params = [];
 		for (let p in data) {
 			if (data.hasOwnProperty(p)) {
@@ -52,11 +49,11 @@ class AuthService extends BaseService {
 			}
 		}
 
-		this.get({url: URL_USER_EXISTS + '?' + params.join("&")}, handler);
+		this.get({url: this._URL_USER_EXISTS + '?' + params.join("&")}, handler);
 	}
 
 	getCurrentUserData() {
-		return JSON.parse(localStorage.getItem(USER_DATA_KEY));
+		return JSON.parse(localStorage.getItem(this._USER_DATA_KEY));
 	}
 
 	getCurrentUser() {

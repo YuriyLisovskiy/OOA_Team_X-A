@@ -51,7 +51,7 @@ export default class Home extends Component {
 	}
 	
 	loadArtworks (page, columns) {
-		ArtworkService.getArtworks(page, columns, (data, err) => {
+		ArtworkService.getArtworks(page, columns, null, null, null, (data, err) => {
 			if (err) {
 				// TODO:
 				alert(getResponseMessage(err));
