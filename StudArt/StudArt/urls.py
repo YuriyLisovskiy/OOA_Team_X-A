@@ -8,7 +8,7 @@ if settings.DEBUG:
     urlpatterns.append(re_path('^admin/?', admin.site.urls))
 
 urlpatterns += [
-    re_path('^api/v1/?', include('api_v1.urls')),
+    re_path('^api/v1/', include('api_v1.urls')),
 ]
 
 if settings.DEBUG:

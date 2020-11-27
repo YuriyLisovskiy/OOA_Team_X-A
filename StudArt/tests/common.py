@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase, APIRequestFactory
 from artwork.models import ArtworkModel
 from core.models import UserModel
 
+
 class APIFactoryTestCase(APITestCase):
 	def setUp(self) -> None:
 		super(APIFactoryTestCase, self).setUp()
