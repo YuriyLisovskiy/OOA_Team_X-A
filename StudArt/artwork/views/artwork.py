@@ -64,28 +64,37 @@ class ArtworksAPIView(generics.ListAPIView):
 	def get_queryset(self):
 		request = self.request
 		user = request.user
-
-		required_q = ~Q(author__blocked_users__pk=user.pk)
-		filter_by_subscriptions = request.GET.get(
-			'filter_by_subscriptions', 'false'
-		).lower() == 'true'
+		required_q = None
 		optional_q = None
-		if filter_by_subscriptions:
-			optional_q = self._or_q(optional_q, Q(author__in=user.subscriptions))
+		if user.is_authenticated:
+			required_q = ~Q(author__blocked_users__pk=user.pk)
+			filter_by_subscriptions = request.GET.get(
+				'filter_by_subscriptions', 'false'
+			).lower() == 'true'
+			if filter_by_subscriptions:
+				optional_q = self._or_q(optional_q, Q(author__in=user.subscriptions))
 
 		tag_filter = request.GET.getlist('tag', None)
-		if tag_filter is not None:
+		if tag_filter is not None and len(tag_filter) > 0:
 			optional_q = self._or_q(optional_q, Q(tags__in=tag_filter))
 
 		author_filter = request.GET.getlist('author', None)
-		if author_filter is not None:
+		if author_filter is not None and len(author_filter) > 0:
 			authors = UserModel.objects.filter(username__in=author_filter)
 			optional_q = self._or_q(optional_q, Q(author__in=authors))
 
 		if optional_q is not None:
-			required_q &= optional_q
+			if required_q is not None:
+				required_q &= optional_q
+			else:
+				required_q = optional_q
 
-		return self.queryset.filter(required_q).order_by('-creation_date_time')
+		if required_q:
+			queryset = self.queryset.filter(required_q)
+		else:
+			queryset = self.queryset.all()
+
+		return queryset.order_by('-creation_date_time')
 
 
 # /api/v1/artworks/<pk>
@@ -154,17 +163,20 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 			if key not in data:
 				return self._bad_request('missing `{}` field'.format(key))
 
-		images = data.pop('images')
+		data.pop('images')
+		images = request.data.getlist('images')
 		if len(images) == 0:
 			return self._bad_request('at least one image is required')
 
-		tags_pks = data.getlist('tags', [])
+		data.pop('tags')
+		tags_pks = request.data.getlist('tags', [])
 		if not ensure_tags_exist(tags_pks):
 			return self._bad_request('at least one tag is required')
 
 		data['author'] = request.user.pk
 		full_data = QueryDict(mutable=True)
 		full_data.update(**data)
+		full_data.setlist('tags', tags_pks)
 		request._full_data = full_data
 		resp = super(CreateArtworkAPIView, self).create(request, *args, **kwargs)
 		images = self.ensure_images_exist(images, resp.data['id'])
