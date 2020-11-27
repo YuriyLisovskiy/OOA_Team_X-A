@@ -4,12 +4,11 @@ import {Link, Route, Switch} from 'react-router-dom';
 import './App.css';
 import AuthService from "./services/auth";
 import Login from "./components/login";
-import Management from "./components/management";
 import Register from "./components/register";
-import Profile from "./components/profile";
+import Profile from "./components/user/profile";
 import Home from "./components/home";
-import Artwork from "./components/artwork";
-import CreateArtwork from "./components/create_artwork";
+import Artwork from "./components/artwork/artwork";
+import CreateArtwork from "./components/artwork/create";
 
 export default class App extends Component {
 
@@ -37,7 +36,7 @@ export default class App extends Component {
 	}
 
 	render() {
-		const currentUser = this.state.currentUser;
+		const user = this.state.currentUser;
 		return (
 			<div id="body">
 				<nav className="navbar navbar-expand-md bg-light navbar-light">
@@ -50,22 +49,20 @@ export default class App extends Component {
 					</button>
 					<div className="collapse navbar-collapse" id="collapsibleNavbar">
 						<ul className="navbar-nav mr-auto">
-							<li>
-								<Link className='nav-link' to='/artwork/new'>
-									<i className="fa fa-plus" aria-hidden="true"/> New Post
-								</Link>
-							</li>
-							{currentUser && currentUser.is_superuser &&
-								<li className="nav-item">
-									<Link to='/management' className='btn nav-link'>Management</Link>
+							{
+								user &&
+								<li>
+									<Link className='nav-link' to='/new/artwork'>
+										<i className="fa fa-plus" aria-hidden="true"/> New Post
+									</Link>
 								</li>
 							}
 						</ul>
-						{currentUser ? (
+						{user ? (
 							<ul className="navbar-nav ml-auto">
 								<li className="nav-item">
 									<Link className='nav-link'
-									      to={'/profile/' + currentUser.id}>{currentUser.username}
+									      to={'/profile/' + user.id}>{user.username}
 									</Link>
 								</li>
 								<li className="nav-item">
@@ -86,11 +83,16 @@ export default class App extends Component {
 				</nav>
 				<div className='container mt-3'>
 					<Switch>
-						<Route path='/login' component={Login}/>
-						<Route path='/management' component={Management}/>
-						<Route path='/register' component={Register} />
+						{
+							!user && <Route path='/login' component={Login}/>
+						}
+						{
+							!user && <Route path='/register' component={Register} />
+						}
+						{
+							user && <Route path='/new/artwork' component={CreateArtwork} />
+						}
 						<Route path='/profile/:id' component={Profile} />
-						<Route path='/artwork/new' component={CreateArtwork} />
 						<Route path='/artwork/:id' component={Artwork} />
 						<Route path={['/', '/home']} component={Home} />
 					</Switch>

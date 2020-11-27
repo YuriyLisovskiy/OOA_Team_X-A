@@ -1,6 +1,6 @@
 import React, {Component} from "react";
-import UserService from "../services/user";
-import Home from "./home";
+import UserService from "../../services/user";
+import Home from "../home";
 
 export default class Profile extends Component {
 

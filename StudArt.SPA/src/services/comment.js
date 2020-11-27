@@ -19,20 +19,87 @@ class CommentService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "count": <int (total pages quantity)>,
+	//    "next": <string (link to load next page)>,
+	//    "previous": <string (link to load previous page)>,
+	//    "results": [
+	//      {
+	//        "id": <int>,
+	//        "text": <string>,
+	//        "points": <int>,
+	//        "author": {
+	//          "id": <int>,
+	//          "username": <string>,
+	//          "avatar": <string (full link)>
+	//        },
+	//        "creation_date": <string>,
+	//        "creation_time": <string>,
+	//        "answers": <array of primary keys of answers>
+	//      },
+	//      ...
+	//    ]
+	//  }
 	getComments = (artworkId, handler) => {
 		this._getList(artworkId, false, handler);
 	}
 
+	// returns:
+	//  {
+	//    "count": <int (total pages quantity)>,
+	//    "next": <string (link to load next page)>,
+	//    "previous": <string (link to load previous page)>,
+	//    "results": [
+	//      {
+	//        "id": <int>,
+	//        "text": <string>,
+	//        "points": <int>,
+	//        "author": {
+	//          "id": <int>,
+	//          "username": <string>,
+	//          "avatar": <string (full link)>
+	//        },
+	//        "creation_date": <string>,
+	//        "creation_time": <string>,
+	//        "answers": <array of primary keys of answers>
+	//      },
+	//      ...
+	//    ]
+	//  }
 	getAnswers = (commandId, handler) => {
 		this._getList(commandId, true, handler);
 	}
 
+	// returns:
+	//  {
+	//    "id": <int>,
+	//    "text": <string>,
+	//    "points": <int>,
+	//    "author": {
+	//      "id": <int>,
+	//      "username": <string>,
+	//      "avatar": <string (full link)>
+	//    },
+	//    "creation_date": <string>,
+	//    "creation_time": <string>,
+	//    "answers": <array of primary keys of answers>
+	//  }
 	getComment = (id, handler) => {
 		this.get({
 			url: this._URL_COMMENTS + '/' + id.toString()
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "id": <int>,
+	//    "author_details": {
+	//      "id": <int>,
+	//      "username": <string>,
+	//      "avatar": <string (full link)>
+	//    }
+	//  }
 	createComment = (id, text, handler) => {
 		this.post({
 			url: this._URL_ARTWORKS + '/' + id.toString() + '/comments/create',
@@ -42,6 +109,8 @@ class CommentService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	// {}
 	editComment = (id, text, handler) => {
 		let data = {};
 		if (text) {
@@ -54,12 +123,23 @@ class CommentService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	// {}
 	deleteComment = (id, handler) => {
 		this.delete_({
 			url: this._URL_COMMENTS + '/' + id.toString() + '/delete'
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "id": <int>,
+	//    "author_details": {
+	//      "id": <int>,
+	//  	"username": <string>,
+	//  	"avatar": <string (full link)>
+	//    }
+	//  }
 	replyToComment = (parentId, text, handler) => {
 		let data = {};
 		if (text) {
@@ -72,6 +152,10 @@ class CommentService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "points": <float>
+	//  }
 	voteForComment = (id, mark, handler) => {
 		this.put({
 			url: this._URL_COMMENTS + '/' + id.toString() + '/vote',

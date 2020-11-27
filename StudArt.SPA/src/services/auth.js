@@ -9,6 +9,18 @@ class AuthService extends BaseService {
 		this._URL_USER_EXISTS = this._BASE_URL + '/auth/user/exists';
 	}
 
+	// returns:
+	//  {
+	//    "id": <int>,
+	//    "username": <string>,
+	//    "email": <string>,
+	//    "first_name": <string>,
+	//    "last_name": <string>,
+	//    "avatar": <string (avatar full link)>,
+	//    "is_superuser": <bool>,
+	//    "rating": <float>,
+	//    "token": <string (JWT token)>
+	//  }
 	register = (username, email, password, handler) => {
 		this.post({url: this._URL_REGISTER, data: {
 			username: username,
@@ -33,14 +45,15 @@ class AuthService extends BaseService {
 		});
 	};
 
-	refresh = () => {
-
-	}
-
 	logout = () => {
 		localStorage.removeItem(this._USER_DATA_KEY);
 	};
 
+	// returns:
+	//  {
+	//    "exists": <bool>,
+	//    "message": <string>
+	//  }
 	userExists = (data, handler) => {
 		let params = [];
 		for (let p in data) {

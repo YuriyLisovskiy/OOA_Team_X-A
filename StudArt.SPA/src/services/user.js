@@ -8,12 +8,27 @@ class UserService extends BaseService {
 		this._URL_SELF = this._URL_USERS + '/self';
 	}
 
+	// returns:
+	//  {
+	//    "id": <int>,
+	//    "first_name": <string>,
+	//    "last_name": <string>,
+	//    "username": <string>,
+	//    "email": <string>,
+	//    "avatar_link": <string (full url)>,
+	//    "is_superuser": <bool>,
+	//    "rating": <float>
+	//  }
 	getUser = (id, handler) => {
 		return this.get({
 			url: this._URL_USERS + '/' + id.toString()
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "avatar_link": <string> (full url)
+	//  }
 	editUser = (id, firstName, lastName, avatar, handler) => {
 		let formData = new FormData();
 		if (firstName) {
@@ -37,6 +52,8 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	// {}
 	blockAuthor = (authorId, handler) => {
 		this.put({
 			url: this._URL_SELF + '/block/author',
@@ -46,6 +63,8 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	// {}
 	unblockAuthor = (authorId, handler) => {
 		this.put({
 			url: this._URL_SELF + '/unblock/author',
@@ -55,6 +74,8 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	// {}
 	subscribeToAuthor = (authorId, handler) => {
 		this.put({
 			url: this._URL_SELF + '/subscribe',
@@ -64,6 +85,8 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	// {}
 	unsubscribeFromAuthor = (authorId, handler) => {
 		this.put({
 			url: this._URL_SELF + '/unsubscribe',
@@ -73,6 +96,25 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "count": <int (total pages quantity)>,
+	//    "next": <string (link to load next page)>,
+	//    "previous": <string (link to load previous page)>,
+	//    "results": [
+	//      {
+	//        "id": <int>,
+	//        "first_name": <string>,
+	//        "last_name": <string>,
+	//        "username": <string>,
+	//        "email": <string>,
+	//        "avatar_link": <string (full url)>,
+	//        "is_superuser": <bool>,
+	//        "rating": <float>
+	//      },
+	//      ...
+	//    ]
+	//  }
 	getSubscriptions = (authorId, page, handler) => {
 		let data = {};
 		if (page) {
@@ -85,6 +127,25 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	//  {
+	//    "count": <int (total pages quantity)>,
+	//    "next": <string (link to load next page)>,
+	//    "previous": <string (link to load previous page)>,
+	//    "results": [
+	//      {
+	//        "id": <int>,
+	//        "first_name": <string>,
+	//        "last_name": <string>,
+	//        "username": <string>,
+	//        "email": <string>,
+	//        "avatar_link": <string (full url)>,
+	//        "is_superuser": <bool>,
+	//        "rating": <float>
+	//      },
+	//      ...
+	//    ]
+	//  }
 	getBlacklist = (page, handler) => {
 		let data = {};
 		if (page) {
@@ -97,6 +158,13 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	// returns:
+	//  [
+	//    {
+	//      "text": <string>
+	//    },
+	//    ...
+	//  ]
 	getMostUsedTagsForAuthor = (authorId, limit, handler) => {
 		let data = {};
 		if (limit) {

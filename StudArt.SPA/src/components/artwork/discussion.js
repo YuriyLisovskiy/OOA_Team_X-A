@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 
-import CommentService from "../services/comment";
-import {getResponseMessage} from "./utils";
+import CommentService from "../../services/comment";
+import {getResponseMessage} from "../utils";
 
 export default class Discussion extends Component {
 

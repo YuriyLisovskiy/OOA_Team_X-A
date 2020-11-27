@@ -7,5 +7,5 @@ export const required_field = value => {
 };
 
 export const getResponseMessage = (r) => {
-	return r.toString();
+	return (r && r.response && r.response.message) || r.toString();
 }

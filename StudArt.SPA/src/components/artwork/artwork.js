@@ -1,9 +1,9 @@
 import React, {Component} from "react";
-import "../styles/artwork.css"
+import "../../styles/artwork/artwork.css"
 import {Link} from "react-router-dom";
 import Discussion from "./discussion";
-import ArtworkService from "../services/artwork";
-import {getResponseMessage} from "./utils";
+import ArtworkService from "../../services/artwork";
+import {getResponseMessage} from "../utils";
 
 export default class Artwork extends Component {
 
