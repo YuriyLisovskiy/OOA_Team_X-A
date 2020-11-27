@@ -22,6 +22,10 @@ class ImageModel(models.Model):
 	image = models.ImageField()
 	artwork = models.ForeignKey(to=ArtworkModel, on_delete=models.CASCADE, related_name='images')
 
+	@property
+	def url(self):
+		return self.image.url
+
 
 class CommentModel(models.Model):
 	text = models.CharField(max_length=500)

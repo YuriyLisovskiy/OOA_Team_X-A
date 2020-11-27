@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import QueryDict
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
@@ -13,9 +14,10 @@ from artwork.serializers.comment_model import (
 
 # /api/v1/artworks/<pk>/comments
 # path args:
-#   - pk: primary key of parent artwork
+#   - pk: primary key of parent artwork (or comment)
 # methods:
-#   - get
+#   - get:
+#       - answers: bool (set to true to search for answers; then pk - primary key if parent comment)
 # returns (success status - 200):
 #   {
 #       "count": <int (total pages quantity)>,
@@ -44,7 +46,13 @@ class CommentsAPIView(generics.ListAPIView):
 	queryset = CommentModel.objects.all()
 
 	def get_queryset(self):
-		return self.queryset.filter(artwork_id=self.kwargs['pk'])
+		get_answers = self.request.data.get('answers', 'false') == 'true'
+		if get_answers:
+			q = Q(comment_id=self.kwargs['pk'])
+		else:
+			q = Q(artwork_id=self.kwargs['pk'])
+
+		return self.queryset.filter(q)
 
 
 # /api/v1/artworks/comments/<pk>

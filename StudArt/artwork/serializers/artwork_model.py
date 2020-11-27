@@ -77,17 +77,16 @@ class CreateArtworkSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = ArtworkModel
 		fields = (
-			'id', 'description', 'tags', 'images', 'author'
+			'id', 'description', 'tags', 'author'
 		)
 		read_only_fields = ('id',)
 		extra_kwargs = {
 			'description': {'write_only': True},
 			'tags': {'write_only': True},
-			'images': {'write_only': True},
 			'author': {'write_only': True}
 		}
 		validators = [
-			RequiredValidator(fields=('description', 'tags', 'images', 'author'))
+			RequiredValidator(fields=('description', 'tags', 'author'))
 		]
 
 

@@ -1,12 +1,8 @@
-from itertools import chain
-
-from django.db.models import QuerySet
 from rest_framework import generics, permissions
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 
-from artwork.models import ArtworkModel, TagModel
 from artwork.serializers.tag_model import TagDetailsSerializer
 from core.mixins import UpdateUserModelMixin
 from core.models import UserModel
