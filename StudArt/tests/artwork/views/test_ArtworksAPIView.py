@@ -14,21 +14,21 @@ class ArtworksAPITestCase(APIFactoryTestCase):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 2, 'page': 1})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 12)
+		self.assertEqual(response.data['count'], 22)
 		self.assertEqual(len(response.data['results']), 2)
 
 	def test_getArtworksFourColumnsFirstPage(self):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 4, 'page': 1})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 12)
+		self.assertEqual(response.data['count'], 22)
 		self.assertEqual(len(response.data['results']), 4)
 
 	def test_getArtworksFourColumnsSecondPage(self):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 4, 'page': 2})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 12)
+		self.assertEqual(response.data['count'], 22)
 		self.assertEqual(len(response.data['results']), 4)
 
 	def test_getArtworksOutOfBoundsPage(self):
@@ -40,28 +40,34 @@ class ArtworksAPITestCase(APIFactoryTestCase):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 3, 'page': 1, 'tag': 'tag1'})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 5)
+		self.assertEqual(response.data['count'], 11)
 		self.assertEqual(len(response.data['results']), 3)
 
-	def test_getArtworksFilterByTagSecondPage(self):
+	def test_getArtworksFilterByTagLastPage(self):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 3, 'page': 2, 'tag': 'tag1'})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 5)
-		self.assertEqual(len(response.data['results']), 2)
+		self.assertEqual(response.data['count'], 11)
+		self.assertEqual(len(response.data['results']), 3)
+		self.assertEqual(len(response.data['results'][0]), 2)
+		self.assertEqual(len(response.data['results'][1]), 2)
+		self.assertEqual(len(response.data['results'][2]), 1)
 
 	def test_getArtworksFilterByAuthorFirstPage(self):
-		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 3, 'page': 1, 'author': 'User'})
+		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 3, 'page': 1, 'author': 'User2'})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 6)
+		self.assertEqual(response.data['count'], 16)
 		self.assertEqual(len(response.data['results']), 3)
 
-	def test_getArtworksFilterByAuthorSecondPage(self):
-		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 3, 'page': 2, 'author': 'User'})
+	def test_getArtworksFilterByAuthorLastPage(self):
+		request = self.request_factory.get(reverse('api_v1:artwork:get_artworks'), {'columns': 3, 'page': 3, 'author': 'User2'})
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(response.data['count'], 6)
+		self.assertEqual(response.data['count'], 16)
 		self.assertEqual(len(response.data['results']), 3)
+		self.assertEqual(len(response.data['results'][0]), 2)
+		self.assertEqual(len(response.data['results'][1]), 1)
+		self.assertEqual(len(response.data['results'][2]), 1)
 
 # todo: test filter_by_subscriptions
