@@ -41,18 +41,21 @@ class ArtworkService extends BaseService {
 		}
 
 		if (filterBySubscriptions === true) {
-			params.push('filter_by_subscriptions=true');
+			let param = 'filter_by_subscriptions=true';
+			params.push(param);
 		}
 
 		if (tags) {
 			for (let i = 0; i < tags.length; i++) {
-				params.push('tag=' + tags[i].toString());
+				let tagParam = 'tag=' + tags[i].toString();
+				params.push(tagParam);
 			}
 		}
 
 		if (authors) {
 			for (let i = 0; i < authors.length; i++) {
-				params.push('author=' + authors[i].toString());
+				let authorParam = 'author=' + authors[i].toString();
+				params.push(authorParam);
 			}
 		}
 

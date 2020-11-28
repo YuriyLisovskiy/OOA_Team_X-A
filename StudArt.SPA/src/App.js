@@ -9,6 +9,7 @@ import Profile from "./components/user/profile";
 import Home from "./components/home";
 import Artwork from "./components/artwork/artwork";
 import CreateArtwork from "./components/artwork/create";
+import Index from "./components/Index";
 
 export default class App extends Component {
 
@@ -94,7 +95,8 @@ export default class App extends Component {
 						}
 						<Route path='/profile/:id' component={Profile} />
 						<Route path='/artwork/:id' component={Artwork} />
-						<Route path={['/', '/home']} component={Home} />
+						<Route path='/artworks' component={Home} />
+						<Route path={['/', '/home']} component={Index} />
 					</Switch>
 				</div>
 			</div>

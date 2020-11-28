@@ -60,9 +60,8 @@ export default class ArtworkPreview extends Component {
 						post.tags && post.tags.length > 0 &&
 						<div className="card-text mt-3">
 							{post.tags.map((tag, i) => {
-								return <TagBadge key={tag} text={tag} textOnly={true} className={
-									this.getClassForTag(i, post.tags.length)
-								}/>;
+								return <TagBadge key={tag} text={tag} textOnly={true} onClick={this.props.onClickTag}
+								                 className={this.getClassForTag(i, post.tags.length)}/>;
 							})}
 						</div>
 					}

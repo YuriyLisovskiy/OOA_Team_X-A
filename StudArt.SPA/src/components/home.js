@@ -16,19 +16,24 @@ export default class Home extends Component {
 			artworksColList: undefined,
 			loading: true,
 			lastLoadedPage: undefined,
-			columnsCount: colsCnt
+			columnsCount: colsCnt,
+			filterTags: undefined,
+			filterAuthors: undefined,
+			filterBySubs: false
 		}
 	}
 
 	makeColsFromResp = (data) => {
 		let newList = [];
 		for (let i = 0; i < this.state.columnsCount; i++) {
-			newList.push(data.results[i].map((artwork) => <ArtworkPreview post={artwork} key={artwork.id}/>))
+			newList.push(data.results[i].map((artwork) =>
+				<ArtworkPreview onClickTag={this.handleOnClickTag} post={artwork} key={artwork.id}/>
+			));
 		}
 
 		return newList;
 	}
-	
+
 	setArtworksState = (currArtworks, newArtworks) => {
 		if (currArtworks) {
 			let newState = [];
@@ -41,10 +46,9 @@ export default class Home extends Component {
 
 		return newArtworks;
 	}
-	
-	loadArtworks = (page, columns) => {
-		// TODO: implement filter buttons!
-		ArtworkService.getArtworks(page, columns, null, null, null, (data, err) => {
+
+	loadArtworks = (page, columns, tags, authors, filterBySubs) => {
+		ArtworkService.getArtworks(page, columns, filterBySubs, tags, authors, (data, err) => {
 			if (err) {
 				// TODO:
 				alert(getResponseMessage(err));
@@ -52,19 +56,38 @@ export default class Home extends Component {
 			else {
 				let newArtworksList = this.makeColsFromResp(data);
 				this.setState({
-					artworks: this.setArtworksState(this.state.artworks, newArtworksList),
+					artworks: this.setArtworksState(
+						page ? this.state.artworks : null, newArtworksList
+					),
 					loading: false,
-					lastLoadedPage: data.next
+					lastLoadedPage: data.next,
+					filterTags: tags
 				});
 			}
 		});
 	}
-	
+
 	componentDidMount () {
+		this.loadArtworks(
+			null,
+			this.state.columnsCount,
+			this.state.filterTags,
+			this.props.filterAuthors,
+			this.props.filterBySubs ? true : null
+		);
 		window.addEventListener("scroll", this.handleScroll);
-		this.loadArtworks(null, this.state.columnsCount);
 	}
-	
+
+	handleOnClickTag = (e, tag) => {
+		this.loadArtworks(
+			null,
+			this.state.columnsCount,
+			[tag],
+			this.props.filterAuthors,
+			this.props.filterBySubs ? true : null
+		);
+	}
+
 	handleScroll = () => {
 		if (this.state.lastLoadedPage) {
 			const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
@@ -79,19 +102,25 @@ export default class Home extends Component {
 					loading: true,
 					lastLoadedPage: undefined
 				});
-				this.loadArtworks(page, this.state.columnsCount);
+				this.loadArtworks(
+					page,
+					this.state.columnsCount,
+					this.state.filterTags,
+					this.props.filterAuthors,
+					this.props.filterBySubs ? true : null
+				);
 			}
 		}
 	}
-	
+
 	componentWillUnmount () {
 		window.removeEventListener("scroll", this.handleScroll);
 	}
-	
+
 	colHasPosts = (colNum) => {
 		return this.state.artworks[colNum] && this.state.artworks[colNum].length > 0;
 	}
-	
+
 	colsHavePosts = () => {
 		if (this.state.artworks) {
 			for (let i = 0; i < this.state.columnsCount; i++) {
@@ -102,14 +131,14 @@ export default class Home extends Component {
 		}
 		return false;
 	}
-	
+
 	makePostsCol = (colNum) => {
 		let cn = "col-md-" + (12 / this.state.columnsCount);
 		return <div key={colNum} className={cn}>
 			{this.colHasPosts(colNum) && this.state.artworks[colNum]}
 		</div>;
 	}
-	
+
 	makeAllColumns = () => {
 		let resultCols = [];
 		for (let i = 0; i < this.state.columnsCount; i++)
@@ -119,7 +148,7 @@ export default class Home extends Component {
 
 		return <div className="row">{resultCols}</div>
 	}
-	
+
 	render () {
 		let hasPosts = this.colsHavePosts();
 		return (
