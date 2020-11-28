@@ -14,33 +14,33 @@ class VoteForArtworkTestCase(APIFactoryTestCase):
 
 	def test_voteUnauthenticated(self):
 		# url = reverse('api_v1:artwork:vote', args=[1])
-		request = self.request_factory.put('/api/v1/artworks/1/vote')
+		request = self.request_factory.put(reverse('api_v1:artwork:vote', args=[1]))
 		response = self.view(request)
 		self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 	def test_voteAuthenticated(self):
-		request = self.request_factory.put('/api/v1/artworks/1/vote', {'mark': 3})
+		request = self.request_factory.put(reverse('api_v1:artwork:vote', args=[1]), {'mark': 3})
 		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 		force_authenticate(request, user=user)
 		response = self.view(request, pk=1)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 	def test_voteNonexistent(self):
-		request = self.request_factory.put('/api/v1/artworks/-1/vote', {'mark': 0})
+		request = self.request_factory.put(reverse('api_v1:artwork:vote', args=[9999]), {'mark': 0})
 		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 		force_authenticate(request, user=user)
-		response = self.view(request, pk=-1)
+		response = self.view(request, pk=9999)
 		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 	def test_voteAddOnePoint(self):
-		request = self.request_factory.put('/api/v1/artworks/1/vote', {'mark': 5})
+		request = self.request_factory.put(reverse('api_v1:artwork:vote', args=[1]), {'mark': 5})
 		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 		force_authenticate(request, user=user)
 		response = self.view(request, pk=1)
 		self.assertEqual(response.data['points'], 2.5)
 
 	def test_voteSeveralPeople(self):
-		request = self.request_factory.put('/api/v1/artworks/1/vote', {'mark': 5})
+		request = self.request_factory.put(reverse('api_v1:artwork:vote', args=[1]), {'mark': 5})
 		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 		user2 = User.objects.create_user(username='olivia2', password='StrongPassword12345')
 		user3 = User.objects.create_user(username='olivia3', password='StrongPassword12345')
