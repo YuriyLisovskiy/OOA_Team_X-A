@@ -1,8 +1,9 @@
 from django.conf import settings
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from artwork.models import ArtworkModel
-from artwork.serializers.common import VoteSerializer, ReadOnlyUserLinkSerializer
+from artwork.serializers.common import ReadOnlyUserLinkSerializer
 from core.validators import RequiredValidator
 
 
@@ -101,10 +102,31 @@ class EditArtworkSerializer(serializers.ModelSerializer):
 		fields = ('description', 'tags')
 
 
-class VoteForArtworkSerializer(VoteSerializer):
+class VoteForArtworkSerializer(serializers.ModelSerializer):
+	mark = serializers.IntegerField(write_only=True)
 
-	def calc_points(self, curr_points, curr_voters_count, mark):
+	@staticmethod
+	def calc_points(curr_points, curr_voters_count, mark):
 		return ((curr_points * curr_voters_count) + mark) / (curr_voters_count + 1)
+
+	def update(self, instance, validated_data):
+		request = self.context.get('request')
+		if request.user.id == instance.author.id:
+			raise ValidationError('self-voting is forbidden')
+
+		if instance.voters.filter(pk=request.user.id).exists():
+			raise ValidationError('re-voting is forbidden')
+
+		mark = validated_data['mark']
+		if mark not in self.Meta.mark_range:
+			raise ValidationError('mark is out of range')
+
+		instance.points = self.calc_points(
+			instance.points, instance.voters.count(), mark
+		)
+		instance.voters.add(request.user)
+		instance.save()
+		return instance
 
 	class Meta:
 		model = ArtworkModel

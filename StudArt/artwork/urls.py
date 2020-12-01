@@ -7,7 +7,7 @@ from artwork.views.artwork import (
 from artwork.views.comment import (
 	ReplyToCommentAPIView, VoteForCommentAPIView, CommentAPIView,
 	CreateCommentAPIView, CommentsAPIView, EditCommentAPIView,
-	DeleteCommentAPIView
+	DeleteCommentAPIView, CancelVoteForCommentAPIView
 )
 
 app_name = 'artwork'
@@ -17,6 +17,7 @@ urlpatterns = [
 	re_path(r'^comments/(?P<pk>\d+)/edit/?', EditCommentAPIView.as_view(), name='edit_comment'),
 	re_path(r'^comments/(?P<pk>\d+)/delete/?', DeleteCommentAPIView.as_view(), name='delete_comment'),
 	re_path(r'^comments/(?P<pk>\d+)/reply/?', ReplyToCommentAPIView.as_view(), name='reply_to_comment'),
+	re_path(r'^comments/(?P<pk>\d+)/vote/cancel/?', CancelVoteForCommentAPIView.as_view(), name='cancel_vote_for_comment'),
 	re_path(r'^comments/(?P<pk>\d+)/vote/?', VoteForCommentAPIView.as_view(), name='vote_for_comment'),
 	re_path(r'^comments/(?P<pk>\d+)/?', CommentAPIView.as_view(), name='get_comment'),
 	re_path(r'^(?P<pk>\d+)/delete/?', DeleteArtworkAPIView.as_view(), name='delete'),

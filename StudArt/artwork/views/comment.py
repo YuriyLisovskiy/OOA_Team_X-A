@@ -8,7 +8,7 @@ from artwork.models import CommentModel
 from artwork.permissions import ModifyCommentPermission
 from artwork.serializers.comment_model import (
 	CommentDetailsSerializer, CreateCommentSerializer, CreateCommentReplySerializer,
-	VoteForCommentSerializer, EditCommentSerializer
+	VoteForCommentSerializer, EditCommentSerializer, CancelVoteForCommentSerializer
 )
 
 
@@ -28,6 +28,8 @@ from artwork.serializers.comment_model import (
 # 	            "id": <int>,
 # 	            "text": <string>,
 # 	            "points": <int>,
+#               "up_voted": <bool>,
+#               "down_voted": <bool>,
 # 	            "author": {
 # 	                "id": <int>,
 # 	                "username": <string>,
@@ -52,7 +54,7 @@ class CommentsAPIView(generics.ListAPIView):
 		else:
 			q = Q(artwork_id=self.kwargs['pk'])
 
-		return self.queryset.filter(q)
+		return self.queryset.filter(q).order_by('-creation_date_time')
 
 
 # /api/v1/artworks/comments/<pk>
@@ -65,6 +67,8 @@ class CommentsAPIView(generics.ListAPIView):
 #       "id": <int>,
 # 	    "text": <string>,
 # 	    "points": <int>,
+#       "up_voted": <bool>,
+#       "down_voted": <bool>,
 # 	    "author": {
 # 	        "id": <int>,
 # 	        "username": <string>,
@@ -99,7 +103,7 @@ class CreateCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentSerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data.dict()
+		data = request.data
 		data['artwork'] = self.kwargs['pk']
 		data['author'] = request.user.pk
 		full_data = QueryDict(mutable=True)
@@ -156,11 +160,12 @@ class ReplyToCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentReplySerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data.dict()
+		data = request.data
 		data['comment'] = self.kwargs['pk']
-		full_data = QueryDict(mutable=True)
-		full_data.update(**data)
-		request._full_data = full_data
+		data['author'] = request.user.pk
+		# full_data = QueryDict(mutable=True)
+		# full_data.update(**data)
+		request._full_data = data
 		return super(ReplyToCommentAPIView, self).create(request, *args, **kwargs)
 
 
@@ -170,8 +175,20 @@ class ReplyToCommentAPIView(generics.CreateAPIView):
 #       - mark: int (value from -10 to 10)
 # returns (success status - 200):
 #   {
-#       "points": <float>
+#       "points": <int>
 #   }
 class VoteForCommentAPIView(generics.UpdateAPIView):
 	queryset = CommentModel.objects.all()
 	serializer_class = VoteForCommentSerializer
+
+
+# /api/v1/artworks/comments/<pk>/vote/cancel
+# methods:
+#   - put
+# returns (success status - 200):
+#   {
+#       "points": <int>
+#   }
+class CancelVoteForCommentAPIView(generics.UpdateAPIView):
+	queryset = CommentModel.objects.all()
+	serializer_class = CancelVoteForCommentSerializer
