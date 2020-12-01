@@ -12,7 +12,7 @@ export default class TagBadge extends Component {
 		let badge;
 		if (this.props.textOnly) {
 			badge = <span className={"badge badge-secondary " + this.props.className}
-			              style={{cursor: "pointer"}}
+			              style={this.props.onClick ? {cursor: "pointer"} : {}}
 			              onClick={this.handleClick}>
 				{this.props.text}
 			</span>;

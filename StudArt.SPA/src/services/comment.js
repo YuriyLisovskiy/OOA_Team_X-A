@@ -29,6 +29,8 @@ class CommentService extends BaseService {
 	//        "id": <int>,
 	//        "text": <string>,
 	//        "points": <int>,
+	//        "up_voted": <bool>,
+	//        "down_voted": <bool>,
 	//        "author": {
 	//          "id": <int>,
 	//          "username": <string>,
@@ -55,6 +57,8 @@ class CommentService extends BaseService {
 	//        "id": <int>,
 	//        "text": <string>,
 	//        "points": <int>,
+	//        "up_voted": <bool>,
+	//        "down_voted": <bool>,
 	//        "author": {
 	//          "id": <int>,
 	//          "username": <string>,
@@ -76,6 +80,8 @@ class CommentService extends BaseService {
 	//    "id": <int>,
 	//    "text": <string>,
 	//    "points": <int>,
+	//    "up_voted": <bool>,
+	//    "down_voted": <bool>,
 	//    "author": {
 	//      "id": <int>,
 	//      "username": <string>,
@@ -87,7 +93,7 @@ class CommentService extends BaseService {
 	//  }
 	getComment = (id, handler) => {
 		this.get({
-			url: this._URL_COMMENTS + '/' + id.toString()
+			url: this._URL_COMMENTS + '/' + id.toString(),
 		}, handler);
 	}
 
@@ -152,9 +158,17 @@ class CommentService extends BaseService {
 		}, handler);
 	}
 
+	upVoteComment = (id, handler) => {
+		this.voteForComment(id, 1, handler);
+	}
+
+	downVoteComment = (id, handler) => {
+		this.voteForComment(id, -1, handler);
+	}
+
 	// returns:
 	//  {
-	//    "points": <float>
+	//    "points": <int>
 	//  }
 	voteForComment = (id, mark, handler) => {
 		this.put({
@@ -162,6 +176,16 @@ class CommentService extends BaseService {
 			data: {
 				mark: mark
 			}
+		}, handler);
+	}
+
+	// returns:
+	//  {
+	//    "points": <int>
+	//  }
+	cancelVoteForComment = (id, handler) => {
+		this.put({
+			url: this._URL_COMMENTS + '/' + id.toString() + '/vote/cancel',
 		}, handler);
 	}
 }
