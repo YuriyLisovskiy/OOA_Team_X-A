@@ -60,6 +60,9 @@ export default class BaseService {
 		if (method === axios.get) {
 			this._axiosRequest(method(params.url, params.config), handler);
 		}
+		else if (method === axios.delete) {
+			this._axiosRequest(method(params.url, params.config), handler);
+		}
 		else {
 			this._axiosRequest(method(params.url, params.data, params.config), handler);
 		}

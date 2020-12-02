@@ -14,24 +14,25 @@ export default class Artwork extends Component {
 		super(props);
 		this.state = {
 			post: undefined,
-			lastLoadedCommentsPage: undefined
+			lastLoadedCommentsPage: undefined,
+			selectedMark: 0
 		}
 	}
 
 	componentDidMount() {
-		ArtworkService.getArtwork(this.props.match.params.id, (data, err) => {
+		ArtworkService.getArtwork(this.props.match.params.id, (post, err) => {
 			if (err) {
 				alert(getResponseMessage(err));
 			}
 			else {
-				CommentService.getComments(data.id, (comments, er) => {
+				CommentService.getComments(post.id, (comments, er) => {
 					if (er) {
 						alert(getErrorMessage(er));
 					}
 					else {
-						data.comments = comments.results;
+						post.comments = comments.results;
 						this.setState({
-							post: data,
+							post: post,
 							lastLoadedCommentsPage: comments.next
 						});
 					}
@@ -53,49 +54,69 @@ export default class Artwork extends Component {
 			const docHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
 			const windowBottom = windowHeight + window.pageYOffset;
 			if (windowBottom >= docHeight - 1) {
+				let pageLink = this.state.lastLoadedCommentsPage;
 				this.setState({
 					loading: true,
 					lastLoadedCommentsPage: undefined
 				});
+
+				console.log(pageLink);
+
 				CommentService.get(
-					{url: this.state.lastLoadedCommentsPage},
+					{url: pageLink},
 					(page, err) => {
-						let post = this.state.post;
-						post.comments = page.results;
-						this.setState({
-							loading: false,
-							lastLoadedCommentsPage: page.next,
-							post: post
-						});
+						if (err) {
+							alert(getErrorMessage(err));
+						}
+						else {
+							let post = this.state.post;
+							post.comments = post.comments.concat(page.results);
+							this.setState({
+								loading: false,
+								lastLoadedCommentsPage: page.next,
+								post: post
+							});
+						}
 					}
 				);
 			}
 		}
 	}
 
-	handleVote = (id) => {
-		return e => {
-			// TODO: set mark from UI
-			ArtworkService.voteForArtwork(id, 10, (data, err) => {
-				if (err) {
-					// TODO:
-					console.log(err.response);
-					alert(getResponseMessage(err));
-				}
-				else {
-					let post = this.state.post;
-					post.points = data.points;
-					this.setState({
-						post: post
-					});
-				}
-			});
-		}
+	handleMarkChanged = (e) => {
+		this.setState({
+			selectedMark: e.target.value
+		});
+	}
+
+	handleVote = (e) => {
+		ArtworkService.voteForArtwork(this.state.post.id, this.state.selectedMark, (data, err) => {
+			if (err) {
+				// TODO:
+				alert(getErrorMessage(err));
+			}
+			else {
+				let post = this.state.post;
+				post.points = data.points;
+				post.voted = true;
+				this.setState({
+					post: post
+				});
+			}
+		});
 	}
 
 	handleAddComment = (comment) => {
 		let post = this.state.post;
 		post.comments.splice(0, 0, comment);
+		this.setState({
+			post: post
+		});
+	}
+
+	onDeleteComment = (comment) => {
+		let post = this.state.post;
+		post.comments.splice(post.comments.indexOf(comment), 1);
 		this.setState({
 			post: post
 		});
@@ -134,14 +155,17 @@ export default class Artwork extends Component {
 							<div className="col-md-11">
 								<div className="d-inline">
 									{
-										post.voted ? (
+										(!post.can_vote || post.voted) ? (
 											<i role="button"
-											   className={"select-none fa fa-lg fa-star" + (post.voted ? "" : "-o")}
-											   aria-hidden="true" onClick={this.handleVote(post.id)}
+											   className="select-none fa fa-lg fa-star"
+											   aria-hidden="true"
 											   data-voted={post.voted ? "voted" : ""}> {post.points}</i>
 										) : (
 											<div className="input-group input-group-sm mb-3">
-												<select className="form-control" defaultValue={0} style={{maxWidth: 60}}>
+												<select className="form-control"
+												        defaultValue={0}
+												        style={{maxWidth: 60}}
+												        onChange={this.handleMarkChanged}>
 													{
 														Array.from(
 															new Array(21),
@@ -150,7 +174,10 @@ export default class Artwork extends Component {
 													}
 												</select>
 												<div className="input-group-append">
-													<button className="btn btn btn-success" type="submit">Vote</button>
+													<button className="btn btn btn-success" type="submit"
+													        onClick={this.handleVote}>
+														Vote
+													</button>
 												</div>
 											</div>
 										)
@@ -186,7 +213,11 @@ export default class Artwork extends Component {
 							<div className="row" id="comments">
 								<div className="col-md-12">
 									{post.comments.map((comment) => (
-										<Comment key={comment.id} data={comment} parentId={comment.id} paddingLeft={20}/>
+										<Comment key={comment.id}
+										         data={comment}
+										         parentId={comment.id}
+										         paddingLeft={20}
+										         onDeleteComment={this.onDeleteComment}/>
 									))}
 								</div>
 							</div>

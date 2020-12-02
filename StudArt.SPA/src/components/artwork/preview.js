@@ -43,18 +43,26 @@ export default class ArtworkPreview extends Component {
 					</div>
 					<div>
 						{
-							post.voted && <div className="d-inline">
+							(!post.can_vote || post.voted) &&
+							<i role="button"
+							   className="select-none fa fa-lg fa-star d-inline mr-2"
+							   aria-hidden="true"
+							   data-voted={post.voted ? "voted" : ""}> {post.points}</i>
+						}
+						<Link to={'/artwork/' + post.id} className="text-muted d-inline">
+							<div className="d-inline select-none">
+								<i className="fa fa-comments fa-lg"
+								   aria-hidden="true"/> {post.comments_count} Discussion{post.comments_count > 1 || post.comments_count === 0 ? 's' : ''}
+							</div>
+						</Link>
+						{
+							post.voted &&
+							<div className="d-inline ml-2">
 								<span className="badge badge-success">
 									<i className="fa fa-check-circle-o" aria-hidden="true"> Rated</i>
 								</span>
 							</div>
 						}
-						<Link to={'/artwork/' + post.id} className="text-muted d-inline">
-							<div className={(post.voted ? "ml-3 " : "") + "d-inline select-none"}>
-								<i className="fa fa-comments fa-lg"
-								   aria-hidden="true"/> {post.comments_count} Discussion{post.comments_count > 1 || post.comments_count === 0 ? 's' : ''}
-							</div>
-						</Link>
 					</div>
 					{
 						post.tags && post.tags.length > 0 &&
