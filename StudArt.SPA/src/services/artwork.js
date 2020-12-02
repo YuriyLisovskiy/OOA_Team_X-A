@@ -25,7 +25,7 @@ class ArtworkService extends BaseService {
 	//        "author": <int (user pk)>,
 	//        "voted": <bool (shows if current user voted ot not)>,
 	//        "can_vote": <bool (shows if current user can vote this post)>,
-	//        "comments": <array of primary keys of comments>
+	//        "comments_count": <int>
 	//     },
 	//     ...
 	//    ]

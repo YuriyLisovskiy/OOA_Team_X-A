@@ -37,8 +37,7 @@ class CommentService extends BaseService {
 	//          "avatar": <string (full link)>
 	//        },
 	//        "creation_date": <string>,
-	//        "creation_time": <string>,
-	//        "answers": <array of primary keys of answers>
+	//        "creation_time": <string>
 	//      },
 	//      ...
 	//    ]
@@ -65,8 +64,7 @@ class CommentService extends BaseService {
 	//          "avatar": <string (full link)>
 	//        },
 	//        "creation_date": <string>,
-	//        "creation_time": <string>,
-	//        "answers": <array of primary keys of answers>
+	//        "creation_time": <string>
 	//      },
 	//      ...
 	//    ]

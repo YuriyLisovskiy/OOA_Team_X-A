@@ -52,7 +52,7 @@ export default class ArtworkPreview extends Component {
 						<Link to={'/artwork/' + post.id} className="text-muted d-inline">
 							<div className={(post.voted ? "ml-3 " : "") + "d-inline select-none"}>
 								<i className="fa fa-comments fa-lg"
-								   aria-hidden="true"/> {post.comments.length} Discussion{post.comments.length > 1 || post.comments.length === 0 ? 's' : ''}
+								   aria-hidden="true"/> {post.comments_count} Discussion{post.comments_count > 1 || post.comments_count === 0 ? 's' : ''}
 							</div>
 						</Link>
 					</div>

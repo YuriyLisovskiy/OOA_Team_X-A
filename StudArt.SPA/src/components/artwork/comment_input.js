@@ -36,7 +36,15 @@ export default class CommentInput extends Component {
 					alert(getErrorMessage(err));
 				}
 				else {
-					this.props.onAddComment(data.id);
+					CommentService.getComment(data.id, (comment, er) => {
+						if (er) {
+							// TODO:
+							alert(getErrorMessage(er));
+						}
+						else {
+							this.props.onAddComment(comment);
+						}
+					});
 				}
 
 				this.setState({

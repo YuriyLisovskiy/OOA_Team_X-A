@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 
 import CommentService from "../../services/comment";
-import {getErrorMessage, getResponseMessage} from "../utils";
+import {getErrorMessage} from "../utils";
 import CommentInput from "./comment_input";
 import "../../styles/common.css"
 import {Link} from "react-router-dom";
@@ -11,23 +11,24 @@ export default class Comment extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			comment: undefined,
+			comment: this.props.data,
 			showReplyInput: false
 		}
 		this.wrapperRef = React.createRef();
-		// this.setWrapperRef = this.setWrapperRef.bind(this);
 	}
 
 	componentDidMount() {
 		document.addEventListener('mouseup', this.handleClickOutside);
-		CommentService.getComment(this.props.id, (data, err) => {
+		CommentService.getAnswers(this.props.data.id, (data, err) => {
 			if (err) {
 				// TODO:
-				alert(getResponseMessage(err));
+				alert(getErrorMessage(err));
 			}
 			else {
+				let comment = this.state.comment;
+				comment.answers = data.results;
 				this.setState({
-					comment: data
+					comment: comment
 				});
 			}
 		});
@@ -46,7 +47,7 @@ export default class Comment extends Component {
 	}
 
 	handleVote = (upVote, method) => {
-		method(this.props.id, (data, err) => {
+		method(this.props.data.id, (data, err) => {
 			if (err) {
 				alert(getErrorMessage(err));
 			}
@@ -88,9 +89,9 @@ export default class Comment extends Component {
 		});
 	}
 
-	handleAddComment = (answerId) => {
+	handleAddComment = (answer) => {
 		let comment = this.state.comment;
-		comment.answers.push(answerId);
+		comment.answers.splice(0, 0, answer);
 		this.setState({
 			comment: comment
 		});
@@ -145,7 +146,7 @@ export default class Comment extends Component {
 						</div>
 					</div>
 					{discussion.answers && discussion.answers.map(
-						(answer) => <Comment key={answer} id={answer} parentId={answer} paddingLeft={paddingLeft + 10}/>
+						(answer) => <Comment key={answer.id} data={answer} parentId={answer.id} paddingLeft={paddingLeft + 10}/>
 					)}
 					<div ref={this.wrapperRef} className="mt-2">
 						{

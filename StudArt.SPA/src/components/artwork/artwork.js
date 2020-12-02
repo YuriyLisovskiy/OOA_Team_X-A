@@ -3,7 +3,8 @@ import "../../styles/artwork/artwork.css"
 import {Link} from "react-router-dom";
 import Comment from "./comment";
 import ArtworkService from "../../services/artwork";
-import {getResponseMessage} from "../utils";
+import CommentService from "../../services/comment";
+import {getErrorMessage, getResponseMessage} from "../utils";
 import CommentInput from "./comment_input";
 import TagBadge from "../tag_badge";
 
@@ -12,7 +13,8 @@ export default class Artwork extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			post: undefined
+			post: undefined,
+			lastLoadedCommentsPage: undefined
 		}
 	}
 
@@ -22,11 +24,53 @@ export default class Artwork extends Component {
 				alert(getResponseMessage(err));
 			}
 			else {
-				this.setState({
-					post: data
+				CommentService.getComments(data.id, (comments, er) => {
+					if (er) {
+						alert(getErrorMessage(er));
+					}
+					else {
+						data.comments = comments.results;
+						this.setState({
+							post: data,
+							lastLoadedCommentsPage: comments.next
+						});
+					}
 				});
 			}
 		});
+		window.addEventListener("scroll", this.handleScroll);
+	}
+
+	componentWillUnmount () {
+		window.removeEventListener("scroll", this.handleScroll);
+	}
+
+	handleScroll = () => {
+		if (this.state.lastLoadedCommentsPage) {
+			const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+			const body = document.body;
+			const html = document.documentElement;
+			const docHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+			const windowBottom = windowHeight + window.pageYOffset;
+			if (windowBottom >= docHeight - 1) {
+				this.setState({
+					loading: true,
+					lastLoadedCommentsPage: undefined
+				});
+				CommentService.get(
+					{url: this.state.lastLoadedCommentsPage},
+					(page, err) => {
+						let post = this.state.post;
+						post.comments = page.results;
+						this.setState({
+							loading: false,
+							lastLoadedCommentsPage: page.next,
+							post: post
+						});
+					}
+				);
+			}
+		}
 	}
 
 	handleVote = (id) => {
@@ -49,9 +93,9 @@ export default class Artwork extends Component {
 		}
 	}
 
-	handleAddComment = (commentId) => {
+	handleAddComment = (comment) => {
 		let post = this.state.post;
-		post.comments.push(commentId);
+		post.comments.splice(0, 0, comment);
 		this.setState({
 			post: post
 		});
@@ -137,13 +181,16 @@ export default class Artwork extends Component {
 						<div className="mt-4">
 							<CommentInput isReply={false} onAddComment={this.handleAddComment} parentId={post.id}/>
 						</div>
-						<div className="row" id="comments">
-							<div className="col-md-12">
-								{post.comments.map((comment) => (
-									<Comment key={comment} id={comment} parentId={comment} paddingLeft={20}/>
-								))}
+						{
+							post.comments &&
+							<div className="row" id="comments">
+								<div className="col-md-12">
+									{post.comments.map((comment) => (
+										<Comment key={comment.id} data={comment} parentId={comment.id} paddingLeft={20}/>
+									))}
+								</div>
 							</div>
-						</div>
+						}
 					</div>
 				)}
 			</div>
