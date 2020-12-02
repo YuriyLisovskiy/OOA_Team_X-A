@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -8,11 +10,15 @@ from core.validators import RequiredValidator
 
 
 class CommentDetailsSerializer(serializers.ModelSerializer):
+	one_h_as_sec = 3600
+
 	author = serializers.SerializerMethodField()
 	up_voted = serializers.SerializerMethodField()
 	down_voted = serializers.SerializerMethodField()
 	creation_date = serializers.SerializerMethodField()
 	creation_time = serializers.SerializerMethodField()
+	can_vote = serializers.SerializerMethodField()
+	can_be_deleted = serializers.SerializerMethodField()
 
 	def __init__(self, *args, **kwargs):
 		super(CommentDetailsSerializer, self).__init__(*args, **kwargs)
@@ -38,11 +44,21 @@ class CommentDetailsSerializer(serializers.ModelSerializer):
 	def get_creation_time(obj):
 		return obj.creation_time.strftime(settings.TIME_FORMAT)
 
+	def get_can_vote(self, obj):
+		request = self.context.get('request', None)
+		return request and obj.author.id != request.user.id
+
+	def get_can_be_deleted(self, obj):
+		request = self.context.get('request', None)
+		has_not_answers = obj.answers.count() == 0
+		time_is_out = (dt.datetime.now(tz=dt.timezone.utc) - obj.creation_date_time).seconds >= self.one_h_as_sec
+		return request and obj.author.id == request.user.id and has_not_answers and not time_is_out
+
 	class Meta:
 		model = CommentModel
 		fields = (
 			'id', 'text', 'points', 'author', 'up_voted', 'down_voted',
-			'creation_date', 'creation_time'
+			'creation_date', 'creation_time', 'can_vote', 'can_be_deleted'
 		)
 
 

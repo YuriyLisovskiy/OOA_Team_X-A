@@ -1,6 +1,12 @@
+import datetime as dt
+
 from django.db import models
 
 from core.models import UserModel
+
+
+def utc_now():
+	return dt.datetime.now(tz=dt.timezone.utc)
 
 
 class TagModel(models.Model):
@@ -11,9 +17,9 @@ class ArtworkModel(models.Model):
 	description = models.TextField(max_length=3000, null=True, blank=True)
 	tags = models.ManyToManyField(to=TagModel, related_name='tags', blank=True)
 	points = models.FloatField(default=0)
-	creation_date = models.DateField(auto_now=True)
-	creation_time = models.TimeField(auto_now=True)
-	creation_date_time = models.DateTimeField(auto_now=True)
+	creation_date = models.DateField(default=utc_now)
+	creation_time = models.TimeField(default=utc_now)
+	creation_date_time = models.DateTimeField(default=utc_now)
 	author = models.ForeignKey(to=UserModel, on_delete=models.CASCADE, related_name='artworks')
 	voters = models.ManyToManyField(to=UserModel, related_name='voted_artworks', blank=True)
 
@@ -31,9 +37,9 @@ class CommentModel(models.Model):
 	text = models.CharField(max_length=500)
 	points = models.IntegerField(default=0)
 	author = models.ForeignKey(to=UserModel, on_delete=models.SET_NULL, related_name='comments', null=True, blank=True)
-	creation_date = models.DateField(auto_now=True)
-	creation_time = models.TimeField(auto_now=True)
-	creation_date_time = models.DateTimeField(auto_now=True)
+	creation_date = models.DateField(default=utc_now)
+	creation_time = models.TimeField(default=utc_now)
+	creation_date_time = models.DateTimeField(default=utc_now)
 	is_discussion = models.BooleanField(default=False)
 	artwork = models.ForeignKey(to=ArtworkModel, on_delete=models.CASCADE, related_name='comments', blank=True, null=True)
 	comment = models.ForeignKey(to='self', on_delete=models.CASCADE, related_name='answers', blank=True, null=True)
