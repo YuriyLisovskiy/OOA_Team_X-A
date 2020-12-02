@@ -27,6 +27,7 @@ class ArtworkDetailsSerializer(serializers.ModelSerializer):
 	images = serializers.SerializerMethodField()
 	creation_date = serializers.SerializerMethodField()
 	creation_time = serializers.SerializerMethodField()
+	comments_count = serializers.SerializerMethodField()
 
 	def __init__(self, *args, **kwargs):
 		super(ArtworkDetailsSerializer, self).__init__(*args, **kwargs)
@@ -65,11 +66,15 @@ class ArtworkDetailsSerializer(serializers.ModelSerializer):
 	def get_creation_time(obj):
 		return obj.creation_time.strftime(settings.TIME_FORMAT)
 
+	@staticmethod
+	def get_comments_count(obj):
+		return obj.comments.count()
+
 	class Meta:
 		model = ArtworkModel
 		fields = (
 			'id', 'description', 'tags', 'points', 'creation_date', 'creation_time',
-			'images', 'author', 'voted', 'can_vote', 'comments'
+			'images', 'author', 'voted', 'can_vote', 'comments_count'
 		)
 
 

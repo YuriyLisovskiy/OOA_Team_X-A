@@ -36,8 +36,7 @@ from artwork.serializers.comment_model import (
 # 	                "avatar": <string (full link)>
 # 	            },
 # 	            "creation_date": <string>,
-# 	            "creation_time": <string>,
-# 	            "answers": <array of primary keys of answers>
+# 	            "creation_time": <string>
 # 	        },
 #           ...
 #       ]
@@ -48,13 +47,15 @@ class CommentsAPIView(generics.ListAPIView):
 	queryset = CommentModel.objects.all()
 
 	def get_queryset(self):
-		get_answers = self.request.data.get('answers', 'false') == 'true'
+		get_answers = self.request.query_params.get('answers', 'false') == 'true'
+		reverse = ''
 		if get_answers:
 			q = Q(comment_id=self.kwargs['pk'])
 		else:
+			reverse = '-'
 			q = Q(artwork_id=self.kwargs['pk'])
 
-		return self.queryset.filter(q).order_by('-creation_date_time')
+		return self.queryset.filter(q).order_by('{}creation_date_time'.format(reverse))
 
 
 # /api/v1/artworks/comments/<pk>
