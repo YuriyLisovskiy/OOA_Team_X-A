@@ -18,5 +18,5 @@ urlpatterns = [
 	re_path(r'^users/(?P<pk>\d+)/subscriptions/?', UserSubscriptionsAPIView.as_view(), name='get_subscriptions_for_user'),
 	re_path(r'^users/(?P<pk>\d+)/tags/top/?', TopNMostUsedTagsForUser.as_view(), name='most_used_tags_for_user'),
 	re_path(r'^users/(?P<pk>\d+)/?', UserDetailsAPIView.as_view(), name='get_user'),
-	re_path(r'^admin/', include('core.admin.urls', namespace='admin'))
+	re_path(r'^admin/', include('core.administration.urls', namespace='administration'))
 ]
