@@ -18,6 +18,7 @@ class CommentDetailsSerializer(serializers.ModelSerializer):
 	creation_date = serializers.SerializerMethodField()
 	creation_time = serializers.SerializerMethodField()
 	can_vote = serializers.SerializerMethodField()
+	can_be_edited = serializers.SerializerMethodField()
 	can_be_deleted = serializers.SerializerMethodField()
 
 	def __init__(self, *args, **kwargs):
@@ -48,7 +49,13 @@ class CommentDetailsSerializer(serializers.ModelSerializer):
 		request = self.context.get('request', None)
 		return request and obj.author.id != request.user.id
 
+	def get_can_be_edited(self, obj):
+		return self._check_modify(obj)
+
 	def get_can_be_deleted(self, obj):
+		return self._check_modify(obj)
+
+	def _check_modify(self, obj):
 		request = self.context.get('request', None)
 		has_not_answers = obj.answers.count() == 0
 		time_is_out = (dt.datetime.now(tz=dt.timezone.utc) - obj.creation_date_time).seconds >= self.one_h_as_sec
@@ -58,7 +65,8 @@ class CommentDetailsSerializer(serializers.ModelSerializer):
 		model = CommentModel
 		fields = (
 			'id', 'text', 'points', 'author', 'up_voted', 'down_voted',
-			'creation_date', 'creation_time', 'can_vote', 'can_be_deleted'
+			'creation_date', 'creation_time', 'can_vote', 'can_be_edited',
+			'can_be_deleted'
 		)
 
 

@@ -38,8 +38,12 @@ class ModifyArtworkPermission(BaseModifyPermission):
 	def _has_comments(obj):
 		return obj.comments.exists()
 
+	@staticmethod
+	def _has_votes(obj):
+		return obj.voters.count() > 0
+
 	def additional_checks(self, obj):
-		return not self._has_comments(obj)
+		return not self._has_comments(obj) and not self._has_votes(obj)
 
 
 class ModifyCommentPermission(BaseModifyPermission):

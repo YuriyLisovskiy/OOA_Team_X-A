@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.http import QueryDict
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from artwork.models import CommentModel
 from artwork.pagination import CommentSetPagination
@@ -38,12 +38,14 @@ from artwork.serializers.comment_model import (
 # 	            "creation_date": <string>,
 # 	            "creation_time": <string>,
 # 	            "can_vote": <bool>,
+# 	            "can_be_edited": <bool>,
 # 	            "can_be_deleted": <bool>
 # 	        },
 #           ...
 #       ]
 #   }
 class CommentsAPIView(generics.ListAPIView):
+	permission_classes = (AllowAny,)
 	serializer_class = CommentDetailsSerializer
 	pagination_class = CommentSetPagination
 	queryset = CommentModel.objects.all()
@@ -80,9 +82,11 @@ class CommentsAPIView(generics.ListAPIView):
 # 	    "creation_date": <string>,
 # 	    "creation_time": <string>,
 # 	    "can_vote": <bool>,
+# 	    "can_be_edited": <bool>,
 # 	    "can_be_deleted": <bool>
 #   }
 class CommentAPIView(generics.RetrieveAPIView):
+	permission_classes = (AllowAny,)
 	queryset = CommentModel.objects.all()
 	serializer_class = CommentDetailsSerializer
 

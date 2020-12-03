@@ -1,4 +1,7 @@
+import datetime as dt
+
 from django.conf import settings
+from django.db.models import Sum
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -20,6 +23,8 @@ def get_artwork_images_links(request, artwork):
 
 
 class ArtworkDetailsSerializer(serializers.ModelSerializer):
+	one_h_as_sec = 3600
+
 	tags = serializers.SerializerMethodField()
 	voted = serializers.SerializerMethodField()
 	can_vote = serializers.SerializerMethodField()
@@ -28,6 +33,9 @@ class ArtworkDetailsSerializer(serializers.ModelSerializer):
 	creation_date = serializers.SerializerMethodField()
 	creation_time = serializers.SerializerMethodField()
 	comments_count = serializers.SerializerMethodField()
+	can_be_edited = serializers.SerializerMethodField()
+	can_be_deleted = serializers.SerializerMethodField()
+	votes_count = serializers.SerializerMethodField()
 
 	def __init__(self, *args, **kwargs):
 		super(ArtworkDetailsSerializer, self).__init__(*args, **kwargs)
@@ -70,11 +78,39 @@ class ArtworkDetailsSerializer(serializers.ModelSerializer):
 	def get_comments_count(obj):
 		return obj.comments.count()
 
+	def get_can_be_edited(self, obj):
+		return self._check_can_be_modified(obj)
+
+	def get_can_be_deleted(self, obj):
+		return self._check_can_be_modified(obj)
+
+	def _check_can_be_modified(self, obj):
+		request = self.context.get('request', None)
+		if not request:
+			return False
+
+		time_is_out = (dt.datetime.now(tz=dt.timezone.utc) - obj.creation_date_time).seconds >= self.one_h_as_sec
+		if time_is_out:
+			return False
+
+		if obj.author.id != request.user.id:
+			return False
+
+		if obj.comments.count() > 0:
+			return False
+
+		return obj.voters.count() == 0
+
+	@staticmethod
+	def get_votes_count(obj):
+		return obj.voters.count()
+
 	class Meta:
 		model = ArtworkModel
 		fields = (
 			'id', 'description', 'tags', 'points', 'creation_date', 'creation_time',
-			'images', 'author', 'voted', 'can_vote', 'comments_count'
+			'images', 'author', 'voted', 'can_vote', 'comments_count', 'can_be_edited',
+			'can_be_deleted', 'votes_count'
 		)
 
 
@@ -109,10 +145,15 @@ class EditArtworkSerializer(serializers.ModelSerializer):
 
 class VoteForArtworkSerializer(serializers.ModelSerializer):
 	mark = serializers.IntegerField(write_only=True)
+	votes_count = serializers.SerializerMethodField()
 
 	@staticmethod
-	def calc_points(curr_points, curr_voters_count, mark):
-		return ((curr_points * curr_voters_count) + mark) / (curr_voters_count + 1)
+	def get_votes_count(obj):
+		return obj.voters.count()
+
+	@staticmethod
+	def calc_points(curr_points, total_items_count, mark):
+		return ((curr_points * total_items_count) + mark) / (total_items_count + 1)
 
 	def update(self, instance, validated_data):
 		request = self.context.get('request')
@@ -131,11 +172,18 @@ class VoteForArtworkSerializer(serializers.ModelSerializer):
 		)
 		instance.voters.add(request.user)
 		instance.save()
+
+		# re-calculate author's rating
+		instance.author.rating = instance.author.artworks.aggregate(
+			Sum('points')
+		)['points__sum'] / instance.author.artworks.count()
+		instance.author.save()
 		return instance
 
 	class Meta:
 		model = ArtworkModel
-		fields = ('mark', 'points')
+		fields = ('mark', 'points', 'votes_count')
+		read_only_fields = ('points', 'votes_count')
 		mark_range = range(-10, 12)
 		validators = [
 			RequiredValidator(fields=('mark',))
