@@ -8,3 +8,28 @@
 	-ms-user-select: none;
 	user-select: none;
 }
+
+.btn-underline {
+	cursor: pointer;
+}
+
+.btn-underline:hover {
+	text-decoration: underline;
+}
+
+.muted-btn {
+	color: #6c757d;
+	cursor: pointer;
+}
+
+.btn-danger-hover:hover {
+	color: #dc3545;
+}
+
+.btn-success-hover:hover {
+	color: #28a745;
+}
+
+.btn-secondary-hover:hover {
+	color: #494f54;
+}

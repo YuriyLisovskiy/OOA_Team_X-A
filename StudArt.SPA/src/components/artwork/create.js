@@ -192,12 +192,8 @@ export default class CreateArtwork extends Component {
 												{this.state.imagesError}
 											</small>
 										}
-										<input type="file" multiple style={{display: "none"}} ref={this.addImageRef}
-										       onKeyPress={e => {
-										        if (e.key.toLowerCase() === 'enter') {
-										            e.preventDefault();
-										        }
-										       }}
+										<input type="file" multiple style={{display: "none"}}
+										       ref={this.addImageRef}
 										       onChange={this.handleAddImage}/>
 									</div>
 								</div>

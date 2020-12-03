@@ -10,6 +10,7 @@ import Home from "./components/home";
 import Artwork from "./components/artwork/artwork";
 import CreateArtwork from "./components/artwork/create";
 import Index from "./components/Index";
+import NotFound from "./components/not_found";
 
 export default class App extends Component {
 
@@ -39,7 +40,7 @@ export default class App extends Component {
 	render() {
 		const user = this.state.currentUser;
 		return (
-			<div id="body">
+			<div id="body" className="pb-5">
 				<nav className="navbar navbar-expand-md bg-light navbar-light">
 					<Link className="navbar-brand" to='/'>
 						<img height={50} src={process.env.PUBLIC_URL + '/logo225.png'} alt="LOGO"/> StudArt
@@ -96,6 +97,7 @@ export default class App extends Component {
 						<Route path='/profile/:id' component={Profile} />
 						<Route path='/artwork/:id' component={Artwork} />
 						<Route path='/artworks' component={Home} />
+						<Route path='/page-not-found' component={NotFound} />
 						<Route path={['/', '/home']} component={Index} />
 					</Switch>
 				</div>

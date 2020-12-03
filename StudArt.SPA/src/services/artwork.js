@@ -25,6 +25,9 @@ class ArtworkService extends BaseService {
 	//        "author": <int (user pk)>,
 	//        "voted": <bool (shows if current user voted ot not)>,
 	//        "can_vote": <bool (shows if current user can vote this post)>,
+	//        "can_be_edited": <bool>,
+	//        "can_be_deleted": <bool>,
+	//        "votes_count": <int>,
 	//        "comments_count": <int>
 	//     },
 	//     ...
@@ -79,7 +82,10 @@ class ArtworkService extends BaseService {
 	//    "author": <int (user pk)>,
 	//    "voted": <bool (shows if current user voted ot not)>,
 	//    "can_vote": <bool (shows if current user can vote this post)>,
-	//    "comments": <array of primary keys of comments>
+	//    "can_be_edited": <bool>,
+	//    "can_be_deleted": <bool>,
+	//    "votes_count": <int>,
+	//    "comments_count": <int>
 	//  }
 	getArtwork = (id, handler) => {
 		this.get({url: this._URL_ARTWORKS + '/' + id.toString()}, handler);

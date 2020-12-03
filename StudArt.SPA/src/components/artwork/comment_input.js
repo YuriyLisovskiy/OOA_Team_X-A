@@ -9,7 +9,8 @@ export default class CommentInput extends Component {
 		super(props);
 		this.state = {
 			text: undefined,
-			loading: false
+			loading: false,
+			textError: undefined
 		}
 		this._buttonText = this.props.isReply ? "Answer" : "Comment";
 		this._inputPlaceholder = this.props.isReply ? "Add your answer" : "Write a comment";
@@ -20,13 +21,19 @@ export default class CommentInput extends Component {
 		return e => {
 			let text = e.target.value;
 			this.setState({
-				text: text.length > 0 ? text : undefined
+				text: text.length > 0 ? text : undefined,
+				textError: undefined
 			});
 		}
 	}
 
 	handleAddComment = (e) => {
-		if (this.state.text) {
+		if (!this.state.text || this.state.text.length === 0) {
+			this.setState({
+				textError: "Comment field must be filled."
+			});
+		}
+		else {
 			this.setState({
 				loading: true
 			});
@@ -58,18 +65,25 @@ export default class CommentInput extends Component {
 	render() {
 		return <div className="row">
 			<div className="col-md-12">
-				<div className="input-group">
-					<input type="text" className="form-control" placeholder={this._inputPlaceholder + "..."}
-					       value={this.state.text ? this.state.text : ""}
-					       onChange={this.handleOnChange()}/>
-					<div className="input-group-append">
-						<button className="btn btn-success" type="button"
-						        onClick={this.handleAddComment}
-						        disabled={this.state.loading}>
-							{this.state.loading &&
-							<span className="spinner-border spinner-border-sm"/>} {this._buttonText}
-						</button>
+				<div className="form-group">
+					<div className="input-group">
+						<input type="text" className="form-control" placeholder={this._inputPlaceholder + "..."}
+						       value={this.state.text ? this.state.text : ""}
+						       onChange={this.handleOnChange()}/>
+						<div className="input-group-append">
+							<button className="btn btn-success" type="button"
+							        onClick={this.handleAddComment}
+							        disabled={this.state.loading}>
+								{this.state.loading &&
+								<span className="spinner-border spinner-border-sm"/>} {this._buttonText}
+							</button>
+						</div>
 					</div>
+					{
+						this.state.textError && <small className="form-text text-danger ml-1 mt-1">
+							{this.state.textError}
+						</small>
+					}
 				</div>
 			</div>
 		</div>;

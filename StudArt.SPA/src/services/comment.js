@@ -39,6 +39,7 @@ class CommentService extends BaseService {
 	//        "creation_date": <string>,
 	//        "creation_time": <string>
 	//        "can_vote": <bool>,
+	//        "can_be_edited": <bool>,
 	//        "can_be_deleted": <bool>
 	//      },
 	//      ...
@@ -68,6 +69,7 @@ class CommentService extends BaseService {
 	//        "creation_date": <string>,
 	//        "creation_time": <string>,
 	//        "can_vote": <bool>,
+	//        "can_be_edited": <bool>,
 	//        "can_be_deleted": <bool>
 	//      },
 	//      ...
