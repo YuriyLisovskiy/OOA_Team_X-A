@@ -140,7 +140,6 @@ export default class Artwork extends Component {
 					let post = this.state.post;
 					post.description = this.state.newDescription;
 					this.setState({
-						newDescription: undefined,
 						editingDescription: false,
 						post: post
 					});
@@ -245,13 +244,19 @@ export default class Artwork extends Component {
 							{
 								this.state.post.images.length > 1 &&
 								<div className="row mb-4">
-									<div className="col-md-12">
+									<div className="col-md-12 text-center">
 										<div className="d-inline">
 											{post.images.map((image, number) =>
-												<ImagePreview key={image} src={image}
-												              number={number}
-												              onClick={this.handleSelectImage}
-												              isSelected={image === this.state.selectedImage}/>
+												<div className="image-container">
+													<ImagePreview key={image} src={image}
+													              number={number}
+													              onClick={this.handleSelectImage}/>
+													{
+														image === this.state.selectedImage &&
+														<i className="fa fa-search image-text-top-right" aria-hidden="true"/>
+													}
+												</div>
+
 											)}
 										</div>
 									</div>
@@ -308,7 +313,7 @@ export default class Artwork extends Component {
 											<div className="d-inline">
 												<i className="fa fa-check-square-o muted-btn btn-success-hover"
 												   aria-hidden="true" onClick={this.handleSaveDescription}> Save</i>
-												<i className="fa fa-times-circle-o muted-btn btn-danger-hover ml-3"
+												<i className="fa fa-times muted-btn btn-danger-hover ml-3"
 												   aria-hidden="true" onClick={this.handleCancelEditDescription}> Cancel</i>
 											</div>
 										}
@@ -318,12 +323,12 @@ export default class Artwork extends Component {
 												{
 													this.state.post.can_be_edited &&
 													<i className="fa fa-pencil-square-o muted-btn btn-success-hover"
-													   aria-hidden="true" onClick={this.handleStartEditDescription}> Edit</i>
+													   aria-hidden="true" onClick={this.handleStartEditDescription}> Edit description</i>
 												}
 												{
 													this.state.post.can_be_deleted &&
 													<i className="fa fa-trash muted-btn btn-danger-hover ml-3"
-													   aria-hidden="true" onClick={this.handleDeletePost}> Delete</i>
+													   aria-hidden="true" onClick={this.handleDeletePost}> Delete post</i>
 												}
 											</div>
 										}

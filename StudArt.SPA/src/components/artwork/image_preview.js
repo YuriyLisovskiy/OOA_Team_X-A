@@ -14,16 +14,20 @@ export default class ImagePreview extends Component {
 				case 0:
 					break;
 				default:
-					this.marginClass = "ml-2";
+					this.marginClass = "ml-2 ";
 					break;
 			}
 		}
+
+		this.borderStyle = {height: 80, cursor: "pointer"};
 	}
 
 	render() {
 		return <img src={this.props.src}
-		            className={"rounded " + this.marginClass + (this.props.customClassName ? this.props.customClassName : "")} alt=""
-		            style={{height: 100, cursor: "pointer"}}
-		            onClick={this.props.onClick}/>
+		            className={
+			            "rounded my-1 " + this.marginClass + (this.props.customClassName ? this.props.customClassName : "")
+		            } alt=""
+		            style={this.borderStyle}
+		            onClick={this.props.onClick}/>;
 	}
 }

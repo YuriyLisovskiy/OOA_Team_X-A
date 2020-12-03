@@ -33,3 +33,21 @@
 .btn-secondary-hover:hover {
 	color: #494f54;
 }
+
+.w-65 {
+	width: 65%;
+}
+
+.image-container {
+	display: inline;
+	position: relative;
+	text-align: center;
+}
+
+.image-text-top-right {
+	position: absolute;
+	bottom: 130%;
+	right: 5%;
+	mix-blend-mode: difference;
+	color: white;
+}

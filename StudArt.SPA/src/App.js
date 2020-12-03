@@ -11,13 +11,15 @@ import Artwork from "./components/artwork/artwork";
 import CreateArtwork from "./components/artwork/create";
 import Index from "./components/Index";
 import NotFound from "./components/not_found";
+import {Dropdown, NavDropdown} from "react-bootstrap";
+import Settings from "./components/user/settings";
+import DropdownItem from "react-bootstrap/DropdownItem";
 
 export default class App extends Component {
 
 	constructor(props) {
 		super(props);
 		this.handleLogOut = this.handleLogOut.bind(this);
-
 		this.state = {
 			currentUser: undefined
 		};
@@ -62,28 +64,50 @@ export default class App extends Component {
 						</ul>
 						{user ? (
 							<ul className="navbar-nav ml-auto">
-								<li className="nav-item">
-									<Link className='nav-link'
-									      to={'/profile/' + user.id}>{user.username}
-									</Link>
-								</li>
-								<li className="nav-item">
-									<Link to='/' className='btn nav-link' onClick={this.handleLogOut}>Sign Out</Link>
-								</li>
+								<NavDropdown title={
+									<div className="d-inline">
+										<div className="text-muted profile-photo d-inline">
+											<img src={user.avatar_link}
+											     alt="Avatar"
+											     className="avatar-picture mr-2"/>
+											<div className="d-inline font-weight-bold">{user.username}</div>
+										</div>
+									</div>
+								} id="basic-nav-dropdown">
+									{
+										user.first_name && user.last_name &&
+										<Dropdown.ItemText>
+											<div className="font-weight-bold">
+												{user.first_name} {user.last_name}
+											</div>
+										</Dropdown.ItemText>
+									}
+									<NavDropdown.Divider/>
+									<Dropdown.Item as={Link} to={'/profile/' + user.id}>
+										<i className="fa fa-user-circle-o" aria-hidden="true"/> My Profile
+									</Dropdown.Item>
+									<Dropdown.Item as={Link} to={'/settings/account'}>
+										<i className="fa fa-cog" aria-hidden="true"/> User Settings
+									</Dropdown.Item>
+									<NavDropdown.Divider/>
+									<DropdownItem as={Link} to='/' onClick={this.handleLogOut}>
+										<i className="fa fa-sign-out" aria-hidden="true"/> Sign Out
+									</DropdownItem>
+								</NavDropdown>
 							</ul>
 						) : (
 							<ul className='navbar-nav ml-auto'>
-								<li className="nav-item">
-									<Link className='nav-link' to='/login'>Login</Link>
+								<li className="nav-item mr-2">
+									<Link className="btn btn-outline-success" to='/login'>LOGIN</Link>
 								</li>
 								<li className="nav-item">
-									<Link className='nav-link' to='/register'>Sign Up</Link>
+									<Link className="btn btn-success" to='/register'>SIGN UP</Link>
 								</li>
 							</ul>
 						)}
 					</div>
 				</nav>
-				<div className='container mt-3'>
+				<div className="container-fluid mt-3 w-65">
 					<Switch>
 						{
 							!user && <Route path='/login' component={Login}/>
@@ -96,6 +120,7 @@ export default class App extends Component {
 						}
 						<Route path='/profile/:id' component={Profile} />
 						<Route path='/artwork/:id' component={Artwork} />
+						<Route path='/settings/account' component={Settings} />
 						<Route path='/artworks' component={Home} />
 						<Route path='/page-not-found' component={NotFound} />
 						<Route path={['/', '/home']} component={Index} />
