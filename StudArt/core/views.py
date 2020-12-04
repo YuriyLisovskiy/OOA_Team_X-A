@@ -159,6 +159,28 @@ class UserBlacklistAPIView(generics.ListAPIView):
 		return self.request.user.blocked_users.all()
 
 
+# /api/v1/core/users/self
+# methods:
+#   - get
+# returns (success status - 200):
+#   {
+#       "id": <int>,
+#       "first_name": <string>,
+#       "last_name": <string>,
+#       "username": <string>,
+#       "email": <string>,
+#       "avatar_link": <string (full url)>,
+#       "is_superuser": <bool>,
+#       "rating": <float>
+#   }
+class SelfUserAPIView(generics.RetrieveAPIView):
+	serializer_class = UserDetailsSerializer
+	queryset = UserModel.objects.all()
+
+	def get_object(self):
+		return self.request.user
+
+
 # /api/v1/core/users/<pk>/tags/top
 # methods:
 #   - get:
