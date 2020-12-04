@@ -13,9 +13,9 @@ export default class BaseService {
 	}
 
 	_authHeader = () => {
-		const user = JSON.parse(localStorage.getItem(this._USER_DATA_KEY));
-		if (user && user.token) {
-			return { Authorization: 'JWT ' + user.token };
+		const access = this._getAccessToken();
+		if (access) {
+			return {Authorization: 'Bearer ' + access};
 		}
 		else {
 			return {};
@@ -69,26 +69,29 @@ export default class BaseService {
 	}
 
 	_tryToAuth = (handler) => {
-		// TODO: try to refresh JWT token!
-		if (handler) {
-			handler(null, {
-				response: {
-					status: 401,
-					message: "Unauthorized"
-				}
-			});
+		let refresh = this._getRefreshToken();
+		if (!refresh) {
+			this._removeCurrentUserData();
+			if (handler) {
+				handler(false);
+			}
+		}
+		else {
+			// TODO:
+			// this._removeCurrentUserData();
+			handler(true);
 		}
 	}
 
 	_ensureAuth = (method, params, handler) => {
 		this._sendRequest(method, params, (data, err) => {
 			if (err && err.response && err.response.status === 401) {
-				this._tryToAuth((data, err) => {
-					if (!err) {
-						this._sendRequest(method, params, handler);
+				this._tryToAuth((success) => {
+					if (!success) {
+						handler(data, err);
 					}
 					else {
-						handler(data, err);
+						this._sendRequest(method, params, handler);
 					}
 				});
 			}
@@ -98,8 +101,70 @@ export default class BaseService {
 		});
 	}
 
-	request = (method, params, handler) => {
-		if (!this._useAuth) {
+	_getCurrentUserData() {
+		return JSON.parse(localStorage.getItem(this._USER_DATA_KEY));
+	}
+
+	_getTokens() {
+		let data = this._getCurrentUserData();
+		return data ? data.tokens : null;
+	}
+
+	_getAccessToken() {
+		let tokens = this._getTokens();
+		return tokens ? tokens.access : null;
+	}
+
+	_getRefreshToken() {
+		let tokens = this._getTokens();
+		return tokens ? tokens.refresh : null;
+	}
+
+	_setCurrentUserData(user, accessToken, refreshToken) {
+		localStorage.setItem(this._USER_DATA_KEY, JSON.stringify({
+			tokens: {
+				access: accessToken,
+				refresh: refreshToken
+			},
+			user: user
+		}));
+	}
+
+	_removeCurrentUserData() {
+		localStorage.removeItem(this._USER_DATA_KEY);
+	}
+
+	_setCurrentUser(user) {
+		let data = this._getCurrentUserData();
+		if (data) {
+			this._setCurrentUserData(user, data.tokens.access, data.tokens.refresh);
+			return true;
+		}
+
+		return false;
+	}
+
+	_setAccessToken(accessToken) {
+		let data = this._getCurrentUserData();
+		if (data) {
+			this._setCurrentUserData(data.user, accessToken, data.tokens.refresh);
+			return true;
+		}
+
+		return false;
+	}
+
+	getCurrentUser() {
+		let data = this._getCurrentUserData();
+		if (data && data.user) {
+			return data.user;
+		}
+
+		return null;
+	}
+
+	request = (method, params, handler, forceAuth = false) => {
+		if (!this._useAuth && !forceAuth) {
 			this._sendRequest(method, params, handler);
 		}
 		else {
@@ -107,19 +172,19 @@ export default class BaseService {
 		}
 	}
 
-	get = (params, handler) => {
-		this.request(axios.get, params, handler);
+	get = (params, handler, forceAuth = false) => {
+		this.request(axios.get, params, handler, forceAuth);
 	}
 
-	post = (params, handler) => {
-		this.request(axios.post, params, handler);
+	post = (params, handler, forceAuth = false) => {
+		this.request(axios.post, params, handler, forceAuth);
 	}
 
-	put = (params, handler) => {
-		this.request(axios.put, params, handler);
+	put = (params, handler, forceAuth = false) => {
+		this.request(axios.put, params, handler, forceAuth);
 	}
 
-	delete_ = (params, handler) => {
-		this.request(axios.delete, params, handler);
+	delete_ = (params, handler, forceAuth = false) => {
+		this.request(axios.delete, params, handler, forceAuth);
 	}
 }

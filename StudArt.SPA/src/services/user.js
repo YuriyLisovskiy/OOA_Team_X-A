@@ -27,6 +27,21 @@ class UserService extends BaseService {
 
 	// returns:
 	//  {
+	//    "id": <int>,
+	//    "first_name": <string>,
+	//    "last_name": <string>,
+	//    "username": <string>,
+	//    "email": <string>,
+	//    "avatar_link": <string (full url)>,
+	//    "is_superuser": <bool>,
+	//    "rating": <float>
+	//  }
+	getMe = (handler) => {
+		return this.get({url: this._URL_SELF}, handler);
+	}
+
+	// returns:
+	//  {
 	//    "avatar_link": <string> (full url)
 	//  }
 	editUser = (id, firstName, lastName, avatar, handler) => {

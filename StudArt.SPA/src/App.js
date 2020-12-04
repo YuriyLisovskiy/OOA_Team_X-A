@@ -14,6 +14,7 @@ import NotFound from "./components/not_found";
 import {Dropdown, NavDropdown} from "react-bootstrap";
 import Settings from "./components/user/settings";
 import DropdownItem from "react-bootstrap/DropdownItem";
+import UserService from "./services/user";
 
 export default class App extends Component {
 
@@ -26,12 +27,16 @@ export default class App extends Component {
 	}
 
 	componentDidMount() {
-		const user = AuthService.getCurrentUser();
-		if (user) {
-			this.setState({
-				currentUser: user
-			});
-		}
+		UserService.getMe((user, err) => {
+			if (err) {
+				// mute error
+			}
+			else {
+				this.setState({
+					currentUser: user
+				});
+			}
+		});
 	}
 
 	handleLogOut() {

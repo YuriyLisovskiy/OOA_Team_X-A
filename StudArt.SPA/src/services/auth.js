@@ -1,4 +1,5 @@
 import BaseService from "./base";
+import UserService from "./user"
 
 class AuthService extends BaseService {
 
@@ -34,19 +35,26 @@ class AuthService extends BaseService {
 			username: username,
 			password: password
 		}
-		this.post({url: this._URL_LOGIN, data: data}, (data, err) => {
+		this.post({url: this._URL_LOGIN, data: data}, (tokens, err) => {
 			if (!err) {
-				if (data.token) {
-					localStorage.setItem(this._USER_DATA_KEY, JSON.stringify(data));
-				}
+				this._setCurrentUserData(null, tokens.access, tokens.refresh);
+				UserService.getMe((user, err) => {
+					if (err) {
+						handler(null, err);
+					}
+					else {
+						this._setCurrentUser(user);
+						handler(null, null);
+					}
+				});
 			}
 
-			handler(data, err);
+			handler(null, err);
 		});
 	};
 
 	logout = () => {
-		localStorage.removeItem(this._USER_DATA_KEY);
+		this._removeCurrentUserData();
 	};
 
 	// returns:
@@ -63,19 +71,6 @@ class AuthService extends BaseService {
 		}
 
 		this.get({url: this._URL_USER_EXISTS + '?' + params.join("&")}, handler);
-	}
-
-	getCurrentUserData() {
-		return JSON.parse(localStorage.getItem(this._USER_DATA_KEY));
-	}
-
-	getCurrentUser() {
-		let data = this.getCurrentUserData();
-		if (data != null) {
-			return data.user;
-		}
-
-		return null;
 	}
 }
 
