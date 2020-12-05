@@ -195,6 +195,7 @@ class SelfUserAPIView(generics.RetrieveAPIView):
 class TopNMostUsedTagsForUser(generics.ListAPIView):
 	serializer_class = TagDetailsSerializer
 	default_limit = 5
+	pagination_class = None
 
 	def get_queryset(self):
 		request = self.request
@@ -203,4 +204,4 @@ class TopNMostUsedTagsForUser(generics.ListAPIView):
 		except ValueError:
 			limit = self.default_limit
 
-		return request.user.last_used_tags.all().order_by('-pk').distinct('text')[:limit]
+		return request.user.last_used_tags.all().order_by('-pk').distinct()[:limit]
