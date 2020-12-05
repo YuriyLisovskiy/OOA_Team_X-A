@@ -133,10 +133,14 @@ REST_FRAMEWORK = {
 	'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination'
 }
 
-JWT_AUTH = {
-	'JWT_RESPONSE_PAYLOAD_HANDLER': 'StudArt.utils.jwt_response_handler',
-	'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
+# JWT_AUTH = {
+# 	'JWT_RESPONSE_PAYLOAD_HANDLER': 'StudArt.utils.jwt_response_handler',
+# 	'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=1),
+# }
 
+SIMPLE_JWT = {
+	'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=1),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(minutes=3),
 }
 
 CORS_ORIGIN_WHITELIST = (
