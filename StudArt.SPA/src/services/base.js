@@ -1,10 +1,14 @@
-import axios from 'axios';
+import axios from "axios";
+import history from "./history";
+import EventObserver from "../utils/observer";
 
 const USER_DATA_KEY = 'user_data';
 const BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 // `handler` receives `json` and `err` args.
 export default class BaseService {
+
+	static #RefreshTokenObserver = new EventObserver();
 
 	constructor(useAuth = true) {
 		this._useAuth = useAuth;
@@ -68,32 +72,61 @@ export default class BaseService {
 		}
 	}
 
-	_tryToAuth = (handler) => {
+	_tryToRefreshToken = (handler) => {
 		let refresh = this._getRefreshToken();
 		if (!refresh) {
 			this._removeCurrentUserData();
-			if (handler) {
-				handler(false);
-			}
+			handler(false);
 		}
 		else {
-			// TODO:
-			// this._removeCurrentUserData();
-			handler(true);
+			this._axiosRequest(axios.post(
+				this._BASE_URL + '/auth/refresh',
+				{
+					refresh: refresh
+				}
+			), (data, err) => {
+				if (err) {
+					if (err.response && err.response.status === 401) {
+						this._removeCurrentUserData();
+					}
+
+					handler(false);
+				}
+				else {
+					this._setAccessToken(data.access);
+					handler(true);
+				}
+			});
 		}
 	}
 
-	_ensureAuth = (method, params, handler) => {
+	_ensureAuth (method, params, handler) {
 		this._sendRequest(method, params, (data, err) => {
 			if (err && err.response && err.response.status === 401) {
-				this._tryToAuth((success) => {
-					if (!success) {
-						handler(data, err);
-					}
-					else {
-						this._sendRequest(method, params, handler);
-					}
-				});
+				if (BaseService.#RefreshTokenObserver.isLocked()) {
+					BaseService.#RefreshTokenObserver.subscribe(
+						_ => this._sendRequest(method, params, handler)
+					);
+				}
+				else {
+					BaseService.#RefreshTokenObserver.lock();
+					BaseService.#RefreshTokenObserver.subscribe(
+						_ => this._sendRequest(method, params, handler)
+					);
+					this._tryToRefreshToken((isSuccess) => {
+						if (!isSuccess) {
+							// TODO: improved redirect!
+							// handler(data, err);
+							history.push('/login');
+							// window.location.reload();
+						}
+						else {
+							BaseService.#RefreshTokenObserver.broadcast(null);
+						}
+
+						BaseService.#RefreshTokenObserver.unlock();
+					});
+				}
 			}
 			else if (handler) {
 				handler(data, err);
