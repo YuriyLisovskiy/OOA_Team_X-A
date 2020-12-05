@@ -1,5 +1,4 @@
 import axios from "axios";
-import history from "./history";
 import EventObserver from "../utils/observer";
 
 const USER_DATA_KEY = 'user_data';
@@ -74,30 +73,24 @@ export default class BaseService {
 
 	_tryToRefreshToken = (handler) => {
 		let refresh = this._getRefreshToken();
-		if (!refresh) {
-			this._removeCurrentUserData();
-			handler(false);
-		}
-		else {
-			this._axiosRequest(axios.post(
-				this._BASE_URL + '/auth/refresh',
-				{
-					refresh: refresh
+		this._axiosRequest(axios.post(
+			this._BASE_URL + '/auth/refresh',
+			{
+				refresh: refresh
+			}
+		), (data, err) => {
+			if (err) {
+				if (err.response && err.response.status === 401) {
+					this._removeCurrentUserData();
 				}
-			), (data, err) => {
-				if (err) {
-					if (err.response && err.response.status === 401) {
-						this._removeCurrentUserData();
-					}
 
-					handler(false);
-				}
-				else {
-					this._setAccessToken(data.access);
-					handler(true);
-				}
-			});
-		}
+				handler(false);
+			}
+			else {
+				this._setAccessToken(data.access);
+				handler(true);
+			}
+		});
 	}
 
 	_ensureAuth (method, params, handler) {
@@ -108,17 +101,20 @@ export default class BaseService {
 						_ => this._sendRequest(method, params, handler)
 					);
 				}
+				else if (!this._getRefreshToken()) {
+					this._removeCurrentUserData();
+					handler(data, err);
+				}
 				else {
 					BaseService.#RefreshTokenObserver.lock();
+					this._setAccessToken(null);
 					BaseService.#RefreshTokenObserver.subscribe(
 						_ => this._sendRequest(method, params, handler)
 					);
 					this._tryToRefreshToken((isSuccess) => {
 						if (!isSuccess) {
-							// TODO: improved redirect!
-							// handler(data, err);
-							history.push('/login');
-							// window.location.reload();
+							this._setRefreshToken(null);
+							window.location.reload();
 						}
 						else {
 							BaseService.#RefreshTokenObserver.broadcast(null);
@@ -181,6 +177,16 @@ export default class BaseService {
 		let data = this._getCurrentUserData();
 		if (data) {
 			this._setCurrentUserData(data.user, accessToken, data.tokens.refresh);
+			return true;
+		}
+
+		return false;
+	}
+
+	_setRefreshToken = (refreshToken) => {
+		let data = this._getCurrentUserData();
+		if (data) {
+			this._setCurrentUserData(data.user, data.tokens.access, refreshToken);
 			return true;
 		}
 

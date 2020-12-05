@@ -20,6 +20,9 @@
 
 .avatar-picture {
 	max-width: 100%;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
 }
 
 .profile-photo img {

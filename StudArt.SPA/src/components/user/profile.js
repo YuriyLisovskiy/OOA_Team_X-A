@@ -1,66 +1,86 @@
 import React, {Component} from "react";
 import UserService from "../../services/user";
-import Home from "../home";
+import {getErrorMessage} from "../utils";
+import Spinner from "../spinner";
+import ArtworksList from "../artwork/list";
+import TagBadge from "../tag_badge";
+import "../../styles/user/profile.css"
 
 export default class Profile extends Component {
 
 	constructor(props) {
 		super(props);
-		// this.handleRegister = this.handleRegister.bind(this);
 		this.state = {
-			user: undefined
+			user: undefined,
+			loading: true
 		}
 	}
 
 	componentDidMount() {
-		UserService.getUser(this.props.match.params.id, (data, err) => {
+		UserService.getUser(this.props.match.params.id, (user, err) => {
 			if (err) {
-				console.log(err);
+				// TODO:
+				alert(getErrorMessage(err));
 			}
 			else {
-				this.setState({
-					user: data
+				UserService.getMostUsedTagsForAuthor(user.id, 5, (tags, err) => {
+					if (err) {
+						// TODO:
+						alert(getErrorMessage(err));
+					}
+					else {
+						user.mostUsedTags = tags;
+						this.setState({
+							user: user,
+							loading: false
+						});
+					}
 				});
 			}
 		});
-		//TODO: get artworks by user id
+	}
+
+	onClickSearchByTag = (_, text) => {
+		console.log(text);
 	}
 
 	render() {
+		let user = this.state.user;
 		return (
-			<div>
-				<div className="col-8 flex-column">
-					<Home columnsCount={2}/>
-				</div>
-				<div className="col-3 flex-column ">
-					<div className=" rounded bg-white h-25 w-100 pt-2 align-content-center">
-						{this.state.user ? (
-						<img src={this.state.user.avatar} alt="Avatar" className="avatar-picture"/>)
-							:(<img src="https://i.pinimg.com/564x/7f/17/5b/7f175b43dbf76a8b958e1c7726a7ddea.jpg" alt="Avatar" className="avatar-picture rounded-circle"/>
-							)}
-						{this.state.user ? (
-								<h2>{this.state.user.username}</h2>)
-							:(<h2>User</h2>
-							)}
-						{this.state.user ? (
-								<p>{this.state.user.description}</p>)
-							:(<p>This is user's description of their profile Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet</p>
-							)}
-						{this.state.user ? (
-								<div>{this.state.user.activeTags}</div>)
-							:(<div>
-									<span className="pl-1 pr-1 ml-1 mr-1 badge badge-pill badge-dark">tag 1</span>
-									<span className="pl-1 pr-1 ml-1 mr-1 badge badge-pill badge-dark">tag 2</span>
-									<span className="pl-1 pr-1 ml-1 mr-1 badge badge-pill badge-dark">tag 3</span>
-									<span className="pl-1 pr-1 ml-1 mr-1 badge badge-pill badge-dark">long tag</span>
-									<span className="pl-1 pr-1 ml-1 mr-1 badge badge-pill badge-dark">VERY very VERY LONG TAG</span>
-								</div>
-							)}
-					</div>
-					<div  className=" rounded bg-white h-25 w-100 pt-2 align-content-center">
-
-					</div>
-				</div>
+			<div className="container">
+				{
+					this.state.loading ? (<Spinner/>) : (
+						<div className="row">
+							<div className="col-md-4">
+								<img src={user.avatar_link} alt="Avatar" className="profile-picture"/>
+								{
+									user.first_name && user.last_name &&
+									<h4 className="mt-1">{user.first_name} {user.last_name}</h4>
+								}
+								<h6>{user.username}</h6>
+								{
+									user && user.mostUsedTags && user.mostUsedTags.length > 0 &&
+									<div>
+										{user.mostUsedTags.map((tag, i) => {
+											return <TagBadge key={tag.text} text={tag.text}
+											                 textOnly={true}
+											                 onClick={this.onClickSearchByTag}
+											                 displayInline={false}/>;
+										})}
+									</div>
+								}
+							</div>
+							<div className="col-md-8">
+								{
+									this.state.user &&
+									<ArtworksList columnsCount={2}
+									              filterAuthors={[this.state.user.username]}
+									              clickOnPreviewTag={false}/>
+								}
+							</div>
+						</div>
+					)
+				}
 			</div>
 		);
 	}

@@ -48,14 +48,14 @@ class ArtworkService extends BaseService {
 			params.push(param);
 		}
 
-		if (tags) {
+		if (tags && tags.length > 0) {
 			for (let i = 0; i < tags.length; i++) {
 				let tagParam = 'tag=' + tags[i].toString();
 				params.push(tagParam);
 			}
 		}
 
-		if (authors) {
+		if (authors && authors.length > 0) {
 			for (let i = 0; i < authors.length; i++) {
 				let authorParam = 'author=' + authors[i].toString();
 				params.push(authorParam);

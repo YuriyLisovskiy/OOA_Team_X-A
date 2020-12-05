@@ -3,25 +3,9 @@ import React, {Component} from "react";
 import "../../styles/artwork/artwork_preview.css"
 import {Link} from "react-router-dom";
 import TagBadge from "../tag_badge";
+import {getClassForTag} from "../utils";
 
 export default class ArtworkPreview extends Component {
-
-	getClassForTag = (idx, length) => {
-		let clsName = '';
-		switch (idx) {
-			case 0:
-				clsName = "mr-1";
-				break;
-			case length - 1:
-				clsName = "ml-1";
-				break;
-			default:
-				clsName = "mx-1";
-				break;
-		}
-
-		return clsName;
-	}
 
 	render() {
 		let post = this.props.post;
@@ -69,7 +53,7 @@ export default class ArtworkPreview extends Component {
 						<div className="card-text mt-3">
 							{post.tags.map((tag, i) => {
 								return <TagBadge key={tag} text={tag} textOnly={true} onClick={this.props.onClickTag}
-								                 className={this.getClassForTag(i, post.tags.length)}/>;
+								                 className={getClassForTag(i, post.tags.length)}/>;
 							})}
 						</div>
 					}

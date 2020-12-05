@@ -103,16 +103,16 @@ export default class App extends Component {
 						) : (
 							<ul className='navbar-nav ml-auto'>
 								<li className="nav-item mr-2">
-									<Link className="btn btn-outline-success" to='/login'>LOGIN</Link>
+									<Link className="btn btn-outline-primary" to='/login'>LOGIN</Link>
 								</li>
 								<li className="nav-item">
-									<Link className="btn btn-success" to='/register'>SIGN UP</Link>
+									<Link className="btn btn-primary" to='/register'>SIGN UP</Link>
 								</li>
 							</ul>
 						)}
 					</div>
 				</nav>
-				<div className="container-fluid mt-3 w-65">
+				<div className="container mt-3 w-65">
 					<Switch>
 						{
 							!user && <Route path='/login' component={Login}/>
