@@ -8,11 +8,17 @@ from core.validators import RequiredValidator
 
 class UserDetailsSerializer(serializers.ModelSerializer):
 	avatar_link = serializers.SerializerMethodField()
+	is_subscribed = serializers.SerializerMethodField()
+	is_blocked = serializers.SerializerMethodField()
 
 	def __init__(self, *args, **kwargs):
 		super(UserDetailsSerializer, self).__init__(*args, **kwargs)
 		for field in self.fields:
 			self.fields[field].read_only = True
+
+	def _is_authenticated(self):
+		request = self.context.get('request', None)
+		return request and request.user.is_authenticated, request
 
 	def get_avatar_link(self, obj):
 		return build_full_url(
@@ -20,11 +26,20 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 			obj.avatar
 		)
 
+	def get_is_subscribed(self, obj):
+		ok, request = self._is_authenticated()
+		return ok and request.user.id != obj.id and request.user.subscriptions.filter(pk=obj.pk).exists()
+
+	def get_is_blocked(self, obj):
+		ok, request = self._is_authenticated()
+		return ok and request.user.id != obj.id and request.user.blocked_users.filter(pk=obj.pk).exists()
+
 	class Meta:
 		model = UserModel
 		fields = (
-			'id', 'first_name', 'last_name', 'username',
-			'email', 'avatar_link', 'is_superuser', 'rating',
+			'id', 'first_name', 'last_name', 'username', 'email',
+			'avatar_link', 'is_superuser', 'rating', 'is_banned',
+			'is_subscribed', 'is_blocked'
 		)
 
 
@@ -54,15 +69,13 @@ class BlockUserSerializer(UserBlacklistSerializer):
 
 	def _modify(self, instance, obj):
 		instance.blocked_users.add(obj)
+		instance.subscriptions.remove(obj)
 		return instance
 
 	class Meta:
 		model = UserModel
 		exists = False
 		fields = ('author_pk',)
-		extra_kwargs = {
-			'author_pk': {'write_only': True},
-		}
 		validators = [
 			RequiredValidator(fields=('author_pk',))
 		]
@@ -85,9 +98,6 @@ class SubscribeToAuthorSerializer(AuthorSubscriptionSerializer):
 		model = UserModel
 		exists = False
 		fields = ('author_pk',)
-		extra_kwargs = {
-			'author_pk': {'write_only': True},
-		}
 		validators = [
 			RequiredValidator(fields=('author_pk',))
 		]

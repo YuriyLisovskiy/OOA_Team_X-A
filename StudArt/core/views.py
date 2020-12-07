@@ -26,7 +26,10 @@ from core.serializers.user_model import (
 #       "email": <string>,
 #       "avatar_link": <string (full url)>,
 #       "is_superuser": <bool>,
-#       "rating": <float>
+#       "rating": <float>,
+#       "is_banned": <bool>,
+#       "is_subscribed": <bool>,
+#       "is_blocked": <bool>
 #   }
 class UserDetailsAPIView(generics.RetrieveAPIView):
 	permission_classes = (permissions.AllowAny,)
