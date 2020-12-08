@@ -96,7 +96,7 @@ class ArtworksAPIView(generics.ListAPIView):
 		else:
 			queryset = self.queryset.all()
 
-		return queryset.order_by('-creation_date_time')
+		return queryset.distinct().order_by('-creation_date_time')
 
 
 # /api/v1/artworks/<pk>
