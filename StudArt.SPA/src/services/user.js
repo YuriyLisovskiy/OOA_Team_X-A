@@ -4,7 +4,9 @@ class UserService extends BaseService {
 
 	constructor() {
 		super();
-		this._URL_USERS = this._BASE_URL + '/core/users';
+		this._URL_CORE = this._BASE_URL + '/core';
+		this._URL_USERS = this._URL_CORE + '/users';
+		this._URL_ADMIN_USERS = this._URL_CORE + '/admin/users';
 		this._URL_SELF = this._URL_USERS + '/self';
 	}
 
@@ -17,7 +19,10 @@ class UserService extends BaseService {
 	//    "email": <string>,
 	//    "avatar_link": <string (full url)>,
 	//    "is_superuser": <bool>,
-	//    "rating": <float>
+	//    "rating": <float>,
+	//    "is_banned": <bool>,
+	//    "is_subscribed": <bool>,
+	//    "is_blocked": <bool>
 	//  }
 	getUser = (id, handler) => {
 		return this.get({
@@ -34,7 +39,10 @@ class UserService extends BaseService {
 	//    "email": <string>,
 	//    "avatar_link": <string (full url)>,
 	//    "is_superuser": <bool>,
-	//    "rating": <float>
+	//    "rating": <float>,
+	//    "is_banned": <bool>,
+	//    "is_subscribed": <bool>,
+	//    "is_blocked": <bool>
 	//  }
 	getMe = (handler) => {
 		return this.get({url: this._URL_SELF}, handler);
@@ -189,6 +197,24 @@ class UserService extends BaseService {
 		this.get({
 			url: this._URL_USERS + '/' + authorId.toString() + '/tags/top',
 			data: data
+		}, handler);
+	}
+
+	// Administration privileges are required.
+	// returns:
+	// {}
+	banUser = (userId, handler) => {
+		this.put({
+			url: this._URL_ADMIN_USERS + '/' + userId.toString() + '/ban'
+		}, handler);
+	}
+
+	// Administration privileges are required.
+	// returns:
+	// {}
+	unbanUser = (userId, handler) => {
+		this.put({
+			url: this._URL_ADMIN_USERS + '/' + userId.toString() + '/unban'
 		}, handler);
 	}
 }

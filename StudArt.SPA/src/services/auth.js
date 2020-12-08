@@ -36,7 +36,10 @@ class AuthService extends BaseService {
 			password: password
 		}
 		this.post({url: this._URL_LOGIN, data: data}, (tokens, err) => {
-			if (!err) {
+			if (err) {
+				handler(null, err);
+			}
+			else {
 				this._setCurrentUserData(null, tokens.access, tokens.refresh);
 				UserService.getMe((user, err) => {
 					if (err) {
@@ -48,8 +51,6 @@ class AuthService extends BaseService {
 					}
 				});
 			}
-
-			handler(null, err);
 		});
 	};
 

@@ -3,7 +3,6 @@ import {Link, Route, Switch} from 'react-router-dom';
 
 import './App.css';
 import AuthService from "./services/auth";
-import Login from "./components/login";
 import Register from "./components/register";
 import Profile from "./components/user/profile";
 import Home from "./components/home";
@@ -15,6 +14,8 @@ import {Dropdown, NavDropdown} from "react-bootstrap";
 import Settings from "./components/user/settings";
 import DropdownItem from "react-bootstrap/DropdownItem";
 import UserService from "./services/user";
+import Drawer from "react-drag-drawer";
+import Login from "./components/login";
 
 export default class App extends Component {
 
@@ -22,7 +23,9 @@ export default class App extends Component {
 		super(props);
 		this.handleLogOut = this.handleLogOut.bind(this);
 		this.state = {
-			currentUser: undefined
+			currentUser: undefined,
+			loginIsOpen: false,
+			registerIsOpen: false
 		};
 	}
 
@@ -41,6 +44,30 @@ export default class App extends Component {
 
 	handleLogOut() {
 		AuthService.logout();
+		window.location = '/';
+	}
+
+	onClickLoginToggle = () => {
+		let {loginIsOpen} = this.state;
+		this.setState({
+			loginIsOpen: !loginIsOpen,
+			registerIsOpen: false
+		});
+	}
+
+	onClickRegisterToggle = () => {
+		let {registerIsOpen} = this.state;
+		this.setState({
+			loginIsOpen: false,
+			registerIsOpen: !registerIsOpen
+		});
+	}
+
+	onLoginSuccess = () => {
+		window.location = '/';
+	}
+
+	onRegisterSuccess = () => {
 		window.location = '/';
 	}
 
@@ -103,23 +130,34 @@ export default class App extends Component {
 						) : (
 							<ul className='navbar-nav ml-auto'>
 								<li className="nav-item mr-2">
-									<Link className="btn btn-outline-primary" to='/login'>LOGIN</Link>
+									<button className="btn btn-outline-primary"
+									        onClick={this.onClickLoginToggle}>
+										LOGIN
+									</button>
 								</li>
 								<li className="nav-item">
-									<Link className="btn btn-primary" to='/register'>SIGN UP</Link>
+									<button className="btn btn-primary"
+									        onClick={this.onClickRegisterToggle}>
+										SIGN UP
+									</button>
 								</li>
 							</ul>
 						)}
 					</div>
 				</nav>
 				<div className="container mt-3 w-65">
+					<Drawer
+						open={this.state.loginIsOpen}
+						onRequestClose={this.onClickLoginToggle}>
+						<Login onLoginSuccess={this.onLoginSuccess}/>
+					</Drawer>
+					<Drawer
+						modalElementClass="container w-30 min-w-300"
+						open={this.state.registerIsOpen}
+						onRequestClose={this.onClickRegisterToggle}>
+						<Register onRegisterSuccess={this.onRegisterSuccess}/>
+					</Drawer>
 					<Switch>
-						{
-							!user && <Route path='/login' component={Login}/>
-						}
-						{
-							!user && <Route path='/register' component={Register} />
-						}
 						{
 							user && <Route path='/new/artwork' component={CreateArtwork} />
 						}

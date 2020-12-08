@@ -51,3 +51,11 @@
 	mix-blend-mode: difference;
 	color: white;
 }
+
+.w-30 {
+	width: 30%;
+}
+
+.min-w-300 {
+	min-width: 300px;
+}
