@@ -233,7 +233,7 @@ class EditArtworkAPIView(generics.UpdateAPIView):
 	)
 
 	def update(self, request, *args, **kwargs):
-		if not ensure_tags_exist(request.data.get('tags', [])):
+		if not ensure_tags_exist(request.data.getlist('tags', [])):
 			if 'tags' in request.data:
 				request.data.pop('tags')
 
