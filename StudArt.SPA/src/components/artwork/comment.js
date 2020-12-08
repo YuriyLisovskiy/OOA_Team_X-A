@@ -25,7 +25,6 @@ export default class Comment extends Component {
 	}
 
 	componentDidMount() {
-		document.addEventListener('mouseup', this.handleClickOutside);
 		CommentService.getAnswers(this.props.data.id, (data, err) => {
 			if (err) {
 				// TODO:
@@ -40,13 +39,14 @@ export default class Comment extends Component {
 				});
 			}
 		});
+		document.addEventListener('mouseup', this._onClickOutside);
 	}
 
 	componentWillUnmount() {
-		document.removeEventListener('mouseup', this.handleClickOutside);
+		document.removeEventListener('mouseup', this._onClickOutside);
 	}
 
-	_checkOutsideClick = (e, reference, newState, secondRef) => {
+	_checkOutside = (e, reference, newState, secondRef) => {
 		if (reference && reference.current && !reference.current.contains(e.target)) {
 			if (secondRef && secondRef.current.contains(e.target)) {
 				return;
@@ -56,19 +56,10 @@ export default class Comment extends Component {
 		}
 	}
 
-	handleClickOutside = (e) => {
-		this._checkOutsideClick(e, this.wrapperEditCommentInputRef, {
-			editing: false,
-			newComment: this.state.comment.text
-		}, this.wrapperSaveCommentButtonRef);
-		this._checkOutsideClick(e, this.wrapperAnswerInputRef, {
-			showReplyInput: false
-		});
-	}
-
-	handleVote = (upVote, method) => {
+	_vote = (upVote, method) => {
 		method(this.state.comment.id, (data, err) => {
 			if (err) {
+				// TODO:
 				alert(getErrorMessage(err));
 			}
 			else {
@@ -83,19 +74,29 @@ export default class Comment extends Component {
 		});
 	}
 
-	handleUpVote = (e) => {
-		this.handleVote(true, CommentService.upVoteComment);
+	_onClickOutside = (e) => {
+		this._checkOutside(e, this.wrapperEditCommentInputRef, {
+			editing: false,
+			newComment: this.state.comment.text
+		}, this.wrapperSaveCommentButtonRef);
+		this._checkOutside(e, this.wrapperAnswerInputRef, {
+			showReplyInput: false
+		});
 	}
 
-	handleDownVote = (e) => {
-		this.handleVote(false, CommentService.downVoteComment);
+	_onClickUpVote = (e) => {
+		this._vote(true, CommentService.upVoteComment);
 	}
 
-	handleCancelVote = (e) => {
+	_onClickDownVote = (e) => {
+		this._vote(false, CommentService.downVoteComment);
+	}
+
+	_onClickCancelVote = (e) => {
 		CommentService.cancelVoteForComment(this.state.comment.id, (data, err) => {
 			if (err) {
+				// TODO:
 				alert(getErrorMessage(err));
-				console.log(err.response);
 			}
 			else {
 				let comment = this.state.comment;
@@ -109,7 +110,7 @@ export default class Comment extends Component {
 		});
 	}
 
-	onAddComment = (answer) => {
+	_onClickAddComment = (answer) => {
 		let comment = this.state.comment;
 		comment.answers.splice(0, 0, answer);
 		this.setState({
@@ -117,7 +118,7 @@ export default class Comment extends Component {
 		});
 	}
 
-	onDeleteComment = (answer) => {
+	_onDeleteComment = (answer) => {
 		let comment = this.state.comment;
 		comment.answers.splice(comment.answers.indexOf(answer), 1);
 		this.setState({
@@ -125,25 +126,25 @@ export default class Comment extends Component {
 		});
 	}
 
-	handleDeleteComment = (e) => {
+	_onClickDeleteComment = (e) => {
 		CommentService.deleteComment(this.state.comment.id, (res, err) => {
 			if (err) {
 				// TODO:
 				alert(getErrorMessage(err));
 			}
 			else {
-				this.props.onDeleteComment(this.state.comment);
+				this.props._onDeleteComment(this.state.comment);
 			}
 		});
 	}
 
-	handleEditComment = (e) => {
+	_onClickEditComment = (e) => {
 		this.setState({
 			editing: true
 		});
 	}
 
-	handleSaveComment = (e) => {
+	_onClickSaveComment = (e) => {
 		if (!this.state.newComment || this.state.newComment.length === 0) {
 			this.setState({
 				newCommentError: "Comment field must be filled."
@@ -173,14 +174,7 @@ export default class Comment extends Component {
 		}
 	}
 
-	handleCancelEditComment = (e) => {
-		this.setState({
-			editing: false,
-			newComment: this.state.comment.text
-		});
-	}
-
-	handleCommentChanged = (e) => {
+	_onChangeComment = (e) => {
 		let text = e.target.value;
 		this.setState({
 			newComment: text.length > 0 ? text : undefined,
@@ -188,7 +182,7 @@ export default class Comment extends Component {
 		})
 	}
 
-	handleShowReply = (e) => {
+	_onClickShowReply = (e) => {
 		this.setState({
 			showReplyInput: true
 		});
@@ -213,7 +207,7 @@ export default class Comment extends Component {
 									this.props.userExists && discussion.can_vote ? (
 										<i className={"fa fa-chevron-up cursor-pointer" + (discussion.up_voted ? " text-success" : "")}
 										   title="Up-vote"
-										   onClick={!discussion.up_voted ? this.handleUpVote : this.handleCancelVote}
+										   onClick={!discussion.up_voted ? this._onClickUpVote : this._onClickCancelVote}
 										   aria-hidden="true"/>
 									) : (
 										<i className="fa fa-chevron-up cursor-pointer text-secondary"
@@ -238,7 +232,7 @@ export default class Comment extends Component {
 							}
 							&nbsp;· <i className="fa fa-reply muted-btn btn-secondary-hover"
 							           aria-hidden="true"
-							           onClick={this.handleShowReply}/>
+							           onClick={this._onClickShowReply}/>
 							{
 								discussion.can_be_edited && (
 									this.state.editing ? (
@@ -247,7 +241,7 @@ export default class Comment extends Component {
 											           aria-hidden="true"
 											           title="Save"
 											           ref={this.wrapperSaveCommentButtonRef}
-											           onClick={this.handleSaveComment}/>
+											           onClick={this._onClickSaveComment}/>
 											<i className="fa fa-times-circle-o muted-btn btn-danger-hover ml-2"
 											   aria-hidden="true"
 											   title="Cancel"/>
@@ -257,7 +251,7 @@ export default class Comment extends Component {
 											&nbsp;· <i className="fa fa-pencil-square-o muted-btn btn-success-hover"
 											           aria-hidden="true"
 											           title="Edit"
-											           onClick={this.handleEditComment}/>
+											           onClick={this._onClickEditComment}/>
 										</div>
 									)
 								)
@@ -272,7 +266,7 @@ export default class Comment extends Component {
 									&nbsp;· <i className="fa fa-trash muted-btn btn-danger-hover"
 									           aria-hidden="true"
 									           title="Remove"
-									           onClick={this.handleDeleteComment}/>
+									           onClick={this._onClickDeleteComment}/>
 								</div>
 							}
 						</small>
@@ -284,7 +278,7 @@ export default class Comment extends Component {
 									this.props.userExists && discussion.can_vote ? (
 										<i className={"fa fa-chevron-down cursor-pointer" + (discussion.down_voted ? " text-danger" : "")}
 										   title="Down-vote"
-										   onClick={!discussion.down_voted ? this.handleDownVote : this.handleCancelVote}
+										   onClick={!discussion.down_voted ? this._onClickDownVote : this._onClickCancelVote}
 										   aria-hidden="true"/>
 									) : (
 										<i className="fa fa-chevron-down cursor-pointer text-secondary"
@@ -302,7 +296,7 @@ export default class Comment extends Component {
 										className="form-control"
 										value={this.state.newComment}
 										maxLength={500}
-										onChange={this.handleCommentChanged}
+										onChange={this._onChangeComment}
 										placeholder="Edit your comment..."
 									/>
 									{
@@ -314,7 +308,7 @@ export default class Comment extends Component {
 							) : (
 								<div className="d-inline"
 								     title="Click to reply to this comment"
-								     onClick={this.handleShowReply}
+								     onClick={this._onClickShowReply}
 								     style={{cursor: "pointer"}}>
 									{discussion.text}
 								</div>
@@ -327,14 +321,14 @@ export default class Comment extends Component {
 						                     userExists={this.props.userExists}
 						                     parentId={answer.id}
 						                     paddingLeft={paddingLeft + 10}
-						                     onDeleteComment={this.onDeleteComment}/>
+						                     onDeleteComment={this._onDeleteComment}/>
 					)}
 					{
 						this.props.userExists &&
 						<div ref={this.wrapperAnswerInputRef} className="mt-2">
 							{
 								this.state.showReplyInput &&
-								<CommentInput isReply={true} onAddComment={this.onAddComment} parentId={discussion.id}/>
+								<CommentInput isReply={true} onAddComment={this._onClickAddComment} parentId={discussion.id}/>
 							}
 						</div>
 					}

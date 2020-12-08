@@ -5,7 +5,7 @@ import Comment from "./comment";
 import AuthService from "../../services/auth";
 import ArtworkService from "../../services/artwork";
 import CommentService from "../../services/comment";
-import {getErrorMessage, getResponseMessage} from "../utils";
+import {getErrorMessage} from "../utils";
 import CommentInput from "./comment_input";
 import TagBadge from "../tag_badge";
 import ImagePreview from "./image_preview";
@@ -38,7 +38,7 @@ export default class Artwork extends Component {
 				}
 				else {
 					// TODO:
-					alert(getResponseMessage(err));
+					alert(getErrorMessage(err));
 				}
 			}
 			else {

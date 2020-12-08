@@ -2,7 +2,7 @@ import React, {Component} from "react";
 
 import ArtworkPreview from "../artwork/preview";
 import ArtworkService from "../../services/artwork";
-import {getOrDefault, getResponseMessage} from "../utils";
+import {getErrorMessage, getOrDefault} from "../utils";
 import Spinner from "../spinner";
 import ArtworkEmptyPreview from "./empty_preview";
 
@@ -26,38 +26,21 @@ export default class ArtworksList extends Component {
 	}
 
 	componentDidMount() {
-		this.loadArtworks(
+		this._loadArtworks(
 			null,
 			this._columnsCount,
 			this.state.filterTags,
 			this.state.filterAuthors,
 			this.state.filterBySubscriptions
 		);
-		window.addEventListener("scroll", this.handleScroll);
+		window.addEventListener("scroll", this._onScroll);
 	}
 
 	componentWillUnmount() {
-		window.removeEventListener("scroll", this.handleScroll);
+		window.removeEventListener("scroll", this._onScroll);
 	}
 
-	makeColsFromResp = (data) => {
-		let newList = [];
-		for (let i = 0; i < this._columnsCount; i++) {
-			newList.push(data.results[i].map((artwork) =>
-				<ArtworkPreview onClickTag={this.handleOnClickTag} post={artwork} key={artwork.id}/>
-			));
-		}
-
-		if (this._columnsCount === 2 && newList[1].length === 0) {
-			newList[1].push(<ArtworkEmptyPreview key={-1}/>);
-		}
-
-		console.log(newList);
-
-		return newList;
-	}
-
-	setArtworksState = (currArtworks, newArtworks) => {
+	_setArtworksState = (currArtworks, newArtworks) => {
 		if (currArtworks) {
 			let newState = [];
 			for (let i = 0; i < this._columnsCount; i++) {
@@ -70,16 +53,31 @@ export default class ArtworksList extends Component {
 		return newArtworks;
 	}
 
-	loadArtworks = (page, columns, tags, authors, filterBySubs) => {
+	_makeColsFromResp = (data) => {
+		let newList = [];
+		for (let i = 0; i < this._columnsCount; i++) {
+			newList.push(data.results[i].map((artwork) =>
+				<ArtworkPreview onClickTag={this._onClickSearchByTag} post={artwork} key={artwork.id}/>
+			));
+		}
+
+		if (this._columnsCount === 2 && newList[1].length === 0) {
+			newList[1].push(<ArtworkEmptyPreview key={-1}/>);
+		}
+
+		return newList;
+	}
+
+	_loadArtworks = (page, columns, tags, authors, filterBySubs) => {
 		ArtworkService.getArtworks(page, columns, filterBySubs, tags, authors, (data, err) => {
 			if (err) {
 				// TODO:
-				alert(getResponseMessage(err));
+				alert(getErrorMessage(err));
 			}
 			else {
-				let newArtworksList = this.makeColsFromResp(data);
+				let newArtworksList = this._makeColsFromResp(data);
 				this.setState({
-					artworks: this.setArtworksState(
+					artworks: this._setArtworksState(
 						page ? this.state.artworks : null, newArtworksList
 					),
 					loading: false,
@@ -89,9 +87,41 @@ export default class ArtworksList extends Component {
 		});
 	}
 
-	handleOnClickTag = (e, tag) => {
+	_colHasPosts = (colNum) => {
+		return this.state.artworks[colNum] && this.state.artworks[colNum].length > 0;
+	}
+
+	_colsHavePosts = () => {
+		if (this.state.artworks) {
+			for (let i = 0; i < this._columnsCount; i++) {
+				if (this.state.artworks[i] && this.state.artworks[i].length > 0) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	_makePostsCol = (colNum) => {
+		let cn = "col-md-" + (12 / this._columnsCount);
+		return <div key={colNum} className={cn}>
+			{this._colHasPosts(colNum) && this.state.artworks[colNum]}
+		</div>;
+	}
+
+	_makeAllColumns = () => {
+		let resultCols = [];
+		for (let i = 0; i < this._columnsCount; i++) {
+			resultCols.push(this._makePostsCol(i));
+		}
+
+		return <div className="row">{resultCols}</div>
+	}
+
+	_onClickSearchByTag = (e, tag) => {
 		if (this._handleClickOnPreviewTag) {
-			this.loadArtworks(
+			this._loadArtworks(
 				null,
 				this._columnsCount,
 				[tag],
@@ -101,7 +131,7 @@ export default class ArtworksList extends Component {
 		}
 	}
 
-	handleScroll = () => {
+	_onScroll = () => {
 		if (this.state.lastLoadedPage) {
 			const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
 			const body = document.body;
@@ -115,7 +145,7 @@ export default class ArtworksList extends Component {
 					loading: true,
 					lastLoadedPage: undefined
 				});
-				this.loadArtworks(
+				this._loadArtworks(
 					page,
 					this._columnsCount,
 					this.state.filterTags,
@@ -126,47 +156,14 @@ export default class ArtworksList extends Component {
 		}
 	}
 
-	colHasPosts = (colNum) => {
-		return this.state.artworks[colNum] && this.state.artworks[colNum].length > 0;
-	}
-
-	colsHavePosts = () => {
-		if (this.state.artworks) {
-			for (let i = 0; i < this._columnsCount; i++) {
-				if (this.state.artworks[i] && this.state.artworks[i].length > 0) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	makePostsCol = (colNum) => {
-		let cn = "col-md-" + (12 / this._columnsCount);
-		return <div key={colNum} className={cn}>
-			{this.colHasPosts(colNum) && this.state.artworks[colNum]}
-		</div>;
-	}
-
-	makeAllColumns = () => {
-		let resultCols = [];
-		for (let i = 0; i < this._columnsCount; i++)
-		{
-			resultCols.push(this.makePostsCol(i));
-		}
-
-		return <div className="row">{resultCols}</div>
-	}
-
 	render () {
-		let hasPosts = this.colsHavePosts();
+		let hasPosts = this._colsHavePosts();
 		return (
 			<div>
 				{
 					hasPosts ? (
 						<div>
-							{this.makeAllColumns()}
+							{this._makeAllColumns()}
 						</div>
 					) : (
 						!this.state.loading && <h2>No posts added yet</h2>

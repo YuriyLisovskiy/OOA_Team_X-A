@@ -1,10 +1,11 @@
 import React, {Component} from "react";
 
 export default class ImagePreview extends Component {
+
 	constructor(props) {
 		super(props);
 		if (!props.onClick) {
-			this.props.onClick = e => {
+			this.props.onClick = _ => {
 			};
 		}
 
@@ -24,9 +25,9 @@ export default class ImagePreview extends Component {
 
 	render() {
 		return <img src={this.props.src}
-		            className={
-			            "rounded my-1 " + this.marginClass + (this.props.customClassName ? this.props.customClassName : "")
-		            } alt=""
+		            className={"rounded my-1 " + this.marginClass + (
+				        this.props.customClassName ? this.props.customClassName : ""
+			        )} alt=""
 		            style={this.borderStyle}
 		            onClick={this.props.onClick}/>;
 	}

@@ -17,17 +17,15 @@ export default class CommentInput extends Component {
 		this._addComment = this.props.isReply ? CommentService.replyToComment : CommentService.createComment;
 	}
 
-	handleOnChange = () => {
-		return e => {
-			let text = e.target.value;
-			this.setState({
-				text: text.length > 0 ? text : undefined,
-				textError: undefined
-			});
-		}
+	_onChangeInput = (e) => {
+		let text = e.target.value;
+		this.setState({
+			text: text.length > 0 ? text : undefined,
+			textError: undefined
+		});
 	}
 
-	handleAddComment = (e) => {
+	_onClickAddComment = (e) => {
 		if (!this.state.text || this.state.text.length === 0) {
 			this.setState({
 				textError: "Comment field must be filled."
@@ -69,10 +67,10 @@ export default class CommentInput extends Component {
 					<div className="input-group">
 						<input type="text" className="form-control" placeholder={this._inputPlaceholder + "..."}
 						       value={this.state.text ? this.state.text : ""}
-						       onChange={this.handleOnChange()}/>
+						       onChange={this._onChangeInput}/>
 						<div className="input-group-append">
 							<button className="btn btn-success" type="button"
-							        onClick={this.handleAddComment}
+							        onClick={this._onClickAddComment}
 							        disabled={this.state.loading}>
 								{this.state.loading &&
 								<span className="spinner-border spinner-border-sm"/>} {this._buttonText}

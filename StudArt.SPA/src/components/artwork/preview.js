@@ -64,7 +64,9 @@ export default class ArtworkPreview extends Component {
 								<small className="underline-on-hover">{post.author.username}</small>
 							</div>
 						</Link>
-						<small className="text-muted float-right mt-1">{post.creation_date} at {post.creation_time}</small>
+						<small className="text-muted float-right mt-1">
+							{post.creation_date} at {post.creation_time}
+						</small>
 					</div>
 				</div>
 			</div>
