@@ -174,9 +174,7 @@ class VoteForArtworkSerializer(serializers.ModelSerializer):
 		instance.save()
 
 		# re-calculate author's rating
-		instance.author.rating = instance.author.artworks.aggregate(
-			Sum('points')
-		)['points__sum'] / instance.author.artworks.count()
+		instance.author.recalculate_rating()
 		instance.author.save()
 		return instance
 
