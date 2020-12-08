@@ -20,6 +20,9 @@ class UserBlacklistSerializer(serializers.ModelSerializer):
 			raise NotFound('author not found')
 
 		obj = obj.first()
+		if instance.pk == obj.pk:
+			raise ValidationError('unable to block or unblock self')
+
 		if self._negate(instance.blocked_users.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
 
@@ -50,6 +53,9 @@ class AuthorSubscriptionSerializer(serializers.ModelSerializer):
 			raise NotFound('author not found')
 
 		obj = obj.first()
+		if instance.pk == obj.pk:
+			raise ValidationError('unable to subscribe to or unsubscribe from self')
+
 		if self._negate(instance.subscriptions.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
 
