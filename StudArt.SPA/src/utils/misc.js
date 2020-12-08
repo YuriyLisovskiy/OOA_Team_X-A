@@ -1,7 +1,3 @@
-export const getResponseMessage = (r) => {
-	return (r && r.response && r.response.message) || r.toString();
-}
-
 export const getMessage = (data) => {
 	if (data.hasOwnProperty('message')) {
 		return data.message;
@@ -25,7 +21,7 @@ export const getOrDefault = (val, default_) => {
 }
 
 export const getClassForTag = (idx, length) => {
-	let clsName = '';
+	let clsName;
 	switch (idx) {
 		case 0:
 			clsName = "mr-1";
@@ -39,4 +35,8 @@ export const getClassForTag = (idx, length) => {
 	}
 
 	return clsName;
+}
+
+export const strIsEmpty = (str) => {
+	return !str || str.length === 0;
 }

@@ -2,12 +2,12 @@ import React, {Component} from "react";
 
 import CommentService from "../../services/comment";
 import UserService from "../../services/user";
-import {getErrorMessage} from "../utils";
-import CommentInput from "./comment_input";
+import {getErrorMessage} from "../../utils/misc";
+import CommentInputComponent from "./CommentInput";
 import "../../styles/common.css"
 import {Link} from "react-router-dom";
 
-export default class Comment extends Component {
+export default class CommentComponent extends Component {
 
 	constructor(props) {
 		super(props);
@@ -84,15 +84,15 @@ export default class Comment extends Component {
 		});
 	}
 
-	_onClickUpVote = (e) => {
+	_onClickUpVote = (_) => {
 		this._vote(true, CommentService.upVoteComment);
 	}
 
-	_onClickDownVote = (e) => {
+	_onClickDownVote = (_) => {
 		this._vote(false, CommentService.downVoteComment);
 	}
 
-	_onClickCancelVote = (e) => {
+	_onClickCancelVote = (_) => {
 		CommentService.cancelVoteForComment(this.state.comment.id, (data, err) => {
 			if (err) {
 				// TODO:
@@ -126,7 +126,7 @@ export default class Comment extends Component {
 		});
 	}
 
-	_onClickDeleteComment = (e) => {
+	_onClickDeleteComment = (_) => {
 		CommentService.deleteComment(this.state.comment.id, (res, err) => {
 			if (err) {
 				// TODO:
@@ -138,13 +138,13 @@ export default class Comment extends Component {
 		});
 	}
 
-	_onClickEditComment = (e) => {
+	_onClickEditComment = (_) => {
 		this.setState({
 			editing: true
 		});
 	}
 
-	_onClickSaveComment = (e) => {
+	_onClickSaveComment = (_) => {
 		if (!this.state.newComment || this.state.newComment.length === 0) {
 			this.setState({
 				newCommentError: "Comment field must be filled."
@@ -182,7 +182,7 @@ export default class Comment extends Component {
 		})
 	}
 
-	_onClickShowReply = (e) => {
+	_onClickShowReply = (_) => {
 		this.setState({
 			showReplyInput: true
 		});
@@ -316,7 +316,7 @@ export default class Comment extends Component {
 						}
 					</div>
 					{discussion.answers && discussion.answers.map(
-						(answer) => <Comment key={answer.id}
+						(answer) => <CommentComponent key={answer.id}
 						                     data={answer}
 						                     userExists={this.props.userExists}
 						                     parentId={answer.id}
@@ -328,7 +328,9 @@ export default class Comment extends Component {
 						<div ref={this.wrapperAnswerInputRef} className="mt-2">
 							{
 								this.state.showReplyInput &&
-								<CommentInput isReply={true} onAddComment={this._onClickAddComment} parentId={discussion.id}/>
+								<CommentInputComponent isReply={true}
+								                       onAddComment={this._onClickAddComment}
+								                       parentId={discussion.id}/>
 							}
 						</div>
 					}

@@ -1,10 +1,10 @@
 import React, {Component} from "react";
-import TagBadge from "../tag_badge";
-import ImagePreview from "./image_preview";
+import TagBadgeComponent from "../TagBadge";
+import ImagePreviewComponent from "./ImagePreview";
 import ArtworkService from "../../services/artwork";
-import {getErrorMessage} from "../utils";
+import {getErrorMessage} from "../../utils/misc";
 
-export default class CreateArtwork extends Component {
+export default class CreateArtworkComponent extends Component {
 
 	constructor(props) {
 		super(props);
@@ -135,7 +135,7 @@ export default class CreateArtwork extends Component {
 		}
 	}
 
-	_onClickCreatePost = (e) => {
+	_onClickCreatePost = (_) => {
 		this.setState({
 			errorMessage: undefined,
 			loading: true
@@ -177,7 +177,7 @@ export default class CreateArtwork extends Component {
 								{
 									this.state.images.length > 0 && <div className="d-inline">
 										{this.state.images.map((image) =>
-											<ImagePreview key={image.url} src={image.url}
+											<ImagePreviewComponent key={image.url} src={image.url}
 											              onClick={this._onClickPreviewImage}
 											              isSelected={image.url === this.state.selectedImage}/>
 										)}
@@ -232,7 +232,7 @@ export default class CreateArtwork extends Component {
 								<div className="col-sm-12">
 									<span>Tags: </span>
 									{this.state.tags.map((tag) =>
-										<TagBadge className="mx-1" key={tag} text={tag}
+										<TagBadgeComponent className="mx-1" key={tag} text={tag}
 										          onClickRemove={this._onClickRemoveTag}/>)}
 								</div>
 							</div>

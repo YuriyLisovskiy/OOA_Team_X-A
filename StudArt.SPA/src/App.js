@@ -1,21 +1,21 @@
 import React, {Component} from 'react';
 import {Link, Route, Switch} from 'react-router-dom';
 
-import './App.css';
+import './styles/app.css';
 import AuthService from "./services/auth";
-import Register from "./components/register";
-import Profile from "./components/user/profile";
-import Home from "./components/home";
-import Artwork from "./components/artwork/artwork";
-import CreateArtwork from "./components/artwork/create";
-import Index from "./components/Index";
-import NotFound from "./components/not_found";
+import RegisterComponent from "./components/Register";
+import ProfileComponent from "./components/user/Profile";
+import HomeComponent from "./components/Home";
+import ArtworkComponent from "./components/artwork/Artwork";
+import CreateArtworkComponent from "./components/artwork/Create";
+import IndexComponent from "./components/Index";
+import NotFound from "./components/errors";
 import {Dropdown, NavDropdown} from "react-bootstrap";
-import Settings from "./components/user/settings";
+import SettingsComponent from "./components/user/Settings";
 import DropdownItem from "react-bootstrap/DropdownItem";
 import UserService from "./services/user";
 import Drawer from "react-drag-drawer";
-import Login from "./components/login";
+import LoginComponent from "./components/Login";
 
 export default class App extends Component {
 
@@ -151,24 +151,24 @@ export default class App extends Component {
 					<Drawer
 						open={this.state.loginIsOpen}
 						onRequestClose={this.onClickLoginToggle}>
-						<Login onLoginSuccess={this.onLoginSuccess}/>
+						<LoginComponent onLoginSuccess={this.onLoginSuccess}/>
 					</Drawer>
 					<Drawer
 						modalElementClass="container w-30 min-w-300"
 						open={this.state.registerIsOpen}
 						onRequestClose={this.onClickRegisterToggle}>
-						<Register onRegisterSuccess={this.onRegisterSuccess}/>
+						<RegisterComponent onRegisterSuccess={this.onRegisterSuccess}/>
 					</Drawer>
 					<Switch>
 						{
-							user && <Route path='/new/artwork' component={CreateArtwork} />
+							user && <Route path='/new/artwork' component={CreateArtworkComponent} />
 						}
-						<Route path='/profile/:id' component={Profile} />
-						<Route path='/artwork/:id' component={Artwork} />
-						<Route path='/settings/account' component={Settings} />
-						<Route path='/artworks' component={Home} />
+						<Route path='/profile/:id' component={ProfileComponent} />
+						<Route path='/artwork/:id' component={ArtworkComponent} />
+						<Route path='/settings/account' component={SettingsComponent} />
+						<Route path='/artworks' component={HomeComponent} />
 						<Route path='/page-not-found' component={NotFound} />
-						<Route path={['/', '/home']} component={Index} />
+						<Route path={['/', '/home']} component={IndexComponent} />
 					</Switch>
 				</div>
 			</div>

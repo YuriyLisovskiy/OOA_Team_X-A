@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 
-export default class ImagePreview extends Component {
+export default class ImagePreviewComponent extends Component {
 
 	constructor(props) {
 		super(props);

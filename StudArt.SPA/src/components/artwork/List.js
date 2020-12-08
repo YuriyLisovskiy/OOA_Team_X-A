@@ -1,14 +1,14 @@
 import React, {Component} from "react";
 
-import ArtworkPreview from "../artwork/preview";
+import ArtworkPreviewComponent from "./Preview";
 import ArtworkService from "../../services/artwork";
-import {getErrorMessage, getOrDefault} from "../utils";
-import Spinner from "../spinner";
-import ArtworkEmptyPreview from "./empty_preview";
+import {getErrorMessage, getOrDefault} from "../../utils/misc";
+import SpinnerComponent from "../Spinner";
+import {ArtworkEmptyPreview} from "./EmptyPreview";
 
 const DEFAULT_COLUMNS_COUNT = 3;
 
-export default class ArtworksList extends Component {
+export default class ArtworksListComponent extends Component {
 
 	constructor(props) {
 		super(props);
@@ -57,7 +57,8 @@ export default class ArtworksList extends Component {
 		let newList = [];
 		for (let i = 0; i < this._columnsCount; i++) {
 			newList.push(data.results[i].map((artwork) =>
-				<ArtworkPreview onClickTag={this._onClickSearchByTag} post={artwork} key={artwork.id}/>
+				<ArtworkPreviewComponent onClickTag={this._onClickSearchByTag}
+				                         post={artwork} key={artwork.id}/>
 			));
 		}
 
@@ -170,7 +171,7 @@ export default class ArtworksList extends Component {
 					)
 				}
 				{
-					this.state.loading && <Spinner/>
+					this.state.loading && <SpinnerComponent/>
 				}
 			</div>
 		);

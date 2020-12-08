@@ -1,17 +1,17 @@
 import React, {Component} from "react";
 import "../../styles/artwork/artwork.css"
 import {Link} from "react-router-dom";
-import Comment from "./comment";
 import AuthService from "../../services/auth";
 import ArtworkService from "../../services/artwork";
 import CommentService from "../../services/comment";
-import {getErrorMessage} from "../utils";
-import CommentInput from "./comment_input";
-import TagBadge from "../tag_badge";
-import ImagePreview from "./image_preview";
-import NotFound from "../not_found";
+import {getErrorMessage} from "../../utils/misc";
+import CommentInputComponent from "./CommentInput";
+import TagBadgeComponent from "../TagBadge";
+import ImagePreviewComponent from "./ImagePreview";
+import NotFound from "../errors";
+import CommentComponent from "./Comment";
 
-export default class Artwork extends Component {
+export default class ArtworkComponent extends Component {
 
 	constructor(props) {
 		super(props);
@@ -111,20 +111,20 @@ export default class Artwork extends Component {
 		}
 	}
 
-	_onClickStartEditDescription = (e) => {
+	_onClickStartEditDescription = (_) => {
 		this.setState({
 			editingDescription: true
 		});
 	}
 
-	_onClickCancelEditDescription = (e) => {
+	_onClickCancelEditDescription = (_) => {
 		this.setState({
 			editingDescription: false,
 			newDescription: this.state.post.description
 		});
 	}
 
-	_onClickSaveDescription = (e) => {
+	_onClickSaveDescription = (_) => {
 		if (!this.state.newDescription || this.state.newDescription.length === 0) {
 			this.setState({
 				descriptionError: "Description field must be filled."
@@ -148,7 +148,7 @@ export default class Artwork extends Component {
 		}
 	}
 
-	_onClickDeletePost = (e) => {
+	_onClickDeletePost = (_) => {
 		ArtworkService.deleteArtwork(this.state.post.id, (resp, err) => {
 			if (err) {
 				// TODO:
@@ -174,7 +174,7 @@ export default class Artwork extends Component {
 		});
 	}
 
-	_onClickVote = (e) => {
+	_onClickVote = (_) => {
 		ArtworkService.voteForArtwork(this.state.post.id, this.state.selectedMark, (data, err) => {
 			if (err) {
 				// TODO:
@@ -248,7 +248,7 @@ export default class Artwork extends Component {
 										<div className="d-inline">
 											{post.images.map((image, number) =>
 												<div className="image-container">
-													<ImagePreview key={image} src={image}
+													<ImagePreviewComponent key={image} src={image}
 													              number={number}
 													              onClick={this._onClickSelectImage}/>
 													{
@@ -364,7 +364,7 @@ export default class Artwork extends Component {
 								post.tags.length > 0 && <div className="row mt-2">
 									<div className="col-md-12">
 										{post.tags.map((tag) =>
-											<TagBadge className="mx-1" key={tag} text={tag} textOnly={true}/>
+											<TagBadgeComponent className="mx-1" key={tag} text={tag} textOnly={true}/>
 										)}
 									</div>
 								</div>
@@ -372,7 +372,9 @@ export default class Artwork extends Component {
 							{
 								this.state.user &&
 								<div className="mt-4">
-									<CommentInput isReply={false} onAddComment={this._onClickAddComment} parentId={post.id}/>
+									<CommentInputComponent isReply={false}
+									                       onAddComment={this._onClickAddComment}
+									                       parentId={post.id}/>
 								</div>
 							}
 							{
@@ -380,7 +382,7 @@ export default class Artwork extends Component {
 								<div className="row" id="comments">
 									<div className="col-md-12">
 										{post.comments.map((comment) => (
-											<Comment key={comment.id}
+											<CommentComponent key={comment.id}
 											         data={comment}
 											         parentId={comment.id}
 											         paddingLeft={20}

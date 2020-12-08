@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 import AuthService from "../services/auth";
-import {getErrorMessage} from "./utils";
+import {getErrorMessage, strIsEmpty} from "../utils/misc";
 
-export default class Login extends Component {
+export default class LoginComponent extends Component {
 
 	constructor(props) {
 		super(props);
@@ -16,29 +16,15 @@ export default class Login extends Component {
 		};
 	}
 
-	onChangeUsername = (e) => {
-		this.setState({
-			username: e.target.value,
-			usernameError: undefined
-		});
-	}
-
-	onChangePassword = (e) => {
-		this.setState({
-			password: e.target.value,
-			passwordError: undefined
-		});
-	}
-
 	_getFieldsError = (username, password) => {
 		let res = null;
-		if (!username || username.length === 0) {
+		if (strIsEmpty(username)) {
 			res = {
 				usernameError: "This field is required."
 			};
 		}
 
-		if (!password || password.length === 0) {
+		if (strIsEmpty(password)) {
 			if (res === null) {
 				res = {};
 			}
@@ -49,7 +35,16 @@ export default class Login extends Component {
 		return res;
 	}
 
-	handleLogin = (e) => {
+	_onChangeMakeFor = (field) => {
+		return e => {
+			let newState = {};
+			newState[field] = e.target.value;
+			newState[field + 'Error'] = undefined;
+			this.setState(newState);
+		}
+	}
+
+	_onClickLogin = (_) => {
 		this.setState({
 			loginError: undefined,
 			loading: true
@@ -101,7 +96,7 @@ export default class Login extends Component {
 									className="form-control"
 									name="username"
 									value={this.state.username}
-									onChange={this.onChangeUsername}
+									onChange={this._onChangeMakeFor('username')}
 									placeholder="Type text..."
 								/>
 								{
@@ -117,7 +112,7 @@ export default class Login extends Component {
 									className="form-control"
 									name="password"
 									value={this.state.password}
-									onChange={this.onChangePassword}
+									onChange={this._onChangeMakeFor('password')}
 									placeholder="Type text..."
 								/>
 								{
@@ -129,7 +124,7 @@ export default class Login extends Component {
 							<div className="form-group">
 								<button
 									className="btn btn-primary btn-block"
-									onClick={this.handleLogin}
+									onClick={this._onClickLogin}
 									disabled={this.state.loading}>
 									{
 										this.state.loading &&

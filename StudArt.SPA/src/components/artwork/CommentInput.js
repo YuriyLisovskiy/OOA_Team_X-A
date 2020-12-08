@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 
 import CommentService from "../../services/comment";
-import {getErrorMessage} from "../utils";
+import {getErrorMessage} from "../../utils/misc";
 
-export default class CommentInput extends Component {
+export default class CommentInputComponent extends Component {
 
 	constructor(props) {
 		super(props);
@@ -25,7 +25,7 @@ export default class CommentInput extends Component {
 		});
 	}
 
-	_onClickAddComment = (e) => {
+	_onClickAddComment = (_) => {
 		if (!this.state.text || this.state.text.length === 0) {
 			this.setState({
 				textError: "Comment field must be filled."

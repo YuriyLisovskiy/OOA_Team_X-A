@@ -1,4 +1,5 @@
 export default class EventObserver {
+
 	constructor () {
 		this._isObserving = false;
 		this._observers = [];
