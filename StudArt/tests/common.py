@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory
 
-from artwork.models import ArtworkModel, TagModel
+from artwork.models import ArtworkModel, TagModel, CommentModel
 from core.models import UserModel
 
 
@@ -59,3 +59,16 @@ class APIFactoryTestCase(APITestCase):
 		ArtworkModel.objects.get(description='Some description 16').tags.set([TagModel.objects.get(text='tag1'), TagModel.objects.get(text='tag3')])
 		ArtworkModel.objects.get(description='Some description 17').tags.set([TagModel.objects.get(text='tag1'), TagModel.objects.get(text='tag3')])
 		ArtworkModel.objects.get(description='Some description 18').tags.set([TagModel.objects.get(text='tag1'), TagModel.objects.get(text='tag3')])
+		CommentModel.objects.create(text='Some comment 1', author=UserModel.objects.get(username='User'), artwork=ArtworkModel.objects.get(description='Some description 1'))
+		CommentModel.objects.create(text='Some comment 2', author=UserModel.objects.get(username='User2'), comment=CommentModel.objects.get(text='Some comment 1'))
+		CommentModel.objects.create(text='Some comment 3', author=UserModel.objects.get(username='User'), comment=CommentModel.objects.get(text='Some comment 2'))
+		CommentModel.objects.create(text='Some comment 3.1', author=UserModel.objects.get(username='User2'), comment=CommentModel.objects.get(text='Some comment 3'))
+		CommentModel.objects.create(text='Some comment 3.2', author=UserModel.objects.get(username='User'), comment=CommentModel.objects.get(text='Some comment 3.1'))
+		CommentModel.objects.create(text='Some comment 3.3', author=UserModel.objects.get(username='User2'), comment=CommentModel.objects.get(text='Some comment 3.2'))
+		CommentModel.objects.create(text='Some comment 4', author=UserModel.objects.get(username='User2'), artwork=ArtworkModel.objects.get(description='Some description 1'))
+		CommentModel.objects.create(text='Some comment 4.1', author=UserModel.objects.get(username='User2'), artwork=ArtworkModel.objects.get(description='Some description 1'))
+		CommentModel.objects.create(text='Some comment 4.2', author=UserModel.objects.get(username='User2'), artwork=ArtworkModel.objects.get(description='Some description 1'))
+		CommentModel.objects.create(text='Some comment 4.3', author=UserModel.objects.get(username='User2'), artwork=ArtworkModel.objects.get(description='Some description 1'))
+		CommentModel.objects.create(text='Some comment 5', author=UserModel.objects.get(username='User2'), artwork=ArtworkModel.objects.get(description='Some description 2'))
+		CommentModel.objects.create(text='Some comment 6', author=UserModel.objects.get(username='User'), comment=CommentModel.objects.get(text='Some comment 5'))
+		CommentModel.objects.create(text='Some comment 7', author=UserModel.objects.get(username='User'), artwork=ArtworkModel.objects.get(description='Some description 2'))

@@ -14,9 +14,9 @@ class DeleteArtworkTestCase(APIFactoryTestCase):
 		self.user = User.objects.get(username='User', email='mail@mail.com')
 
 	def test_Delete(self):
-		request = self.request_factory.delete(reverse('api_v1:artwork:delete', args=[1]))
+		request = self.request_factory.delete(reverse('api_v1:artwork:delete', args=[3]))
 		force_authenticate(request, user=self.user)
-		response = self.view(request, pk=1)
+		response = self.view(request, pk=3)
 		self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 	def test_DeleteNonexistent(self):
