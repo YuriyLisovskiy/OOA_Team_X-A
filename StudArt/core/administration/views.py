@@ -1,6 +1,6 @@
 from rest_framework import generics
 
-from core.admin.serializers import BanUserSerializer, UnbanUserSerializer
+from core.administration.serializers import BanUserSerializer, UnbanUserSerializer
 from core.models import UserModel
 from core.permissions import IsSuperUser, SelfBanPermission
 

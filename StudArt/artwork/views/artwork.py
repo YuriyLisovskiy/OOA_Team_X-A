@@ -41,6 +41,8 @@ from core.models import UserModel
 # 	            "author": <int (user pk)>,
 # 	            "voted": <bool (shows if current user voted ot not)>,
 # 	            "can_vote": <bool (shows if current user can vote this post)>,
+# 	            "can_be_edited": <bool>,
+# 	            "can_be_deleted": <bool>,
 # 	            "comments": <array of primary keys of comments>
 # 	        },
 # 	        ...
@@ -114,7 +116,9 @@ class ArtworksAPIView(generics.ListAPIView):
 # 	    "author": <int (user pk)>,
 # 	    "voted": <bool (shows if current user voted ot not)>,
 # 	    "can_vote": <bool (shows if current user can vote this post)>,
-# 	    "comments": <array of primary keys of comments>
+#       "can_be_edited": <bool>,
+#       "can_be_deleted": <bool>,
+#       "comments_count": <int>
 #   }
 class ArtworkAPIView(generics.RetrieveAPIView):
 	permission_classes = (permissions.AllowAny,)
@@ -221,11 +225,9 @@ class EditArtworkAPIView(generics.UpdateAPIView):
 	)
 
 	def update(self, request, *args, **kwargs):
-		if not ensure_tags_exist(request.data.getlist('tags', [])):
-			return Response(
-				data={'message': 'at least one tag is required'},
-				status=400
-			)
+		if not ensure_tags_exist(request.data.get('tags', [])):
+			if 'tags' in request.data:
+				request.data.pop('tags')
 
 		return super(EditArtworkAPIView, self).update(request, *args, **kwargs)
 

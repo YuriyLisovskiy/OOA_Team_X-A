@@ -1,3 +1,5 @@
+import datetime as dt
+
 from rest_framework import permissions
 
 
@@ -10,9 +12,10 @@ from rest_framework import permissions
 # ATTENTION: Requires `author` attribute of type `UserModel`
 class BaseModifyPermission(permissions.BasePermission):
 
-	@staticmethod
-	def _1h_passed(obj):
-		return obj.creation_date_time
+	one_h_as_sec = 3600
+
+	def _1h_passed(self, obj):
+		return (dt.datetime.now(tz=dt.timezone.utc) - obj.creation_date_time).seconds >= self.one_h_as_sec
 
 	@staticmethod
 	def _is_owner(request, obj):
@@ -35,8 +38,12 @@ class ModifyArtworkPermission(BaseModifyPermission):
 	def _has_comments(obj):
 		return obj.comments.exists()
 
+	@staticmethod
+	def _has_votes(obj):
+		return obj.voters.count() > 0
+
 	def additional_checks(self, obj):
-		return not self._has_comments(obj)
+		return not self._has_comments(obj) and not self._has_votes(obj)
 
 
 class ModifyCommentPermission(BaseModifyPermission):

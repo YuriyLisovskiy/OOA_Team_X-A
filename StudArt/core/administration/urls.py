@@ -1,8 +1,8 @@
 from django.urls import re_path
 
-from core.admin.views import BanUserAPIView, UnbanUserAPIView
+from core.administration.views import BanUserAPIView, UnbanUserAPIView
 
-app_name = 'core.admin'
+app_name = 'core.administration'
 
 urlpatterns = [
 	re_path(r'^users/(?P<pk>\d+)/ban/?', BanUserAPIView.as_view(), name='ban_user'),

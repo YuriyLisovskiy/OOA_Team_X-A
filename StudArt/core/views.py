@@ -26,7 +26,10 @@ from core.serializers.user_model import (
 #       "email": <string>,
 #       "avatar_link": <string (full url)>,
 #       "is_superuser": <bool>,
-#       "rating": <float>
+#       "rating": <float>,
+#       "is_banned": <bool>,
+#       "is_subscribed": <bool>,
+#       "is_blocked": <bool>
 #   }
 class UserDetailsAPIView(generics.RetrieveAPIView):
 	permission_classes = (permissions.AllowAny,)
@@ -159,6 +162,28 @@ class UserBlacklistAPIView(generics.ListAPIView):
 		return self.request.user.blocked_users.all()
 
 
+# /api/v1/core/users/self
+# methods:
+#   - get
+# returns (success status - 200):
+#   {
+#       "id": <int>,
+#       "first_name": <string>,
+#       "last_name": <string>,
+#       "username": <string>,
+#       "email": <string>,
+#       "avatar_link": <string (full url)>,
+#       "is_superuser": <bool>,
+#       "rating": <float>
+#   }
+class SelfUserAPIView(generics.RetrieveAPIView):
+	serializer_class = UserDetailsSerializer
+	queryset = UserModel.objects.all()
+
+	def get_object(self):
+		return self.request.user
+
+
 # /api/v1/core/users/<pk>/tags/top
 # methods:
 #   - get:
@@ -173,6 +198,7 @@ class UserBlacklistAPIView(generics.ListAPIView):
 class TopNMostUsedTagsForUser(generics.ListAPIView):
 	serializer_class = TagDetailsSerializer
 	default_limit = 5
+	pagination_class = None
 
 	def get_queryset(self):
 		request = self.request
@@ -181,4 +207,4 @@ class TopNMostUsedTagsForUser(generics.ListAPIView):
 		except ValueError:
 			limit = self.default_limit
 
-		return request.user.last_used_tags.all().order_by('-pk').distinct('text')[:limit]
+		return request.user.last_used_tags.all().order_by('-pk').distinct()[:limit]

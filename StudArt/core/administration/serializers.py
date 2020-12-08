@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from core.models import UserModel
 
@@ -10,12 +11,17 @@ class BanningUserSerializer(serializers.ModelSerializer):
 		return True
 
 	def update(self, instance, validated_data):
+		request = self.context.get('request')
+		if request.user.id == instance.id:
+			raise ValidationError('unable to ban or unban self')
+
 		instance.is_banned = self._ban
 		instance.save()
 		return instance
 
 	class Meta:
-		models = UserModel
+		model = UserModel
+		fields = set()
 
 
 class BanUserSerializer(BanningUserSerializer):

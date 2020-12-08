@@ -37,7 +37,7 @@ class VoteForArtworkTestCase(APIFactoryTestCase):
 		user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 		force_authenticate(request, user=user)
 		response = self.view(request, pk=1)
-		self.assertEqual(response.data['points'], 2.5)
+		self.assertEqual(response.data['points'], 5.0)
 
 	def test_voteSeveralPeople(self):
 		request = self.request_factory.put(reverse('api_v1:artwork:vote', args=[1]), {'mark': 5})
@@ -50,4 +50,4 @@ class VoteForArtworkTestCase(APIFactoryTestCase):
 		self.view(request, pk=1)
 		force_authenticate(request, user=user3)
 		response = self.view(request, pk=1)
-		self.assertEqual(response.data['points'], 15/4)
+		self.assertEqual(response.data['points'], 15/3)
