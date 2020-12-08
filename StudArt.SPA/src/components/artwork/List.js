@@ -13,7 +13,7 @@ export default class ArtworksListComponent extends Component {
 	constructor(props) {
 		super(props);
 		this._columnsCount = getOrDefault(this.props.columnsCount, DEFAULT_COLUMNS_COUNT);
-		this._handleClickOnPreviewTag = getOrDefault(this.props.clickOnPreviewTag, true)
+		this._handleClickOnPreviewTag = getOrDefault(this.props.clickOnPreviewTag, true);
 		this.state = {
 			artworks: undefined,
 			artworksColList: undefined,
@@ -22,7 +22,7 @@ export default class ArtworksListComponent extends Component {
 			filterTags: getOrDefault(this.props.filterTags, []),
 			filterAuthors: getOrDefault(this.props.filterAuthors, []),
 			filterBySubscriptions: getOrDefault(this.props.filterBySubscriptions, false)
-		}
+		};
 	}
 
 	componentDidMount() {
@@ -38,6 +38,19 @@ export default class ArtworksListComponent extends Component {
 
 	componentWillUnmount() {
 		window.removeEventListener("scroll", this._onScroll);
+	}
+
+	searchByTags = (tags) => {
+		this.setState({
+			filterTags: tags
+		});
+		this._loadArtworks(
+			null,
+			this._columnsCount,
+			this.state.filterTags,
+			this.state.filterAuthors,
+			this.state.filterBySubscriptions
+		);
 	}
 
 	_setArtworksState = (currArtworks, newArtworks) => {
@@ -122,13 +135,16 @@ export default class ArtworksListComponent extends Component {
 
 	_onClickSearchByTag = (e, tag) => {
 		if (this._handleClickOnPreviewTag) {
-			this._loadArtworks(
-				null,
-				this._columnsCount,
-				[tag],
-				this.state.filterAuthors,
-				this.state.filterBySubscriptions
-			);
+			// this._loadArtworks(
+			// 	null,
+			// 	this._columnsCount,
+			// 	[tag],
+			// 	this.state.filterAuthors,
+			// 	this.state.filterBySubscriptions
+			// );
+			if (this.props.onClickTag) {
+				this.props.onClickTag(e, tag);
+			}
 		}
 	}
 
@@ -157,23 +173,21 @@ export default class ArtworksListComponent extends Component {
 		}
 	}
 
-	render () {
+	render() {
 		let hasPosts = this._colsHavePosts();
-		return (
-			<div>
-				{
-					hasPosts ? (
-						<div>
-							{this._makeAllColumns()}
-						</div>
-					) : (
-						!this.state.loading && <h2>No posts added yet</h2>
-					)
-				}
-				{
-					this.state.loading && <SpinnerComponent/>
-				}
-			</div>
-		);
+		return <div>
+			{
+				hasPosts ? (
+					<div>
+						{this._makeAllColumns()}
+					</div>
+				) : (
+					!this.state.loading && <h2 className="text-center text-muted">No posts</h2>
+				)
+			}
+			{
+				this.state.loading && <SpinnerComponent/>
+			}
+		</div>;
 	}
 }

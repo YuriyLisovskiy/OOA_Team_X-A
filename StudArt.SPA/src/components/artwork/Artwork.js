@@ -364,7 +364,7 @@ export default class ArtworkComponent extends Component {
 								post.tags.length > 0 && <div className="row mt-2">
 									<div className="col-md-12">
 										{post.tags.map((tag) =>
-											<TagBadgeComponent className="mx-1" key={tag} text={tag} textOnly={true}/>
+											<TagBadgeComponent key={tag} className="mx-1" text={tag} textOnly={true}/>
 										)}
 									</div>
 								</div>

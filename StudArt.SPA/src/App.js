@@ -3,7 +3,7 @@ import {Link, Route, Switch} from 'react-router-dom';
 
 import './styles/app.css';
 import AuthService from "./services/auth";
-import RegisterComponent from "./components/Register";
+import RegisterComponent from "./components/user/Register";
 import ProfileComponent from "./components/user/Profile";
 import HomeComponent from "./components/Home";
 import ArtworkComponent from "./components/artwork/Artwork";
@@ -14,8 +14,7 @@ import {Dropdown, NavDropdown} from "react-bootstrap";
 import SettingsComponent from "./components/user/Settings";
 import DropdownItem from "react-bootstrap/DropdownItem";
 import UserService from "./services/user";
-import Drawer from "react-drag-drawer";
-import LoginComponent from "./components/Login";
+import LoginComponent from "./components/user/Login";
 
 export default class App extends Component {
 
@@ -148,17 +147,14 @@ export default class App extends Component {
 					</div>
 				</nav>
 				<div className="container mt-3 w-65">
-					<Drawer
-						open={this.state.loginIsOpen}
-						onRequestClose={this.onClickLoginToggle}>
-						<LoginComponent onLoginSuccess={this.onLoginSuccess}/>
-					</Drawer>
-					<Drawer
-						modalElementClass="container w-30 min-w-300"
-						open={this.state.registerIsOpen}
-						onRequestClose={this.onClickRegisterToggle}>
-						<RegisterComponent onRegisterSuccess={this.onRegisterSuccess}/>
-					</Drawer>
+					<LoginComponent onLoginSuccess={this.onLoginSuccess}
+					                open={this.state.loginIsOpen}
+						            onRequestClose={this.onClickLoginToggle}
+						            onClickSwitchToRegister={this.onClickRegisterToggle}/>
+					<RegisterComponent onRegisterSuccess={this.onRegisterSuccess}
+					                   open={this.state.registerIsOpen}
+					                   onRequestClose={this.onClickRegisterToggle}
+					                   onClickSwitchToLogin={this.onClickLoginToggle}/>
 					<Switch>
 						{
 							user && <Route path='/new/artwork' component={CreateArtworkComponent} />

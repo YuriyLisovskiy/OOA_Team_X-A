@@ -47,11 +47,6 @@ export default class ProfileComponent extends Component {
 		});
 	}
 
-	_onClickSearchByTag = (_, text) => {
-		// TODO: search by tag in user's posts.
-		console.log(text);
-	}
-
 	_toggleUserAction = (boolVal, methods, updatedUser) => {
 		return _ => {
 			let method = boolVal ? methods.ifTrue : methods.ifFalse;
@@ -175,6 +170,7 @@ export default class ProfileComponent extends Component {
 										}
 									</div>
 								}
+								<h5 className="float-right">Rating: {user.rating}</h5>
 								{
 									user.first_name && user.last_name &&
 									<h4 className="mb-2">{user.first_name} {user.last_name}</h4>
@@ -182,12 +178,13 @@ export default class ProfileComponent extends Component {
 								<h6>{user.username}</h6>
 								{
 									user && user.mostUsedTags && user.mostUsedTags.length > 0 &&
-									<div>
+									<div className="mt-4">
+										<div className="text-muted">Most used tags:</div>
 										{user.mostUsedTags.map((tag) => {
 											return <TagBadgeComponent key={tag.text} text={tag.text}
-											                 textOnly={true}
-											                 onClick={this._onClickSearchByTag}
-											                 displayInline={false}/>;
+											                          className="mr-1"
+											                          textOnly={true}
+											                          displayInline={true}/>;
 										})}
 									</div>
 								}

@@ -59,3 +59,11 @@
 .min-w-300 {
 	min-width: 300px;
 }
+
+.w-25 {
+	width: 25%;
+}
+
+.min-w-250 {
+	min-width: 250px;
+}

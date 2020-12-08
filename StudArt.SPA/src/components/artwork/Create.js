@@ -238,7 +238,7 @@ export default class CreateArtworkComponent extends Component {
 							</div>
 						}
 						<div className="row">
-							<div className="col-sm-8">
+							<div className="col-sm-9">
 								<div className="form-group">
 									<div className="input-group">
 										<input
@@ -267,7 +267,7 @@ export default class CreateArtworkComponent extends Component {
 									</small>
 								</div>
 							</div>
-							<div className="col-sm-1 ml-auto">
+							<div className="col-sm-3 text-right">
 								<div className="form-group">
 									<button
 										onClick={this._onClickCreatePost}
