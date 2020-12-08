@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.http import QueryDict
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -206,6 +206,14 @@ class DeleteArtworkAPIView(generics.DestroyAPIView):
 	permission_classes = (
 		IsAuthenticated & ModifyArtworkPermission,
 	)
+
+	def destroy(self, request, *args, **kwargs):
+		instance = self.get_object()
+		author = instance.author
+		self.perform_destroy(instance)
+		author.recalculate_rating()
+		author.save()
+		return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # /api/v1/artworks/<pk>/edit
