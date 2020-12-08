@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 
 import CommentService from "../../services/comment";
+import UserService from "../../services/user";
 import {getErrorMessage} from "../utils";
 import CommentInput from "./comment_input";
 import "../../styles/common.css"
@@ -15,7 +16,8 @@ export default class Comment extends Component {
 			showReplyInput: false,
 			editing: false,
 			newComment: undefined,
-			newCommentError: undefined
+			newCommentError: undefined,
+			currentUser: UserService.getCurrentUser()
 		}
 		this.wrapperEditCommentInputRef = React.createRef();
 		this.wrapperSaveCommentButtonRef = React.createRef();
@@ -261,7 +263,11 @@ export default class Comment extends Component {
 								)
 							}
 							{
-								!this.state.editing && discussion.can_be_deleted &&
+								!this.state.editing && (
+									discussion.can_be_deleted || (
+										this.state.currentUser && this.state.currentUser.is_superuser
+									)
+								) &&
 								<div className="d-inline">
 									&nbsp;· <i className="fa fa-trash muted-btn btn-danger-hover"
 									           aria-hidden="true"

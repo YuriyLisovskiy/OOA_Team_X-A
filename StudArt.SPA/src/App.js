@@ -108,13 +108,15 @@ export default class App extends Component {
 								} id="basic-nav-dropdown">
 									{
 										user.first_name && user.last_name &&
-										<Dropdown.ItemText>
-											<div className="font-weight-bold">
-												{user.first_name} {user.last_name}
-											</div>
-										</Dropdown.ItemText>
+										<div>
+											<Dropdown.ItemText>
+												<div className="font-weight-bold">
+													{user.first_name} {user.last_name}
+												</div>
+											</Dropdown.ItemText>
+											<NavDropdown.Divider/>
+										</div>
 									}
-									<NavDropdown.Divider/>
 									<Dropdown.Item as={Link} to={'/profile/' + user.id}>
 										<i className="fa fa-user-circle-o" aria-hidden="true"/> My Profile
 									</Dropdown.Item>

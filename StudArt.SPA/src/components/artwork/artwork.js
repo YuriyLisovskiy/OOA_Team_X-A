@@ -37,12 +37,14 @@ export default class Artwork extends Component {
 					});
 				}
 				else {
+					// TODO:
 					alert(getResponseMessage(err));
 				}
 			}
 			else {
 				CommentService.getComments(post.id, (comments, er) => {
 					if (er) {
+						// TODO:
 						alert(getErrorMessage(er));
 					}
 					else {
@@ -59,14 +61,14 @@ export default class Artwork extends Component {
 				});
 			}
 		});
-		window.addEventListener("scroll", this.handleScroll);
+		window.addEventListener("scroll", this._onScroll);
 	}
 
 	componentWillUnmount () {
-		window.removeEventListener("scroll", this.handleScroll);
+		window.removeEventListener("scroll", this._onScroll);
 	}
 
-	handleSelectImage = (e) => {
+	_onClickSelectImage = (e) => {
 		if (this.state.selectedImage !== e.target.src) {
 			this.setState({
 				selectedImage: e.target.src
@@ -74,7 +76,7 @@ export default class Artwork extends Component {
 		}
 	}
 
-	handleScroll = () => {
+	_onScroll = () => {
 		if (this.state.lastLoadedCommentsPage) {
 			const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
 			const body = document.body;
@@ -87,13 +89,11 @@ export default class Artwork extends Component {
 					loading: true,
 					lastLoadedCommentsPage: undefined
 				});
-
-				console.log(pageLink);
-
 				CommentService.get(
 					{url: pageLink},
 					(page, err) => {
 						if (err) {
+							// TODO:
 							alert(getErrorMessage(err));
 						}
 						else {
@@ -111,20 +111,20 @@ export default class Artwork extends Component {
 		}
 	}
 
-	handleStartEditDescription = (e) => {
+	_onClickStartEditDescription = (e) => {
 		this.setState({
 			editingDescription: true
 		});
 	}
 
-	handleCancelEditDescription = (e) => {
+	_onClickCancelEditDescription = (e) => {
 		this.setState({
 			editingDescription: false,
 			newDescription: this.state.post.description
 		});
 	}
 
-	handleSaveDescription = (e) => {
+	_onClickSaveDescription = (e) => {
 		if (!this.state.newDescription || this.state.newDescription.length === 0) {
 			this.setState({
 				descriptionError: "Description field must be filled."
@@ -148,7 +148,7 @@ export default class Artwork extends Component {
 		}
 	}
 
-	handleDeletePost = (e) => {
+	_onClickDeletePost = (e) => {
 		ArtworkService.deleteArtwork(this.state.post.id, (resp, err) => {
 			if (err) {
 				// TODO:
@@ -160,7 +160,7 @@ export default class Artwork extends Component {
 		});
 	}
 
-	handleDescriptionChanged = (e) => {
+	_onChangeDescription = (e) => {
 		let text = e.target.value;
 		this.setState({
 			newDescription: text.length > 0 ? text : undefined,
@@ -168,13 +168,13 @@ export default class Artwork extends Component {
 		})
 	}
 
-	handleMarkChanged = (e) => {
+	_onChangeMark = (e) => {
 		this.setState({
 			selectedMark: e.target.value
 		});
 	}
 
-	handleVote = (e) => {
+	_onClickVote = (e) => {
 		ArtworkService.voteForArtwork(this.state.post.id, this.state.selectedMark, (data, err) => {
 			if (err) {
 				// TODO:
@@ -192,7 +192,7 @@ export default class Artwork extends Component {
 		});
 	}
 
-	handleAddComment = (comment) => {
+	_onClickAddComment = (comment) => {
 		let post = this.state.post;
 		post.comments.splice(0, 0, comment);
 		post.can_be_edited = false;
@@ -203,7 +203,7 @@ export default class Artwork extends Component {
 		});
 	}
 
-	onDeleteComment = (comment) => {
+	_onClickDeleteComment = (comment) => {
 		let post = this.state.post;
 		post.comments.splice(post.comments.indexOf(comment), 1);
 		this.setState({
@@ -250,7 +250,7 @@ export default class Artwork extends Component {
 												<div className="image-container">
 													<ImagePreview key={image} src={image}
 													              number={number}
-													              onClick={this.handleSelectImage}/>
+													              onClick={this._onClickSelectImage}/>
 													{
 														image === this.state.selectedImage &&
 														<i className="fa fa-search image-text-top-right" aria-hidden="true"/>
@@ -277,7 +277,7 @@ export default class Artwork extends Component {
 														<select className="form-control"
 														        defaultValue={0}
 														        style={{maxWidth: 60}}
-														        onChange={this.handleMarkChanged}>
+														        onChange={this._onChangeMark}>
 															{
 																Array.from(
 																	new Array(21),
@@ -287,7 +287,7 @@ export default class Artwork extends Component {
 														</select>
 														<div className="input-group-append">
 															<button className="btn btn btn-success" type="submit"
-															        onClick={this.handleVote}>
+															        onClick={this._onClickVote}>
 																Vote
 															</button>
 														</div>
@@ -312,9 +312,9 @@ export default class Artwork extends Component {
 											this.state.post.can_be_edited && this.state.editingDescription &&
 											<div className="d-inline">
 												<i className="fa fa-check-square-o muted-btn btn-success-hover"
-												   aria-hidden="true" onClick={this.handleSaveDescription}> Save</i>
+												   aria-hidden="true" onClick={this._onClickSaveDescription}> Save</i>
 												<i className="fa fa-times muted-btn btn-danger-hover ml-3"
-												   aria-hidden="true" onClick={this.handleCancelEditDescription}> Cancel</i>
+												   aria-hidden="true" onClick={this._onClickCancelEditDescription}> Cancel</i>
 											</div>
 										}
 										{
@@ -322,13 +322,13 @@ export default class Artwork extends Component {
 											<div className="d-inline">
 												{
 													this.state.post.can_be_edited &&
-													<i className="fa fa-pencil-square-o muted-btn btn-success-hover"
-													   aria-hidden="true" onClick={this.handleStartEditDescription}> Edit description</i>
+													<i className="fa fa-pencil-square-o muted-btn btn-success-hover mr-2"
+													   aria-hidden="true" onClick={this._onClickStartEditDescription}> Edit description</i>
 												}
 												{
-													this.state.post.can_be_deleted &&
-													<i className="fa fa-trash muted-btn btn-danger-hover ml-3"
-													   aria-hidden="true" onClick={this.handleDeletePost}> Delete post</i>
+													(this.state.post.can_be_deleted || (this.state.user && this.state.user.is_superuser)) &&
+													<i className="fa fa-trash muted-btn btn-danger-hover ml-1"
+													   aria-hidden="true" onClick={this._onClickDeletePost}> Delete post</i>
 												}
 											</div>
 										}
@@ -345,7 +345,7 @@ export default class Artwork extends Component {
 												className="form-control"
 												name="description"
 												value={this.state.newDescription}
-												onChange={this.handleDescriptionChanged}
+												onChange={this._onChangeDescription}
 												placeholder="Type text..."
 											/>
 												{
@@ -372,7 +372,7 @@ export default class Artwork extends Component {
 							{
 								this.state.user &&
 								<div className="mt-4">
-									<CommentInput isReply={false} onAddComment={this.handleAddComment} parentId={post.id}/>
+									<CommentInput isReply={false} onAddComment={this._onClickAddComment} parentId={post.id}/>
 								</div>
 							}
 							{
@@ -385,7 +385,7 @@ export default class Artwork extends Component {
 											         parentId={comment.id}
 											         paddingLeft={20}
 											         userExists={this.state.user !== null}
-											         onDeleteComment={this.onDeleteComment}/>
+											         onDeleteComment={this._onClickDeleteComment}/>
 										))}
 									</div>
 								</div>

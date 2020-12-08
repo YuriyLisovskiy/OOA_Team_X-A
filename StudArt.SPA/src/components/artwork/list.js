@@ -4,6 +4,7 @@ import ArtworkPreview from "../artwork/preview";
 import ArtworkService from "../../services/artwork";
 import {getOrDefault, getResponseMessage} from "../utils";
 import Spinner from "../spinner";
+import ArtworkEmptyPreview from "./empty_preview";
 
 const DEFAULT_COLUMNS_COUNT = 3;
 
@@ -46,6 +47,12 @@ export default class ArtworksList extends Component {
 				<ArtworkPreview onClickTag={this.handleOnClickTag} post={artwork} key={artwork.id}/>
 			));
 		}
+
+		if (this._columnsCount === 2 && newList[1].length === 0) {
+			newList[1].push(<ArtworkEmptyPreview key={-1}/>);
+		}
+
+		console.log(newList);
 
 		return newList;
 	}
