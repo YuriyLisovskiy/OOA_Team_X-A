@@ -35,4 +35,4 @@ class CommentAPITestCase(APIFactoryTestCase):
 											{'text': 'Some new comment'})
 		force_authenticate(request, user=self.user)
 		response = self.view(request, pk=9999)
-		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
