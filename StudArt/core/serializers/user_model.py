@@ -1,6 +1,4 @@
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
 
 from core.models import UserModel
 from core.serializers.common import UserBlacklistSerializer, AuthorSubscriptionSerializer
@@ -73,32 +71,6 @@ class EditSelfUserAvatarSerializer(serializers.ModelSerializer):
 		read_only_fields = ('avatar_link',)
 		extra_kwargs = {
 			'avatar': {'write_only': True}
-		}
-
-
-class EditSelfEmailSerializer(serializers.ModelSerializer):
-
-	def update(self, instance, validated_data):
-		if not instance.check_password(validated_data['password']):
-			raise exceptions.NotAuthenticated('Password is incorrect.')
-
-		email = validated_data['email']
-		try:
-			validate_email(email)
-		except ValidationError:
-			raise exceptions.ValidationError('Email is not valid.')
-
-		instance.email = email
-		instance.save()
-		return instance
-
-	class Meta:
-		model = UserModel
-		fields = (
-			'email', 'password'
-		)
-		extra_kwargs = {
-			'password': {'write_only': True}
 		}
 
 
