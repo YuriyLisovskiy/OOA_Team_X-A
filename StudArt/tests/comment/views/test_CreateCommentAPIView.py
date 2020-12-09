@@ -1,3 +1,5 @@
+import json
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import force_authenticate
@@ -14,8 +16,8 @@ class CreateCommentAPITestCase(APIFactoryTestCase):
 		self.user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 
 	def test_CreateCommentAuthenticated(self):
-		request = self.request_factory.post(reverse('api_v1:artwork:create_comment', args=[1]), {
-			"text": 'Some new comment'}, content_type='application/json')
+		request = self.request_factory.post(reverse('api_v1:artwork:create_comment', args=[1]), json.dumps(
+			{"text": 'Some new comment'}), content_type='application/json')
 		force_authenticate(request, user=self.user)
 		response = self.view(request, pk=1)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
