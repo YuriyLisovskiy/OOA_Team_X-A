@@ -4,6 +4,8 @@ import {getErrorMessage} from "../../utils/misc";
 import SpinnerComponent from "../Spinner";
 import ArtworksListComponent from "../artwork/List";
 import TagBadgeComponent from "../TagBadge";
+import NotFound from "../errors";
+import {Link} from "react-router-dom";
 
 export default class ProfileComponent extends Component {
 
@@ -12,32 +14,67 @@ export default class ProfileComponent extends Component {
 		this.state = {
 			user: undefined,
 			loading: true,
-			currentUser: UserService.getCurrentUser()
+			currentUser: UserService.getCurrentUser(),
+			notFound: false,
+			subscriptions: [],
+			mostUsedTags: []
 		}
 	}
 
 	componentDidMount() {
-		UserService.getUser(this.props.match.params.id, (user, err) => {
-			if (err) {
-				// TODO:
-				alert(getErrorMessage(err));
-			}
-			else if (this.state.currentUser) {
-				UserService.getMostUsedTagsForAuthor(user.id, 5, (tags, err) => {
-					if (err) {
+		let userId = null;
+		if (this.props.match.params.id) {
+			userId = this.props.match.params.id;
+		}
+		else if (this.state.currentUser) {
+			userId = this.state.currentUser.id;
+		}
+
+		if (userId) {
+			UserService.getUser(userId, (user, err) => {
+				if (err) {
+					if (err.response.status === 404) {
+						this.setState({
+							notFound: true,
+							loading: false
+						});
+					}
+					else {
 						// TODO:
 						alert(getErrorMessage(err));
 					}
-					else {
-						user.mostUsedTags = tags;
-						this._setLoadedUser(user);
-					}
-				});
-			}
-			else {
-				this._setLoadedUser(user);
-			}
-		});
+				}
+				else {
+					this._setLoadedUser(user);
+					UserService.getMostUsedTagsForAuthor(userId, 5, (tags, err) => {
+						if (err) {
+							// TODO:
+							alert(getErrorMessage(err));
+						}
+						else {
+							this.setState({
+								mostUsedTags: tags
+							});
+						}
+					});
+
+					UserService.getSubscriptions(userId, 1, (data, err) => {
+						if (err) {
+							// TODO:
+							alert(getErrorMessage(err));
+						}
+						else {
+							this.setState({
+								subscriptions: data.results
+							});
+						}
+					});
+				}
+			});
+		}
+		else {
+			this.props.history.push('/');
+		}
 	}
 
 	_setLoadedUser = (user) => {
@@ -109,14 +146,15 @@ export default class ProfileComponent extends Component {
 
 	render() {
 		let user = this.state.user;
-		return (
-			<div className="container">
-				{
-					this.state.loading ? (<SpinnerComponent/>) : (
+		return <div className="container">
+			{
+				this.state.loading ? (<SpinnerComponent/>) : (
+					this.state.notFound ? (<NotFound/>) : (
 						<div className="row">
 							<div className="col-md-4">
 								<div className="mx-auto text-center text-muted mb-2">PROFILE</div>
-								<img src={user.avatar_link} alt="Avatar" className="img-thumbnail mx-auto d-block mb-2"/>
+								<img src={user.avatar_link} alt="Avatar"
+								     className="img-thumbnail mx-auto d-block mb-2"/>
 								{
 									this.state.currentUser && this.state.currentUser.id !== user.id &&
 									<div>
@@ -161,7 +199,7 @@ export default class ProfileComponent extends Component {
 														</button>
 													)
 												}
-												<button type="button" className="btn btn-outline-danger"
+												<button type="button" className="btn btn-outline-secondary"
 												        onClick={this._onClickBlacklistAuthor(true)}>
 													Block
 												</button>
@@ -170,17 +208,24 @@ export default class ProfileComponent extends Component {
 										}
 									</div>
 								}
-								<h5 className="float-right">Rating: {user.rating}</h5>
 								{
-									user.first_name && user.last_name &&
-									<h4 className="mb-2">{user.first_name} {user.last_name}</h4>
+									(this.state.currentUser.id === user.id || user.show_rating) &&
+									<h5 className="float-right">Rating: {user.rating}</h5>
+								}
+								{
+									(this.state.currentUser.id === user.id || (
+										user.show_full_name && user.first_name && user.last_name
+									)) &&
+									<h5 className="mb-2">{user.first_name} {user.last_name}</h5>
 								}
 								<h6>{user.username}</h6>
 								{
-									user && user.mostUsedTags && user.mostUsedTags.length > 0 &&
+									this.state.mostUsedTags.length > 0 &&
 									<div className="mt-4">
-										<div className="text-muted">Most used tags:</div>
-										{user.mostUsedTags.map((tag) => {
+										<div className="text-muted text-center mb-1 muted-border-bottom">
+											<small>MOST USED TAGS</small>
+										</div>
+										{this.state.mostUsedTags.map((tag) => {
 											return <TagBadgeComponent key={tag.text} text={tag.text}
 											                          className="mr-1"
 											                          textOnly={true}
@@ -188,20 +233,53 @@ export default class ProfileComponent extends Component {
 										})}
 									</div>
 								}
+								{
+									(
+										this.state.currentUser.id === user.id || user.show_subscriptions
+									) && this.state.subscriptions.length > 0 &&
+									<div>
+										<div className="text-muted text-center mt-4 mb-1 muted-border-bottom">
+											<small>SUBSCRIPTIONS</small>
+										</div>
+										{
+											this.state.subscriptions.map((user) => {
+												return <Link to={'/profile/' + user.id} className="float-left"
+												             key={user.id}>
+													<div className="text-muted profile-photo">
+														<img src={user.avatar_link} alt="Avatar" className="avatar-picture mr-2"/>
+														<span className="d-inline">
+														{
+															user.first_name && user.last_name &&
+															<span>{user.first_name} {user.last_name} [</span>
+														}
+															{user.username}
+															{
+																user.first_name && user.last_name &&
+																"]"
+															}
+													</span>
+													</div>
+												</Link>;
+											})
+										}
+									</div>
+								}
 							</div>
 							<div className="col-md-8">
-								<div className="mx-auto text-center text-muted mb-2">ARTWORKS</div>
+								<div className="mx-auto text-center text-muted mb-2">
+									ARTWORKS
+								</div>
 								{
-									this.state.user &&
+									user &&
 									<ArtworksListComponent columnsCount={2}
-									              filterAuthors={[this.state.user.username]}
-									              clickOnPreviewTag={false}/>
+									                       filterAuthors={[user.username]}
+									                       clickOnPreviewTag={false}/>
 								}
 							</div>
 						</div>
 					)
-				}
-			</div>
-		);
+				)
+			}
+		</div>;
 	}
 }

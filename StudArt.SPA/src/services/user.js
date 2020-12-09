@@ -22,7 +22,10 @@ class UserService extends BaseService {
 	//    "rating": <float>,
 	//    "is_banned": <bool>,
 	//    "is_subscribed": <bool>,
-	//    "is_blocked": <bool>
+	//    "is_blocked": <bool>,
+	//    "show_full_name": <bool>,
+	//    "show_rating": <bool>,
+	//    "show_subscriptions": <bool>
 	//  }
 	getUser = (id, handler) => {
 		return this.get({
@@ -42,7 +45,10 @@ class UserService extends BaseService {
 	//    "rating": <float>,
 	//    "is_banned": <bool>,
 	//    "is_subscribed": <bool>,
-	//    "is_blocked": <bool>
+	//    "is_blocked": <bool>,
+	//    "show_full_name": <bool>,
+	//    "show_rating": <bool>,
+	//    "show_subscriptions": <bool>
 	//  }
 	getMe = (handler) => {
 		return this.get({url: this._URL_SELF}, handler);
@@ -50,24 +56,58 @@ class UserService extends BaseService {
 
 	// returns:
 	//  {
-	//    "avatar_link": <string> (full url)
+	//    "first_name": <string>,
+	//    "last_name": <string>,
+	//    "avatar_link": <string> (full url),
+	//    "show_full_name": <bool>,
+	//    "show_rating": <bool>,
+	//    "show_subscriptions": <bool>
 	//  }
-	editUser = (id, firstName, lastName, avatar, handler) => {
+	editUser = (id, firstName, lastName, showFullName, showRating, showSubscriptions, handler) => {
+		let data = {};
+		if (firstName !== null) {
+			data['first_name'] = firstName;
+		}
+
+		if (lastName !== null) {
+			data['last_name'] = lastName;
+		}
+
+		if (showFullName !== null) {
+			data['show_full_name'] = showFullName;
+		}
+
+		if (showRating !== null) {
+			data['show_rating'] = showRating;
+		}
+
+		if (showSubscriptions !== null) {
+			data['show_subscriptions'] = showSubscriptions;
+		}
+
+		this.put({
+			url: this._URL_SELF + '/edit',
+			data: data
+		}, handler);
+	}
+
+	// returns:
+	//  {
+	//    "first_name": <string>,
+	//    "last_name": <string>,
+	//    "avatar_link": <string> (full url),
+	//    "show_full_name": <bool>,
+	//    "show_rating": <bool>,
+	//    "show_subscriptions": <bool>
+	//  }
+	updateAvatar = (id, avatar, handler) => {
 		let formData = new FormData();
-		if (firstName) {
-			formData.append('first_name', firstName);
-		}
-
-		if (lastName) {
-			formData.append('last_name', lastName);
-		}
-
 		if (avatar) {
 			formData.append('avatar', avatar);
 		}
 
 		this.put({
-			url: this._URL_SELF + '/edit',
+			url: this._URL_SELF + '/edit/avatar',
 			data: formData,
 			headers: {
 				'Content-Type': 'multipart/form-data'
@@ -76,13 +116,32 @@ class UserService extends BaseService {
 	}
 
 	editEmail = (id, email, password, handler) => {
-		// TODO: editEmail
-		handler(null, {response: {data: {detail: "Password is invalid."}}});
+		this.put({
+			url: this._URL_SELF + '/edit/email',
+			data: {
+				email: email,
+				password: password
+			}
+		}, handler);
 	}
 
 	editPassword = (id, oldPassword, newPassword, handler) => {
-		// TODO: editPassword
-		handler(null, {response: {data: {detail: "Old password is invalid."}}});
+		this.put({
+			url: this._URL_SELF + '/edit/password',
+			data: {
+				old_password: oldPassword,
+				new_password: newPassword
+			}
+		}, handler);
+	}
+
+	deactivateMe = (id, password, handler) => {
+		this.put({
+			url: this._URL_SELF + '/deactivate',
+			data: {
+				password: password
+			}
+		}, handler);
 	}
 
 	// returns:
@@ -143,7 +202,13 @@ class UserService extends BaseService {
 	//        "email": <string>,
 	//        "avatar_link": <string (full url)>,
 	//        "is_superuser": <bool>,
-	//        "rating": <float>
+	//        "rating": <float>,
+	//        "is_banned": <bool>,
+	//        "is_subscribed": <bool>,
+	//        "is_blocked": <bool>,
+	//        "show_full_name": <bool>,
+	//        "show_rating": <bool>,
+	//        "show_subscriptions": <bool>
 	//      },
 	//      ...
 	//    ]
@@ -174,7 +239,13 @@ class UserService extends BaseService {
 	//        "email": <string>,
 	//        "avatar_link": <string (full url)>,
 	//        "is_superuser": <bool>,
-	//        "rating": <float>
+	//        "rating": <float>,
+	//        "is_banned": <bool>,
+	//        "is_subscribed": <bool>,
+	//        "is_blocked": <bool>,
+	//        "show_full_name": <bool>,
+	//        "show_rating": <bool>,
+	//        "show_subscriptions": <bool>
 	//      },
 	//      ...
 	//    ]

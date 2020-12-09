@@ -133,7 +133,7 @@ export default class CommentComponent extends Component {
 				alert(getErrorMessage(err));
 			}
 			else {
-				this.props._onDeleteComment(this.state.comment);
+				this.props.onDeleteComment(this.state.comment);
 			}
 		});
 	}
@@ -225,7 +225,7 @@ export default class CommentComponent extends Component {
 						<small className="d-inline mx-1 text-muted mt-1">
 							· {discussion.creation_date} at {discussion.creation_time + " "}
 							{
-								discussion.points > 0 &&
+								discussion.points !== 0 &&
 								<div className="d-inline">
 									· [{discussion.points} point{discussion.points !== 1 && discussion.points !== -1 ? "s" : ""}]
 								</div>

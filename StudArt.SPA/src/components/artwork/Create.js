@@ -3,6 +3,7 @@ import TagBadgeComponent from "../TagBadge";
 import ImagePreviewComponent from "./ImagePreview";
 import ArtworkService from "../../services/artwork";
 import {getErrorMessage} from "../../utils/misc";
+import "../../styles/common.css";
 
 export default class CreateArtworkComponent extends Component {
 
@@ -176,10 +177,11 @@ export default class CreateArtworkComponent extends Component {
 							<div className="col-sm-12 text-center">
 								{
 									this.state.images.length > 0 && <div className="d-inline">
-										{this.state.images.map((image) =>
+										{this.state.images.map((image, idx) =>
 											<ImagePreviewComponent key={image.url} src={image.url}
-											              onClick={this._onClickPreviewImage}
-											              isSelected={image.url === this.state.selectedImage}/>
+											                       number={idx}
+											                       onClick={this._onClickPreviewImage}
+											                       isSelected={image.url === this.state.selectedImage}/>
 										)}
 									</div>
 								}

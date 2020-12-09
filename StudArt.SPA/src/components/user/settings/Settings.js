@@ -3,7 +3,8 @@ import {Tab, Tabs} from "react-bootstrap";
 import UserService from "../../../services/user"
 import AccountSettingsComponent from "./Account";
 import ProfileSettingsComponent from "./Profile";
-import SafetyAndPrivacySettingsComponent from "./SafetyAndPrivacy";
+import PrivacyAndSafetySettingsComponent from "./PrivacyAndSafety";
+import PropTypes from "prop-types";
 
 export default class SettingsComponent extends Component {
 
@@ -24,19 +25,29 @@ export default class SettingsComponent extends Component {
 			</div>
 			<div className="row">
 				<div className="col-12">
-					<Tabs defaultActiveKey="account" transition={false}>
+					<Tabs defaultActiveKey="account" transition={false} activeKey={this.props.activeKey} onSelect={
+						key => this.props.history.push('/settings/' + key)
+					}>
 						<Tab eventKey="account" title="Account" tabClassName="text-secondary">
 							<AccountSettingsComponent user={this.state.user}/>
 						</Tab>
 						<Tab eventKey="profile" title="Profile" tabClassName="text-secondary">
-							<ProfileSettingsComponent user={this.state.user}/>
+							<ProfileSettingsComponent user={this.state.user}
+							                          updateFullName={this.props.updateFullName}
+							                          updateAvatar={this.props.updateAvatar}/>
 						</Tab>
-						<Tab eventKey="safetyAndPrivacy" title="Safety & Privacy" tabClassName="text-secondary">
-							<SafetyAndPrivacySettingsComponent user={this.state.user}/>
+						<Tab eventKey="privacy-and-safety" title="Privacy & Safety" tabClassName="text-secondary">
+							<PrivacyAndSafetySettingsComponent user={this.state.user}/>
 						</Tab>
 					</Tabs>
 				</div>
 			</div>
 		</div>;
 	}
+}
+
+SettingsComponent.propTypes = {
+	updateAvatar: PropTypes.func,
+	updateFullName: PropTypes.func,
+	activeKey: PropTypes.string
 }

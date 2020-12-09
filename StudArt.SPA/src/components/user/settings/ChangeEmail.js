@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import PasswordVerificationComponent from "./PasswordVerification";
 import PropTypes from "prop-types";
 import UserService from "../../../services/user";
-import {emailIsValid, getErrorMessage, strIsEmpty} from "../../../utils/misc";
+import {emailIsValid, getErrorMessage} from "../../../utils/misc";
 
 export default class ChangeEmailComponent extends Component {
 
@@ -60,6 +60,7 @@ export default class ChangeEmailComponent extends Component {
 						user: user,
 						newEmailDrawerIsOpen: false
 					});
+					UserService._setCurrentUser(user);
 					finished();
 				}
 			}

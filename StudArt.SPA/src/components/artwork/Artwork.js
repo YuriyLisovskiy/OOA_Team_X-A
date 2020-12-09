@@ -247,15 +247,10 @@ export default class ArtworkComponent extends Component {
 									<div className="col-md-12 text-center">
 										<div className="d-inline">
 											{post.images.map((image, number) =>
-												<div className="image-container">
-													<ImagePreviewComponent key={image} src={image}
-													              number={number}
-													              onClick={this._onClickSelectImage}/>
-													{
-														image === this.state.selectedImage &&
-														<i className="fa fa-search image-text-top-right" aria-hidden="true"/>
-													}
-												</div>
+												<ImagePreviewComponent key={image} src={image}
+												                       number={number}
+												                       isSelected={image === this.state.selectedImage}
+												                       onClick={this._onClickSelectImage}/>
 
 											)}
 										</div>

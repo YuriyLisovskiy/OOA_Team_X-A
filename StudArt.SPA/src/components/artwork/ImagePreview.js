@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import PropTypes from "prop-types";
 
 export default class ImagePreviewComponent extends Component {
 
@@ -24,11 +25,21 @@ export default class ImagePreviewComponent extends Component {
 	}
 
 	render() {
-		return <img src={this.props.src}
-		            className={"rounded my-1 " + this.marginClass + (
-				        this.props.customClassName ? this.props.customClassName : ""
-			        )} alt=""
-		            style={this.borderStyle}
-		            onClick={this.props.onClick}/>;
+		return <div className="image-container">
+			<img src={this.props.src}
+			     className={"rounded my-1 " + this.marginClass + (
+				     this.props.customClassName ? this.props.customClassName : ""
+			     )} alt=""
+			     style={this.borderStyle}
+			     onClick={this.props.onClick}/>
+			{
+				this.props.isSelected &&
+				<i className="fa fa-search image-text-top-right" aria-hidden="true"/>
+			}
+		</div>;
 	}
+}
+
+ImagePreviewComponent.propTypes = {
+	src: PropTypes.string
 }

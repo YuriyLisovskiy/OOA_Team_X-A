@@ -75,8 +75,14 @@ export default class ArtworksListComponent extends Component {
 			));
 		}
 
-		if (this._columnsCount === 2 && newList[1].length === 0) {
-			newList[1].push(<ArtworkEmptyPreview key={-1}/>);
+		if (this._columnsCount === 2) {
+			if (newList[0].length === 0) {
+				newList[0].push(<ArtworkEmptyPreview key={-2}/>);
+			}
+
+			if (newList[1].length === 0) {
+				newList[1].push(<ArtworkEmptyPreview key={-1}/>);
+			}
 		}
 
 		return newList;
@@ -135,13 +141,6 @@ export default class ArtworksListComponent extends Component {
 
 	_onClickSearchByTag = (e, tag) => {
 		if (this._handleClickOnPreviewTag) {
-			// this._loadArtworks(
-			// 	null,
-			// 	this._columnsCount,
-			// 	[tag],
-			// 	this.state.filterAuthors,
-			// 	this.state.filterBySubscriptions
-			// );
 			if (this.props.onClickTag) {
 				this.props.onClickTag(e, tag);
 			}

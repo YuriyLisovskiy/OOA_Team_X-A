@@ -67,3 +67,7 @@
 .min-w-250 {
 	min-width: 250px;
 }
+
+.muted-border-bottom {
+	border-bottom: 1px solid #c9cace
+}

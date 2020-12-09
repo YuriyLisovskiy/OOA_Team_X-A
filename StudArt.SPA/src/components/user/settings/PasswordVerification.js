@@ -13,6 +13,7 @@ export default class PasswordVerificationComponent extends Component {
 			passwordError: undefined,
 			loading: false
 		};
+		this._inputRef = React.createRef();
 	}
 
 	componentDidMount() {
@@ -47,6 +48,7 @@ export default class PasswordVerificationComponent extends Component {
 					loading: false,
 					password: ""
 				});
+				this._inputRef.current.value = "";
 			});
 		}
 		else {
@@ -67,7 +69,9 @@ export default class PasswordVerificationComponent extends Component {
 		return <DrawerComponent title="CONFIRM AN ACTION"
 		                        open={this.props.open}
 		                        onRequestClose={this.props.onRequestClose}
-		                        modalElementClass="container w-25 min-w-250">
+		                        modalElementClass={this.props.modalElementClass ?
+			                        this.props.modalElementClass : "container w-25 min-w-250"
+		                        }>
 			{
 				this.props.description &&
 				<div className="text-center pb-4">{this.props.description}</div>
@@ -81,7 +85,7 @@ export default class PasswordVerificationComponent extends Component {
 				</div>
 			}
 			<div className="form-group">
-				<input type="password" className="form-control"
+				<input type="password" className="form-control" ref={this._inputRef}
 				       placeholder="Type password..." onChange={this._onChangePassword}/>
 				{
 					this.state.passwordError && <small className="form-text text-danger ml-1 mt-1">
