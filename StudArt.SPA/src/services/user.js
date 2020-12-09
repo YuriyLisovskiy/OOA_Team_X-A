@@ -75,6 +75,16 @@ class UserService extends BaseService {
 		}, handler);
 	}
 
+	editEmail = (id, email, password, handler) => {
+		// TODO: editEmail
+		handler(null, {response: {data: {detail: "Password is invalid."}}});
+	}
+
+	editPassword = (id, oldPassword, newPassword, handler) => {
+		// TODO: editPassword
+		handler(null, {response: {data: {detail: "Old password is invalid."}}});
+	}
+
 	// returns:
 	// {}
 	blockAuthor = (authorId, handler) => {

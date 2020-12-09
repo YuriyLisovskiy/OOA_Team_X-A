@@ -40,3 +40,8 @@ export const getClassForTag = (idx, length) => {
 export const strIsEmpty = (str) => {
 	return !str || str.length === 0;
 }
+
+export const emailIsValid = (email) => {
+	// TODO: check if email is valid!
+	return !strIsEmpty(email);
+}

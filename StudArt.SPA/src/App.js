@@ -11,7 +11,7 @@ import CreateArtworkComponent from "./components/artwork/Create";
 import IndexComponent from "./components/Index";
 import NotFound from "./components/errors";
 import {Dropdown, NavDropdown} from "react-bootstrap";
-import SettingsComponent from "./components/user/Settings";
+import SettingsComponent from "./components/user/settings/Settings";
 import DropdownItem from "react-bootstrap/DropdownItem";
 import UserService from "./services/user";
 import LoginComponent from "./components/user/Login";

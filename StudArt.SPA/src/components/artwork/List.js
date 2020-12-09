@@ -182,7 +182,7 @@ export default class ArtworksListComponent extends Component {
 						{this._makeAllColumns()}
 					</div>
 				) : (
-					!this.state.loading && <h2 className="text-center text-muted">No posts</h2>
+					!this.state.loading && <h2 className="text-center text-muted">No posts found</h2>
 				)
 			}
 			{

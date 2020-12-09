@@ -82,12 +82,20 @@ export default class HomeComponent extends Component {
 				<div className="col-md-12">
 					<div className="form-group mb-4">
 						<div className="input-group">
-							<input type="text" className="form-control" placeholder="Type tag..."
+							<div className="input-group-prepend">
+								<span className="input-group-text">
+									<i className="fa fa-search" aria-hidden="true"/>
+									<div className="ml-2">Search by tags:</div>
+								</span>
+							</div>
+							<input type="text" className="form-control" placeholder="..."
 							       value={this.state.currentTag}
 							       onChange={this._onChangeTagInput}
 							       onKeyDown={this._onKeyDownAddTag}/>
-							<div className="input-group-append">
-								<button className="btn btn-success" onClick={this._onClickAddTag}>Add</button>
+							<div className="input-group-append" title="Add tag to search">
+								<button className="btn btn-success" onClick={this._onClickAddTag}>
+									<i className="fa fa-plus" aria-hidden="true"/>
+								</button>
 							</div>
 						</div>
 						{
