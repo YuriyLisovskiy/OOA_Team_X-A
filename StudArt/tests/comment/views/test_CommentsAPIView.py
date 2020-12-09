@@ -4,9 +4,9 @@ from artwork.views.comment import CommentsAPIView
 from tests.common import APIFactoryTestCase
 
 
-class ArtworkAPITestCase(APIFactoryTestCase):
+class CommentsAPITestCase(APIFactoryTestCase):
 	def setUp(self) -> None:
-		super(ArtworkAPITestCase, self).setUp()
+		super(CommentsAPITestCase, self).setUp()
 		self.view = CommentsAPIView.as_view()
 
 	def test_GetCommentsOfArtwork(self):

@@ -7,9 +7,9 @@ from artwork.views.comment import CreateCommentAPIView
 from tests.common import APIFactoryTestCase
 
 
-class CommentAPITestCase(APIFactoryTestCase):
+class CreateCommentAPITestCase(APIFactoryTestCase):
 	def setUp(self) -> None:
-		super(CommentAPITestCase, self).setUp()
+		super(CreateCommentAPITestCase, self).setUp()
 		self.view = CreateCommentAPIView.as_view()
 		self.user = User.objects.create_user(username='olivia', password='StrongPassword12345')
 
