@@ -168,7 +168,7 @@ class ReplyToCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentReplySerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data
+		data = request.data.dict()
 		data['comment'] = self.kwargs['pk']
 		data['author'] = request.user.pk
 		# full_data = QueryDict(mutable=True)

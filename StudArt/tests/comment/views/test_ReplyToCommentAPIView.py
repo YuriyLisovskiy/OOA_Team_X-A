@@ -37,4 +37,4 @@ class ReplyToCommentAPITestCase(APIFactoryTestCase):
 		request = self.request_factory.post(reverse('api_v1:artwork:edit_comment', args=[9999]), {'text': 'New text'})
 		force_authenticate(request, user=self.user_user)
 		response = self.view(request, pk=9999)
-		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
