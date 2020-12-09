@@ -2,6 +2,7 @@ from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 
 from artwork.models import CommentModel
+from core.models import UserModel
 
 
 class ArtworkSetPagination(PageNumberPagination):
@@ -33,3 +34,11 @@ class CommentSetPagination(PageNumberPagination):
 			return CommentModel.objects.count()
 
 		return self.page_size
+
+
+class UserModelAllSetPagination(PageNumberPagination):
+	page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
+	page_size_query_param = 'page_size'
+
+	def get_page_size(self, request):
+		return UserModel.objects.count()

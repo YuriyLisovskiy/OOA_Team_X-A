@@ -1,14 +1,17 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, exceptions
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 
+from artwork.mixins import BlacklistMixin
+from artwork.pagination import UserModelAllSetPagination
 from artwork.serializers.tag_model import TagDetailsSerializer
 from core.mixins import UpdateUserModelMixin
 from core.models import UserModel
 from core.serializers.user_model import (
 	UserDetailsSerializer, EditSelfUserSerializer, BlockUserSerializer,
-	UnblockUserSerializer, SubscribeToAuthorSerializer, UnsubscribeFromAuthorSerializer
+	UnblockUserSerializer, SubscribeToAuthorSerializer, UnsubscribeFromAuthorSerializer,
+	EditSelfUserAvatarSerializer, EditSelfEmailSerializer
 )
 
 
@@ -34,29 +37,65 @@ from core.serializers.user_model import (
 #       "show_rating": <bool>,
 #       "show_subscriptions": <bool>
 #   }
-class UserDetailsAPIView(generics.RetrieveAPIView):
+class UserDetailsAPIView(generics.RetrieveAPIView, BlacklistMixin):
 	permission_classes = (permissions.AllowAny,)
 	queryset = UserModel.objects.all()
 	serializer_class = UserDetailsSerializer
 
+	def get_object(self):
+		obj = super(UserDetailsAPIView, self).get_object()
+		if self.is_blacklisted(self.request, obj):
+			raise exceptions.NotFound()
+
+		return obj
+
 
 # /api/v1/core/users/self/edit
 # methods:
-#   - put: first_name, last_name
-# methods:
-#   - put (Content-Type must be `multipart/form-data`):
+#   - put:
 #       - first_name: string
 #       - last_name: string
-#       - avatar: image
 #       - show_full_name: bool
 #       - show_rating: bool
 #       - show_subscriptions: bool
 # returns (success status - 200):
 #   {
-#       "avatar_link": <string> (full url)
+#       "first_name": <string>
+#       "last_name": <string>
+#       "show_full_name": <bool>
+#       "show_rating": <bool>
+#       "show_subscriptions": <bool>
 #   }
 class EditSelfAPIView(APIView, UpdateUserModelMixin):
 	serializer_class = EditSelfUserSerializer
+
+
+# /api/v1/core/users/self/edit/avatar
+# methods:
+#   - put (Content-Type must be `multipart/form-data`):
+#       - avatar: image
+# returns (success status - 200):
+#   {
+#       "avatar_link": <string> (full url)
+#   }
+class EditSelfAvatarAPIView(APIView, UpdateUserModelMixin):
+	serializer_class = EditSelfUserAvatarSerializer
+
+
+# /api/v1/core/users/self/edit/email
+# methods:
+#   - put
+#       - email: string
+#       - password: string
+# returns (success status - 200):
+#   {
+#       "email": <string>
+#   }
+class EditSelfEmailAPIView(APIView, UpdateUserModelMixin):
+	serializer_class = EditSelfEmailSerializer
+
+
+# class EditSelfPasswordAPIView
 
 
 # /api/v1/core/users/self/block/author
@@ -85,7 +124,7 @@ class UnblockUserAPIView(APIView, UpdateUserModelMixin):
 #       - author_pk: int (primary key of an author to subscribe to)
 # returns (success status - 200):
 #   {}
-class SubscribeToAuthorAPIView(APIView, UpdateUserModelMixin):
+class SubscribeToAuthorAPIView(APIView, UpdateUserModelMixin, BlacklistMixin):
 	serializer_class = SubscribeToAuthorSerializer
 
 
@@ -126,7 +165,7 @@ class UnsubscribeFromAuthorAPIView(APIView, UpdateUserModelMixin):
 #   }
 class UserSubscriptionsAPIView(generics.ListAPIView):
 	serializer_class = UserDetailsSerializer
-	pagination_class = PageNumberPagination
+	pagination_class = UserModelAllSetPagination
 
 	def get_queryset(self):
 		user_pk = self.kwargs['pk']
@@ -134,7 +173,7 @@ class UserSubscriptionsAPIView(generics.ListAPIView):
 		if not user.exists():
 			raise NotFound('user not found')
 
-		return user.first().subscriptions.all()
+		return user.first().subscriptions.all().order_by('-subscriptions')
 
 
 # /api/v1/core/users/self/blacklist
@@ -162,10 +201,10 @@ class UserSubscriptionsAPIView(generics.ListAPIView):
 #   }
 class UserBlacklistAPIView(generics.ListAPIView):
 	serializer_class = UserDetailsSerializer
-	pagination_class = PageNumberPagination
+	pagination_class = UserModelAllSetPagination
 
 	def get_queryset(self):
-		return self.request.user.blocked_users.all()
+		return self.request.user.blocked_users.all().order_by('-blocked_users')
 
 
 # /api/v1/core/users/self

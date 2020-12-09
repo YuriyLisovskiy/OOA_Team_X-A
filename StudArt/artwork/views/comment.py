@@ -111,12 +111,10 @@ class CreateCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentSerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data.dict()
+		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
 		data['artwork'] = self.kwargs['pk']
 		data['author'] = request.user.pk
-		full_data = QueryDict(mutable=True)
-		full_data.update(**data)
-		request._full_data = full_data
+		request._full_data = data
 		return super(CreateCommentAPIView, self).create(request, *args, **kwargs)
 
 
@@ -168,11 +166,9 @@ class ReplyToCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentReplySerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data.dict()
+		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
 		data['comment'] = self.kwargs['pk']
 		data['author'] = request.user.pk
-		# full_data = QueryDict(mutable=True)
-		# full_data.update(**data)
 		request._full_data = data
 		return super(ReplyToCommentAPIView, self).create(request, *args, **kwargs)
 
