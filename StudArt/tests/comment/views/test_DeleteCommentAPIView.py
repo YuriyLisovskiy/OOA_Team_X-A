@@ -17,12 +17,12 @@ class DeleteCommentAPITestCase(APIFactoryTestCase):
 	def test_DeleteComment(self):
 		request = self.request_factory.delete(reverse('api_v1:artwork:delete_comment', args=[16]))
 		force_authenticate(request, user=self.user_user)
-		response = self.view(request, pk=14)
-		self.assertEqual(response.status_code, status.HTTP_200_OK)
+		response = self.view(request, pk=16)
+		self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 	def test_DeleteCommentUnauthenticated(self):
 		request = self.request_factory.delete(reverse('api_v1:artwork:delete_comment', args=[16]))
-		response = self.view(request, pk=14)
+		response = self.view(request, pk=16)
 		self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 	def test_DeleteCommentWithReplies(self):

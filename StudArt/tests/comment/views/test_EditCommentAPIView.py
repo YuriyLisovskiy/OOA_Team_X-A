@@ -17,12 +17,12 @@ class EditCommentAPITestCase(APIFactoryTestCase):
 	def test_EditComment(self):
 		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[16]), {'text': 'New text'})
 		force_authenticate(request, user=self.user_user)
-		response = self.view(request, pk=14)
+		response = self.view(request, pk=16)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 	def test_EditCommentUnauthenticated(self):
 		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[16]), {'text': 'New text'})
-		response = self.view(request, pk=14)
+		response = self.view(request, pk=16)
 		self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 	def test_EditCommentWithReplies(self):
