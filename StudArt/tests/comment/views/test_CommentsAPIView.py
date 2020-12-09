@@ -19,6 +19,15 @@ class ArtworkAPITestCase(APIFactoryTestCase):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_comments', args=[1]), {'answers': True})
 		response = self.view(request, pk=1)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
-		self.assertEqual(len(response.data['results']), 2)
+		self.assertEqual(len(response.data['results']), 4)
 
+	def test_GetCommentsOfNonexistentArtwork(self):
+		request = self.request_factory.get(reverse('api_v1:artwork:get_comments', args=[9999]), {'answers': False})
+		response = self.view(request, pk=9999)
+		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+	def test_GetCommentsOfNonexistentComment(self):
+		request = self.request_factory.get(reverse('api_v1:artwork:get_comments', args=[18]), {'answers': True})
+		response = self.view(request, pk=18)
+		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
