@@ -39,7 +39,8 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 		fields = (
 			'id', 'first_name', 'last_name', 'username', 'email',
 			'avatar_link', 'is_superuser', 'rating', 'is_banned',
-			'is_subscribed', 'is_blocked'
+			'is_subscribed', 'is_blocked', 'show_full_name', 'show_rating',
+			'show_subscriptions'
 		)
 
 
@@ -55,13 +56,17 @@ class EditSelfUserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserModel
 		fields = (
-			'first_name', 'last_name', 'avatar', 'avatar_link'
+			'first_name', 'last_name', 'avatar', 'avatar_link',
+			'show_full_name', 'show_rating', 'show_subscriptions'
 		)
 		read_only_fields = ('avatar_link',)
 		extra_kwargs = {
-			'first_name': {'write_only': True},
-			'last_name': {'write_only': True},
-			'avatar': {'write_only': True}
+			# 'first_name': {'write_only': True},
+			# 'last_name': {'write_only': True},
+			'avatar': {'write_only': True},
+			# 'show_full_name': {'write_only': True},
+			# 'show_rating': {'write_only': True},
+			# 'show_subscriptions': {'write_only': True}
 		}
 
 

@@ -29,7 +29,10 @@ from core.serializers.user_model import (
 #       "rating": <float>,
 #       "is_banned": <bool>,
 #       "is_subscribed": <bool>,
-#       "is_blocked": <bool>
+#       "is_blocked": <bool>,
+#       "show_full_name": <bool>,
+#       "show_rating": <bool>,
+#       "show_subscriptions": <bool>
 #   }
 class UserDetailsAPIView(generics.RetrieveAPIView):
 	permission_classes = (permissions.AllowAny,)
@@ -45,6 +48,9 @@ class UserDetailsAPIView(generics.RetrieveAPIView):
 #       - first_name: string
 #       - last_name: string
 #       - avatar: image
+#       - show_full_name: bool
+#       - show_rating: bool
+#       - show_subscriptions: bool
 # returns (success status - 200):
 #   {
 #       "avatar_link": <string> (full url)
