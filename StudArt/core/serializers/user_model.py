@@ -61,12 +61,7 @@ class EditSelfUserSerializer(serializers.ModelSerializer):
 		)
 		read_only_fields = ('avatar_link',)
 		extra_kwargs = {
-			# 'first_name': {'write_only': True},
-			# 'last_name': {'write_only': True},
-			'avatar': {'write_only': True},
-			# 'show_full_name': {'write_only': True},
-			# 'show_rating': {'write_only': True},
-			# 'show_subscriptions': {'write_only': True}
+			'avatar': {'write_only': True}
 		}
 
 

@@ -51,7 +51,7 @@ class CommentsAPIView(generics.ListAPIView):
 	queryset = CommentModel.objects.all()
 
 	def get_queryset(self):
-		get_answers = self.request.query_params.get('answers', 'false') == 'true'
+		get_answers = self.request.query_params.get('answers', 'false').lower() == 'true'
 		reverse = ''
 		if get_answers:
 			q = Q(comment_id=self.kwargs['pk'])
@@ -111,7 +111,7 @@ class CreateCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentSerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data
+		data = request.data.dict()
 		data['artwork'] = self.kwargs['pk']
 		data['author'] = request.user.pk
 		full_data = QueryDict(mutable=True)
