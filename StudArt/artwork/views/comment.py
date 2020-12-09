@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.http import QueryDict
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -110,7 +111,7 @@ class CreateCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentSerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data if isinstance(request.data, dict) else request.data.dict()
+		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
 		data['artwork'] = self.kwargs['pk']
 		data['author'] = request.user.pk
 		request._full_data = data
@@ -165,7 +166,7 @@ class ReplyToCommentAPIView(generics.CreateAPIView):
 	serializer_class = CreateCommentReplySerializer
 
 	def create(self, request, *args, **kwargs):
-		data = request.data if isinstance(request.data, dict) else request.data.dict()
+		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
 		data['comment'] = self.kwargs['pk']
 		data['author'] = request.user.pk
 		request._full_data = data
