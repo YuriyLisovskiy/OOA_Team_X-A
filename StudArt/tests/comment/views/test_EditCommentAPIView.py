@@ -1,3 +1,5 @@
+import json
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import force_authenticate
@@ -15,18 +17,18 @@ class EditCommentAPITestCase(APIFactoryTestCase):
 		self.user_user = User.objects.get(username='User', email='mail@mail.com')
 
 	def test_EditComment(self):
-		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[16]), {"text": 'New text'}, content_type='application/json')
+		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[16]), json.dumps({"text": "New text"}), content_type="application/json")
 		force_authenticate(request, user=self.user_user)
 		response = self.view(request, pk=16)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 	def test_EditCommentUnauthenticated(self):
-		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[16]), {"text": 'New text'}, content_type='application/json')
+		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[16]), json.dumps({"text": 'New text'}), content_type='application/json')
 		response = self.view(request, pk=16)
 		self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 	def test_EditCommentWithReplies(self):
-		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[1]), {"text": 'New text'}, content_type='application/json')
+		request = self.request_factory.put(reverse('api_v1:artwork:edit_comment', args=[1]), json.dumps({"text": 'New text'}), content_type='application/json')
 		force_authenticate(request, user=self.user_user)
 		response = self.view(request, pk=1)
 		self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

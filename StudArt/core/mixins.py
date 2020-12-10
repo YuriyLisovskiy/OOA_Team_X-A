@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from rest_framework.response import Response
 
 
@@ -42,3 +43,14 @@ class UpdateUserModelMixin(CustomUpdateModelMixin):
 
 	def patch(self, request, *args, **kwargs):
 		return self.partial_update(request, *args, **kwargs)
+
+
+class APIViewValidationMixin:
+	validators = set()
+
+	def validate_data(self, request):
+		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
+		for validator in self.validators:
+			validator(data)
+
+		return data

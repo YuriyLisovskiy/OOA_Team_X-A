@@ -1,18 +1,20 @@
+from django.core.validators import validate_email
 from rest_framework import generics, permissions, exceptions
-from rest_framework.exceptions import NotFound
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from artwork.mixins import BlacklistMixin
 from artwork.pagination import UserModelAllSetPagination
 from artwork.serializers.tag_model import TagDetailsSerializer
-from core.mixins import UpdateUserModelMixin
+from core.mixins import UpdateUserModelMixin, APIViewValidationMixin
 from core.models import UserModel
 from core.serializers.user_model import (
 	UserDetailsSerializer, EditSelfUserSerializer, BlockUserSerializer,
 	UnblockUserSerializer, SubscribeToAuthorSerializer, UnsubscribeFromAuthorSerializer,
-	EditSelfUserAvatarSerializer, EditSelfEmailSerializer
+	EditSelfUserAvatarSerializer
 )
+from core.validators import RequiredValidator
 
 
 # /api/v1/core/users/<pk>
@@ -91,11 +93,71 @@ class EditSelfAvatarAPIView(APIView, UpdateUserModelMixin):
 #   {
 #       "email": <string>
 #   }
-class EditSelfEmailAPIView(APIView, UpdateUserModelMixin):
-	serializer_class = EditSelfEmailSerializer
+class EditSelfEmailAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixin):
+	validators = (
+		RequiredValidator(fields=('email', 'password')),
+	)
+
+	def update(self, request, *args, **kwargs):
+		validated_data = self.validate_data(request)
+		instance = self.get_object()
+		if not instance.check_password(validated_data['password']):
+			raise exceptions.NotAuthenticated('Password is incorrect.')
+
+		email = validated_data['email']
+		try:
+			validate_email(email)
+		except ValidationError:
+			raise exceptions.ValidationError('Email is not valid.')
+
+		instance.email = email
+		instance.save()
+		return Response(data={'email': email}, status=200)
 
 
-# class EditSelfPasswordAPIView
+# /api/v1/core/users/self/edit/password
+# methods:
+#   - put
+#       - old_password: string
+#       - new_password: string
+# returns (success status - 200):
+#   {}
+class EditSelfPasswordAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixin):
+	validators = (
+		RequiredValidator(fields=('old_password', 'new_password')),
+	)
+
+	def put(self, request, *args, **kwargs):
+		validated_data = self.validate_data(request)
+		user = self.get_object()
+		if not user.check_password(validated_data['old_password']):
+			raise exceptions.ValidationError('Current password is incorrect.')
+
+		user.set_password(validated_data['new_password'])
+		user.save()
+		return Response(status=200)
+
+
+# /api/v1/core/users/self/deactivate
+# methods:
+#   - put
+#       - password: string
+# returns (success status - 200):
+#   {}
+class DeactivateSelfAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixin):
+	validators = (
+		RequiredValidator(fields=('password',)),
+	)
+
+	def put(self, request, *args, **kwargs):
+		validated_data = self.validate_data(request)
+		user = self.get_object()
+		if not user.check_password(validated_data['password']):
+			raise exceptions.ValidationError('Password is incorrect.')
+
+		user.is_active = False
+		user.save()
+		return Response(status=200)
 
 
 # /api/v1/core/users/self/block/author
@@ -247,9 +309,14 @@ class TopNMostUsedTagsForUser(generics.ListAPIView):
 
 	def get_queryset(self):
 		request = self.request
+		user_pk = self.kwargs.get('pk', request.user.pk)
 		try:
 			limit = int(request.data.get('limit', self.default_limit))
 		except ValueError:
 			limit = self.default_limit
 
-		return request.user.last_used_tags.all().order_by('-pk').distinct()[:limit]
+		user = UserModel.objects.filter(pk=user_pk)
+		if not user.exists():
+			raise exceptions.NotFound('User is not found')
+
+		return user.first().last_used_tags.all().order_by('-pk').distinct()[:limit]
