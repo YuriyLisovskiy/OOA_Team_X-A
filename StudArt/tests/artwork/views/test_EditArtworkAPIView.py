@@ -1,3 +1,5 @@
+import json
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import force_authenticate
@@ -26,6 +28,26 @@ class EditArtworkTestCase(APIFactoryTestCase):
 		force_authenticate(request, user=self.user)
 		response = self.view(request, pk=3)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+	def test_EditTagsWithSameTags(self):
+		new_tags = ['tag1', 'tag3']
+		request = self.request_factory.put(reverse('api_v1:artwork:edit', args=[3]), {'tags': new_tags})
+		force_authenticate(request, user=self.user)
+		response = self.view(request, pk=3)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+	def test_EditTagsWithoutNewTags(self):
+		new_tags = []
+		request = self.request_factory.put(reverse('api_v1:artwork:edit', args=[3]), {'tags': new_tags})
+		force_authenticate(request, user=self.user)
+		response = self.view(request, pk=3)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+	def test_EditAwWithNoData(self):
+		request = self.request_factory.put(reverse('api_v1:artwork:edit', args=[3]))
+		force_authenticate(request, user=self.user)
+		response = self.view(request, pk=3)
+		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 	def test_EditTagsWithNonexistentTagModels(self):
 		new_tags = ['tag1', 'newtag2']
