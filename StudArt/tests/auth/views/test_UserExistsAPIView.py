@@ -14,3 +14,4 @@ class UserExistsAPITestCase(APIFactoryTestCase):
 		super(UserExistsAPITestCase, self).setUp()
 		self.view = UserExistsAPIView.as_view()
 		self.user_admin = User.objects.get(username='admin')
+
