@@ -1,21 +1,14 @@
 from django.conf import settings
 from rest_framework import serializers
-from rest_framework_jwt.settings import api_settings
 
 from core.models import UserModel
-from core.validators import RequiredValidator
+from core.validators import (
+	RequiredValidator, UsernameValidator, PasswordValidator
+)
 
 
-class UserWithTokenSerializer(serializers.ModelSerializer):
-	token = serializers.SerializerMethodField()
+class RegisterUserSerializer(serializers.ModelSerializer):
 	avatar = serializers.SerializerMethodField()
-
-	def get_token(self, obj):
-		# jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-		# jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-		# payload = jwt_payload_handler(obj)
-		# token = jwt_encode_handler(payload)
-		return 'token'
 
 	def get_avatar(self, obj):
 		request = self.context.get('request', None)
@@ -36,15 +29,17 @@ class UserWithTokenSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserModel
 		fields = (
-			'token', 'id', 'username', 'email', 'password',
-			'first_name', 'last_name', 'avatar', 'is_superuser', 'rating'
+			'id', 'username', 'email', 'password', 'first_name',
+			'last_name', 'avatar', 'is_superuser', 'rating'
 		)
 		read_only_fields = (
-			'id', 'token', 'first_name', 'last_name', 'avatar', 'rating', 'is_superuser'
+			'id', 'first_name', 'last_name', 'avatar', 'rating', 'is_superuser'
 		)
 		extra_kwargs = {
 			'password': {'write_only': True},
 		}
 		validators = [
-			RequiredValidator(fields=('username', 'email', 'password'))
+			RequiredValidator(fields=('username', 'email', 'password')),
+			UsernameValidator(),
+			PasswordValidator()
 		]
