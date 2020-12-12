@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 
-from auth.serializers import UserWithTokenSerializer
+from auth.serializers import RegisterUserSerializer
 from core.models import UserModel
 
 
@@ -27,7 +27,7 @@ from core.models import UserModel
 class RegisterUserAPIView(generics.CreateAPIView):
 	permission_classes = (permissions.AllowAny,)
 	queryset = UserModel.objects.all()
-	serializer_class = UserWithTokenSerializer
+	serializer_class = RegisterUserSerializer
 
 
 # /api/v1/auth/user/exists

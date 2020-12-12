@@ -14,7 +14,7 @@ from core.serializers.user_model import (
 	UnblockUserSerializer, SubscribeToAuthorSerializer, UnsubscribeFromAuthorSerializer,
 	EditSelfUserAvatarSerializer
 )
-from core.validators import RequiredValidator
+from core.validators import RequiredValidator, PasswordValidator
 
 
 # /api/v1/core/users/<pk>
@@ -125,6 +125,7 @@ class EditSelfEmailAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixin
 class EditSelfPasswordAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixin):
 	validators = (
 		RequiredValidator(fields=('old_password', 'new_password')),
+		PasswordValidator(password_key='new_password')
 	)
 
 	def put(self, request, *args, **kwargs):
