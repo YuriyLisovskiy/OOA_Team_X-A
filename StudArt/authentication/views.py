@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 
-from auth.serializers import RegisterUserSerializer
+from authentication.serializers import RegisterUserSerializer
 from core.models import UserModel
 
 

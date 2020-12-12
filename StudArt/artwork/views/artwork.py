@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.http import QueryDict
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, exceptions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -68,13 +68,16 @@ class ArtworksAPIView(generics.ListAPIView):
 		user = request.user
 		required_q = None
 		optional_q = None
-		if user.is_authenticated:
+		if 'filter_by_subscriptions' in request.GET:
+			if not user.is_authenticated:
+				raise exceptions.NotAuthenticated()
+
 			required_q = ~Q(author__blocked_users__pk=user.pk)
 			filter_by_subscriptions = request.GET.get(
 				'filter_by_subscriptions', 'false'
 			).lower() == 'true'
 			if filter_by_subscriptions:
-				optional_q = self._or_q(optional_q, Q(author__in=user.subscriptions))
+				optional_q = self._or_q(optional_q, Q(author__in=user.subscriptions.all()))
 
 		tag_filter = request.GET.getlist('tag', None)
 		if tag_filter is not None and len(tag_filter) > 0:
@@ -233,7 +236,11 @@ class EditArtworkAPIView(generics.UpdateAPIView):
 	)
 
 	def update(self, request, *args, **kwargs):
-		if not ensure_tags_exist(request.data.getlist('tags', [])):
+		if isinstance(request.data, QueryDict):
+			if not ensure_tags_exist(request.data.getlist('tags', [])):
+				if 'tags' in request.data:
+					request.data.pop('tags')
+		else:
 			if 'tags' in request.data:
 				request.data.pop('tags')
 
