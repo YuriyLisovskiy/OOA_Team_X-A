@@ -14,4 +14,45 @@ class UserExistsAPITestCase(APIFactoryTestCase):
 		super(UserExistsAPITestCase, self).setUp()
 		self.view = UserExistsAPIView.as_view()
 		self.user_admin = User.objects.get(username='admin')
-
+	
+	def test_GetExistingUserByUsername(self):
+		request = self.request_factory.get(reverse('api_v1:auth:user_exists'),
+										   {
+											   'username': 'User'
+										   })
+		response = self.view(request)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+		self.assertEqual(response.data['exists'], True)
+	
+	def test_GetExistingUserByEmail(self):
+		request = self.request_factory.get(reverse('api_v1:auth:user_exists'),
+											{
+												'email': 'user@mail.com'
+											})
+		response = self.view(request)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+		self.assertEqual(response.data['exists'], True)
+		
+	def test_GetExistingUserByUsernameAndEmail(self):
+		request = self.request_factory.get(reverse('api_v1:auth:user_exists'),
+										   {
+											   'email': 'user@mail.com',
+											   'username': 'User'
+										   })
+		response = self.view(request)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+		self.assertEqual(response.data['exists'], True)
+	
+	def test_GetUserNoData(self):
+		request = self.request_factory.get(reverse('api_v1:auth:user_exists'))
+		response = self.view(request)
+		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+	
+	def test_GetNonxistentUser(self):
+		request = self.request_factory.get(reverse('api_v1:auth:user_exists'),
+										   {
+											   'username': 'User6969'
+										   })
+		response = self.view(request)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+		self.assertEqual(response.data['exists'], False)
