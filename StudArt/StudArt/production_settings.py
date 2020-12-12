@@ -1,11 +1,9 @@
 import os
 from pathlib import Path
 
-SECRET_ADMIN_URL = 'admin'
+SECRET_ADMIN_URL = os.getenv('DJANGO_SECRET_ADMIN_URL')
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-
-PROJECT_ID = os.getenv('GCLOUD_PROJECT_ID', '')
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'none')
 
@@ -34,11 +32,19 @@ DATABASES = {
 	}
 }
 
-STATIC_URL = 'https://storage.googleapis.com/{}/{}'.format(
-	os.getenv('GCLOUD_STATIC_FILES_BUCKET', ''),
-	os.getenv('GCLOUD_STATIC_FILES_DIR', '')
-)
-
 CORS_ORIGIN_WHITELIST = [
 	origin.strip('\n').strip() for origin in os.getenv('CORS_ORIGIN_WHITELIST', '').split('\n')
 ]
+
+PROJECT_ID = os.getenv('GCLOUD_PROJECT_ID', '')
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = os.getenv('GCLOUD_STATIC_FILES_BUCKET', '')
+GS_DEFAULT_ACL = 'publicRead'
+GS_LOCATION = os.getenv('GCLOUD_MEDIA_FILES_DIR', '')
+
+GCLOUD_BUCKET = 'https://storage.googleapis.com/{}'.format(
+	os.getenv('GCLOUD_STATIC_FILES_BUCKET', '')
+)
+
+MEDIA_URL = '{}/{}'.format(GCLOUD_BUCKET, GS_LOCATION)
