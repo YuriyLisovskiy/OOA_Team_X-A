@@ -15,7 +15,7 @@ class ArtworkAPITestCase(APIFactoryTestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 		self.assertEqual(response.data['id'], 1)
 		self.assertEqual(response.data['description'], 'Some description 1')
-		self.assertEqual(response.data['points'], 0)
+		self.assertEqual(response.data['points'], 5)
 
 	def test_getNonexistentArtwork(self):
 		request = self.request_factory.get(reverse('api_v1:artwork:get_artwork', args=[9999]))
