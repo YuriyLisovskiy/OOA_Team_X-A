@@ -1,6 +1,8 @@
 import React, {Component} from "react";
 import AuthService from "../../services/auth";
-import {getErrorMessage, getMessage, strIsEmpty} from "../../utils/misc";
+import {
+	checkPassword, getErrorMessage, getMessage, strIsEmpty
+} from "../../utils/misc";
 import DrawerComponent from "../Drawer";
 import PropTypes from "prop-types";
 
@@ -30,6 +32,7 @@ export default class RegisterComponent extends Component {
 		}
 	}
 
+	// TODO:
 	_setError = (err) => {
 		let msg = getErrorMessage(err);
 		if (msg.email) {
@@ -42,49 +45,112 @@ export default class RegisterComponent extends Component {
 		});
 	}
 
-	_getFieldError = (name, field, res) => {
-		if (strIsEmpty(field)) {
+	_getFieldError = (name, isNotValidFunc, res) => {
+		let errMessage = isNotValidFunc();
+		if (errMessage) {
 			if (res === null) {
 				res = {};
 			}
 
-			res[name + 'Error'] = "This field is required.";
+			let currError = res[name + 'Error'];
+			if (!currError) {
+				res[name + 'Error'] = errMessage;
+			}
 		}
 
+		return res;
+	}
+
+	_requiredFieldError = (field) => {
+		if (strIsEmpty(field)) {
+			return 'This field is required.';
+		}
+
+		return undefined;
+	}
+
+	_charIsAllowedInUsername = (char) => {
+		let allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789';
+		return allowedChars.includes(char);
+	}
+
+	_usernameError = (username) => {
+		if (username.length > 30 || username.length < 5) {
+			return 'Username must be at least 5 and up to 30 characters long.';
+		}
+
+		for (let i = 0; i < username.length; i++) {
+			if (!this._charIsAllowedInUsername(username.charAt(i))) {
+				return 'Username must contain only upper and (or) lower case letters, numbers and underscore symbol.';
+			}
+		}
+
+		return undefined;
+	}
+
+	_getUsernameError = (username, res) => {
+		res = this._getFieldError(
+			'username', _ => this._requiredFieldError(username), res
+		);
+		res = this._getFieldError(
+			'username', _ => this._usernameError(username), res
+		);
+		return res;
+	}
+
+	_getPasswordError = (password, res) => {
+		res = this._getFieldError(
+			'password', _ => this._requiredFieldError(password), res
+		);
+		res = this._getFieldError(
+			'password', _ => checkPassword(password), res
+		);
 		return res;
 	}
 
 	_getRegisterError = (username, email, password, passwordRepeat) => {
 		let res = null;
-		res = this._getFieldError('username', username, res);
-		res = this._getFieldError('email', email, res);
-		res = this._getFieldError('password', password, res);
-		let passwordRepeatError = this._getFieldError('passwordRepeat', passwordRepeat, res);
-		if (!passwordRepeatError && passwordRepeat !== password) {
-			if (res === null) {
-				res = {};
-			}
-
-			res.passwordRepeatError = "Passwords do not match.";
-		}
-
+		res = this._getUsernameError(username, res);
+		res = this._getFieldError(
+			'email', _ => this._requiredFieldError(email), res
+		);
+		res = this._getPasswordError(password, res);
+		res = this._getFieldError(
+			'passwordRepeat', _ => {
+				return passwordRepeat !== password ? 'Passwords do not match.' : undefined;
+			}, res
+		);
 		return res;
 	}
 
-	_onChangeMakeFor = (field) => {
+	_onChangeMakeFor = (field, validationFunc) => {
 		return e => {
 			let state = {};
 			let text = e.target.value;
 			state[field] = text;
-			state[field + 'Error'] = undefined;
+			state[field + 'Error'] = validationFunc ? validationFunc(text) : undefined;
 			this.setState(state);
 			return text;
 		}
 	}
 
+	_onChangeUsername = (e) => {
+		return this._onChangeMakeFor('username', this._usernameError)(e);
+	}
+
+	_onChangeEmail = (e) => {
+		return this._onChangeMakeFor('email', text => {
+			if (!text.includes('@')) {
+				return 'Email is invalid.';
+			}
+
+			return undefined;
+		})(e);
+	}
+
 	_onChangePassword = (e) => {
 		this._setPasswordsError(
-			this._onChangeMakeFor('password')(e), this.state.passwordRepeat
+			this._onChangeMakeFor('password', checkPassword)(e), this.state.passwordRepeat
 		);
 	}
 
@@ -126,7 +192,18 @@ export default class RegisterComponent extends Component {
 							this.state.password,
 							(data, err) => {
 								if (err) {
-									this._setError(err);
+									if (err.response.data) {
+										let errors = err.response.data;
+										this.setState({
+											usernameError: errors.username || undefined,
+											emailError: errors.email || undefined,
+											passwordError: errors.password || undefined,
+											loading: false
+										})
+									}
+									else {
+										this._setError(err);
+									}
 								}
 								else {
 									this.props.onRegisterSuccess();
@@ -172,7 +249,7 @@ export default class RegisterComponent extends Component {
 							className="form-control"
 							name="username"
 							value={this.state.username}
-							onChange={this._onChangeMakeFor('username')}
+							onChange={this._onChangeUsername}
 							placeholder="Type text..."
 							onKeyDown={this._onKeyDownLogin}
 						/>
@@ -190,7 +267,7 @@ export default class RegisterComponent extends Component {
 							className="form-control"
 							name="email"
 							value={this.state.email}
-							onChange={this._onChangeMakeFor('email')}
+							onChange={this._onChangeEmail}
 							placeholder="Type text..."
 							onKeyDown={this._onKeyDownLogin}
 						/>

@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import DrawerComponent from "../../Drawer";
 import PropTypes from "prop-types";
 import UserService from "../../../services/user";
-import {getErrorMessage, strIsEmpty} from "../../../utils/misc";
+import {checkPassword, getErrorMessage, requiredFieldError} from "../../../utils/misc";
 
 export default class ChangePasswordComponent extends Component {
 
@@ -20,40 +20,68 @@ export default class ChangePasswordComponent extends Component {
 		};
 	}
 
-	_onChangeMakeFor = (field) => {
+	_onChangeMakeFor = (field, validationFunc) => {
 		return e => {
-			let newState = {};
+			let state = {};
 			let text = e.target.value;
-			newState[field] = text;
-			newState[field + 'Error'] = undefined;
-			this.setState(newState);
+			state[field] = text;
+			state[field + 'Error'] = validationFunc ? validationFunc(text) : undefined;
+			this.setState(state);
 			return text;
 		}
 	}
 
-	_getFieldError = (name, field, res) => {
-		if (strIsEmpty(field)) {
+	// _getFieldError = (name, field, res) => {
+	// 	if (strIsEmpty(field)) {
+	// 		if (res === null) {
+	// 			res = {};
+	// 		}
+	//
+	// 		res[name + 'Error'] = "This field is required.";
+	// 	}
+	//
+	// 	return res;
+	// }
+
+	_getFieldError = (name, getErrorFunc, res) => {
+		let errMessage = getErrorFunc();
+		if (errMessage) {
 			if (res === null) {
 				res = {};
 			}
 
-			res[name + 'Error'] = "This field is required.";
+			let currError = res[name + 'Error'];
+			if (!currError) {
+				res[name + 'Error'] = errMessage;
+			}
 		}
 
 		return res;
 	}
 
+	_getNewPasswordError = (newPassword, res) => {
+		res = this._getFieldError(
+			'newPassword', _ => requiredFieldError(this.state.newPassword), res
+		);
+		res = this._getFieldError(
+			'newPassword', _ => checkPassword(this.state.newPassword), res
+		);
+		return res;
+	}
+
 	_getPasswordsErrors = () => {
 		let res = null;
-		res = this._getFieldError('oldPassword', this.state.oldPassword, res);
-		res = this._getFieldError('newPassword', this.state.newPassword, res);
-		res = this._getFieldError('newPasswordRepeat', this.state.newPasswordRepeat, res);
-		if (!res && this.state.newPasswordRepeat !== this.state.newPassword) {
-			res = {
-				passwordRepeatError: 'Passwords do not match.'
-			}
-		}
-
+		res = this._getFieldError(
+			'oldPassword', _ => requiredFieldError(this.state.oldPassword), res
+		);
+		res = this._getNewPasswordError(this.state.newPassword, res);
+		res = this._getFieldError(
+			'newPasswordRepeat', _ => {
+				return this.state.newPasswordRepeat !== this.state.newPassword ? (
+					'Passwords do not match.'
+				) : undefined;
+			}, res
+		);
 		return res;
 	}
 
@@ -81,7 +109,7 @@ export default class ChangePasswordComponent extends Component {
 
 	_onChangeNewPassword = (e) => {
 		this._setPasswordsError(
-			this._onChangeMakeFor('newPassword')(e), this.state.newPasswordRepeat
+			this._onChangeMakeFor('newPassword', checkPassword)(e), this.state.newPasswordRepeat
 		);
 	}
 

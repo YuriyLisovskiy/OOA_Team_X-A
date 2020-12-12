@@ -2,7 +2,7 @@ import axios from "axios";
 import EventObserver from "../utils/observer";
 
 const USER_DATA_KEY = 'user_data';
-const BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const API_V1 = '/api/v1';
 
 // `handler` receives `json` and `err` args.
 export default class BaseService {
@@ -11,7 +11,7 @@ export default class BaseService {
 
 	constructor(useAuth = true) {
 		this._useAuth = useAuth;
-		this._BASE_URL = BASE_URL;
+		this._BASE_URL = process.env.REACT_APP_API_URL_BASE + API_V1;
 		this._USER_DATA_KEY = USER_DATA_KEY;
 	}
 

@@ -15,10 +15,15 @@ import UserService from "./services/user";
 import LoginComponent from "./components/user/Login";
 import MyProfileComponent from "./components/user/MyProfile";
 
+import dotenv from "dotenv";
+
 export default class App extends Component {
 
 	constructor(props) {
 		super(props);
+
+		dotenv.config();
+
 		this.state = {
 			currentUser: undefined,
 			loginIsOpen: false,

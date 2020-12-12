@@ -42,6 +42,21 @@ export const strIsEmpty = (str) => {
 }
 
 export const emailIsValid = (email) => {
-	// TODO: check if email is valid!
-	return !strIsEmpty(email);
+	return !strIsEmpty(email) && email.includes('@');
+}
+
+export const checkPassword = (password) => {
+	if (!password || password.length < 8) {
+		return 'Password must be at least 8 characters long.';
+	}
+
+	return undefined;
+}
+
+export const requiredFieldError = (field) => {
+	if (strIsEmpty(field)) {
+		return 'This field is required.';
+	}
+
+	return undefined;
 }

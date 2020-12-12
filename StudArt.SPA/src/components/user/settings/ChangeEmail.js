@@ -36,7 +36,7 @@ export default class ChangeEmailComponent extends Component {
 	_onClickEmailSave = (_) => {
 		if (!emailIsValid(this.state.newEmail)) {
 			this.setState({
-				newEmailError: "Email field is empty or invalid."
+				newEmailError: 'Email field is empty or invalid.'
 			});
 		}
 		else {

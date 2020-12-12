@@ -8,9 +8,11 @@
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.0",
     "bootstrap": "^4.5.3",
+    "dotenv": "^8.2.0",
     "history": "^5.0.0",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
+    "react-app-env": "^1.2.3",
     "react-bootstrap": "^1.4.0",
     "react-dom": "^17.0.1",
     "react-drag-drawer": "^3.3.4",
@@ -26,10 +28,12 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "react-app-env start",
+    "build": "react-app-env build",
+    "test": "react-app-env test",
+    "eject": "react-scripts eject",
+    "docker-build": "docker build -t studart-spa:test .",
+    "docker-run": "docker run -p 3000:80 studart-spa:test"
   },
   "eslintConfig": {
     "extends": [
