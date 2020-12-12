@@ -1,9 +1,9 @@
 from django.urls import re_path
 from rest_framework_simplejwt import views as jwt_views
 
-from auth.views import RegisterUserAPIView, UserExistsAPIView
+from authentication.views import RegisterUserAPIView, UserExistsAPIView
 
-app_name = 'auth'
+app_name = 'authentication'
 
 urlpatterns = [
     re_path(r'^login/?', jwt_views.TokenObtainPairView.as_view(), name='login'),
