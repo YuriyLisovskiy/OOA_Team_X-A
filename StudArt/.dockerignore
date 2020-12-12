@@ -1,0 +1,24 @@
+Dockerfile*
+
+# Git/Github stuff
+.git
+.github
+
+# Project stuff
+.idea/
+/misc/
+/tests/
+/static/
+/static-root/
+/media/
+/media-root/
+/venv/
+README.md
+db.sqlite3
+
+# Python stuff
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache
