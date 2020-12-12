@@ -24,7 +24,7 @@ class APIFactoryTestCase(APITestCase):
 		TagModel.objects.create(text='tag3')
 		TagModel.objects.create(text='tag4')
 		TagModel.objects.create(text='tag5')
-		ArtworkModel.objects.create(description='Some description 1', author=UserModel.objects.get(username='User'))
+		ArtworkModel.objects.create(description='Some description 1', author=UserModel.objects.get(username='User'), points=5)
 		ArtworkModel.objects.create(description='Some description 2', author=UserModel.objects.get(username='User'))
 		ArtworkModel.objects.create(description='Some description 3', author=UserModel.objects.get(username='User'))
 		ArtworkModel.objects.create(description='Some description 4', author=UserModel.objects.get(username='User'))
