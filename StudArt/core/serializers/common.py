@@ -60,6 +60,8 @@ class AuthorSubscriptionSerializer(serializers.ModelSerializer):
 
 		if self._negate(instance.subscriptions.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
+		else:
+			raise exceptions.ValidationError('Unable to perform an operation')
 
 		instance.save()
 		return instance
