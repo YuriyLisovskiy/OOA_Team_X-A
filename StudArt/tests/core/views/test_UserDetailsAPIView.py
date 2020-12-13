@@ -24,7 +24,7 @@ class UserDetailsAPITestCase(APIFactoryTestCase):
 	def test_GetInfoUserBannedYou(self):
 		request = self.request_factory.get(reverse('api_v1:core:get_user', args=[3]))
 		force_authenticate(request, self.user)
-		response = self.view(request, pk=1)
+		response = self.view(request, pk=3)
 		
 		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 	
@@ -32,7 +32,7 @@ class UserDetailsAPITestCase(APIFactoryTestCase):
 		request = self.request_factory.get(reverse('api_v1:core:get_user', args=[1]))
 		force_authenticate(request, self.user_3)
 		response = self.view(request, pk=1)
-		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
 	
 	def test_GetInfoOfSelf(self):
 		request = self.request_factory.get(reverse('api_v1:core:get_user', args=[1]))

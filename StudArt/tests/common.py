@@ -12,8 +12,10 @@ class APIFactoryTestCase(APITestCase):
 	@classmethod
 	def setUpTestData(cls):
 		# Set up non-modified objects used by all test methods
-		UserModel.objects.create(username='User', email='mail@mail.com', password='qwerty')
-		UserModel.objects.create(username='User2', email='mail2@mail.com', password='12345678')
+		user1 = UserModel.objects.create(username='User', email='mail@mail.com')
+		user1.set_password('qwerty')
+		user2 = UserModel.objects.create(username='User2', email='mail2@mail.com')
+		user2.set_password('12345678')
 		UserModel.objects.create(username='User3', email='mail3@mail.com', )
 		UserModel.objects.create(username='User4', email='mail4@mail.com', )
 		UserModel.objects.create(username='admin', email='admin@mail.com', is_superuser=True)
