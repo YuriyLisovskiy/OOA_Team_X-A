@@ -1,6 +1,7 @@
 from django.core.validators import validate_email
 from rest_framework import generics, permissions, exceptions
 from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -230,6 +231,7 @@ class UnsubscribeFromAuthorAPIView(APIView, UpdateUserModelMixin):
 # 	    ]
 #   }
 class UserSubscriptionsAPIView(generics.ListAPIView):
+	permission_classes = (AllowAny,)
 	serializer_class = UserDetailsSerializer
 	pagination_class = UserModelAllSetPagination
 
@@ -312,6 +314,7 @@ class SelfUserAPIView(generics.RetrieveAPIView):
 #       ...
 #   ]
 class TopNMostUsedTagsForUser(generics.ListAPIView):
+	permission_classes = (AllowAny,)
 	serializer_class = TagDetailsSerializer
 	default_limit = 5
 	pagination_class = None
