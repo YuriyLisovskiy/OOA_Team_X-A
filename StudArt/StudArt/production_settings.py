@@ -52,4 +52,4 @@ GCLOUD_BUCKET = 'https://storage.googleapis.com/{}'.format(
 )
 
 MEDIA_URL = '{}/{}'.format(GCLOUD_BUCKET, GS_LOCATION)
-STATIC_URL = '{}/static'.format(GCLOUD_BUCKET)
+STATIC_URL = '{}/static/'.format(GCLOUD_BUCKET)
