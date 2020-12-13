@@ -1,12 +1,12 @@
-from rest_framework import serializers
-from rest_framework.exceptions import NotFound
+from rest_framework import serializers, exceptions
+from rest_framework.exceptions import NotFound, ValidationError
 
 from core.models import UserModel
 from core.validators import RequiredValidator
 
 
 class UserBlacklistSerializer(serializers.ModelSerializer):
-	author_pk = serializers.IntegerField()
+	author_pk = serializers.IntegerField(write_only=True)
 
 	def _negate(self, bool_res):
 		return bool_res if self.Meta.exists else not bool_res
@@ -19,8 +19,14 @@ class UserBlacklistSerializer(serializers.ModelSerializer):
 		if not obj.exists():
 			raise NotFound('author not found')
 
-		if self._negate(instance.blocked_users.filter(obj).exists()):
+		obj = obj.first()
+		if instance.pk == obj.pk:
+			raise ValidationError('unable to block or unblock self')
+
+		if self._negate(instance.blocked_users.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
+		else:
+			raise exceptions.ValidationError('Unable to perform an operation')
 
 		instance.save()
 		return instance
@@ -29,16 +35,13 @@ class UserBlacklistSerializer(serializers.ModelSerializer):
 		model = UserModel
 		exists = True
 		fields = ('author_pk',)
-		extra_kwargs = {
-			'author_pk': {'write_only': True},
-		}
 		validators = [
 			RequiredValidator(fields=('author_pk',))
 		]
 
 
 class AuthorSubscriptionSerializer(serializers.ModelSerializer):
-	author_pk = serializers.IntegerField(required=True)
+	author_pk = serializers.IntegerField(write_only=True)
 
 	def _negate(self, bool_res):
 		return bool_res if self.Meta.exists else not bool_res
@@ -47,12 +50,18 @@ class AuthorSubscriptionSerializer(serializers.ModelSerializer):
 		return lambda *args, **kwargs: instance
 
 	def update(self, instance, validated_data):
-		obj = UserModel.objects.filter(pk=validated_data['author_pk'])
+		obj = UserModel.objects.filter(pk=validated_data.pop('author_pk'))
 		if not obj.exists():
 			raise NotFound('author not found')
 
-		if self._negate(instance.subscriptions.filter(obj).exists()):
+		obj = obj.first()
+		if instance.pk == obj.pk:
+			raise ValidationError('unable to subscribe to or unsubscribe from self')
+
+		if self._negate(instance.subscriptions.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
+		else:
+			raise exceptions.ValidationError('Unable to perform an operation')
 
 		instance.save()
 		return instance
@@ -61,9 +70,6 @@ class AuthorSubscriptionSerializer(serializers.ModelSerializer):
 		model = UserModel
 		exists = True
 		fields = ('author_pk',)
-		extra_kwargs = {
-			'author_pk': {'write_only': True},
-		}
 		validators = [
 			RequiredValidator(fields=('author_pk',))
 		]

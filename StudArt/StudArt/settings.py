@@ -1,4 +1,5 @@
 import datetime
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -9,6 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'set in local_settings.py'
+
+SECRET_ADMIN_URL = 'admin'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -28,6 +31,7 @@ INSTALLED_APPS = [
 	'corsheaders',
 	'api_v1',
 	'artwork',
+	'authentication',
 	'core'
 ]
 
@@ -36,7 +40,7 @@ MIDDLEWARE = [
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
 	'django.middleware.common.CommonMiddleware',
-	'django.middleware.csrf.CsrfViewMiddleware',
+	# 'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -47,8 +51,6 @@ ROOT_URLCONF = 'StudArt.urls'
 TEMPLATES = [
 	{
 		'BACKEND': 'django.template.backends.django.DjangoTemplates',
-		'DIRS': [BASE_DIR / 'templates']
-		,
 		'APP_DIRS': True,
 		'OPTIONS': {
 			'context_processors': [
@@ -69,7 +71,7 @@ WSGI_APPLICATION = 'StudArt.wsgi.application'
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': BASE_DIR / 'db.sqlite3',
+		'NAME': str(os.path.join(BASE_DIR, "db.sqlite3")),
 	}
 }
 
@@ -109,9 +111,6 @@ USE_TZ = True
 
 STATIC_ROOT = BASE_DIR / 'static-root'
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-	BASE_DIR / 'static'
-]
 
 MEDIA_ROOT = BASE_DIR / 'media-root'
 MEDIA_URL = '/media/'
@@ -123,17 +122,15 @@ REST_FRAMEWORK = {
 		'rest_framework.permissions.IsAuthenticated',
 	),
 	'DEFAULT_AUTHENTICATION_CLASSES': (
-		'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-		'rest_framework.authentication.SessionAuthentication',
-		'rest_framework.authentication.BasicAuthentication',
+		'rest_framework_simplejwt.authentication.JWTAuthentication',
 	),
 	'PAGE_SIZE': 50,
 	'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination'
 }
 
-JWT_AUTH = {
-	'JWT_RESPONSE_PAYLOAD_HANDLER': 'StudArt.utils.jwt_response_handler',
-	'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
+SIMPLE_JWT = {
+	'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
+	'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=30),
 }
 
 CORS_ORIGIN_WHITELIST = (

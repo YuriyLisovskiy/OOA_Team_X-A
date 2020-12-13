@@ -1,3 +1,5 @@
+from django.http import QueryDict
+from rest_framework import exceptions
 from rest_framework.response import Response
 
 
@@ -6,7 +8,10 @@ class CustomUpdateModelMixin:
 	def update(self, request, *args, **kwargs):
 		partial = kwargs.pop('partial', False)
 		instance = self.get_object()
-		serializer = self.get_serializer(instance, data=request.data, partial=partial)
+		serializer = self.get_serializer(
+			instance, data=request.data,
+			partial=partial, context={'request': request}
+		)
 		serializer.is_valid(raise_exception=True)
 		self.perform_update(serializer)
 
@@ -39,3 +44,17 @@ class UpdateUserModelMixin(CustomUpdateModelMixin):
 
 	def patch(self, request, *args, **kwargs):
 		return self.partial_update(request, *args, **kwargs)
+
+
+class APIViewValidationMixin:
+	validators = set()
+
+	def validate_data(self, request):
+		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
+		try:
+			for validator in self.validators:
+				validator(data)
+		except exceptions.ValidationError as exc:
+			return exc
+
+		return data

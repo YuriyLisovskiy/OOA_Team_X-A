@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.http import QueryDict
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status, exceptions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -41,6 +41,8 @@ from core.models import UserModel
 # 	            "author": <int (user pk)>,
 # 	            "voted": <bool (shows if current user voted ot not)>,
 # 	            "can_vote": <bool (shows if current user can vote this post)>,
+# 	            "can_be_edited": <bool>,
+# 	            "can_be_deleted": <bool>,
 # 	            "comments": <array of primary keys of comments>
 # 	        },
 # 	        ...
@@ -64,28 +66,40 @@ class ArtworksAPIView(generics.ListAPIView):
 	def get_queryset(self):
 		request = self.request
 		user = request.user
-
-		required_q = ~Q(author__blocked_users__pk=user.pk)
-		filter_by_subscriptions = request.GET.get(
-			'filter_by_subscriptions', 'false'
-		).lower() == 'true'
+		required_q = None
 		optional_q = None
-		if filter_by_subscriptions:
-			optional_q = self._or_q(optional_q, Q(author__in=user.subscriptions))
+		if 'filter_by_subscriptions' in request.GET:
+			if not user.is_authenticated:
+				raise exceptions.NotAuthenticated()
+
+			required_q = ~Q(author__blocked_users__pk=user.pk)
+			filter_by_subscriptions = request.GET.get(
+				'filter_by_subscriptions', 'false'
+			).lower() == 'true'
+			if filter_by_subscriptions:
+				optional_q = self._or_q(optional_q, Q(author__in=user.subscriptions.all()))
 
 		tag_filter = request.GET.getlist('tag', None)
-		if tag_filter is not None:
+		if tag_filter is not None and len(tag_filter) > 0:
 			optional_q = self._or_q(optional_q, Q(tags__in=tag_filter))
 
 		author_filter = request.GET.getlist('author', None)
-		if author_filter is not None:
+		if author_filter is not None and len(author_filter) > 0:
 			authors = UserModel.objects.filter(username__in=author_filter)
 			optional_q = self._or_q(optional_q, Q(author__in=authors))
 
 		if optional_q is not None:
-			required_q &= optional_q
+			if required_q is not None:
+				required_q &= optional_q
+			else:
+				required_q = optional_q
 
-		return self.queryset.filter(required_q).order_by('-creation_date_time')
+		if required_q:
+			queryset = self.queryset.filter(required_q)
+		else:
+			queryset = self.queryset.all()
+
+		return queryset.distinct().order_by('-creation_date_time')
 
 
 # /api/v1/artworks/<pk>
@@ -105,7 +119,9 @@ class ArtworksAPIView(generics.ListAPIView):
 # 	    "author": <int (user pk)>,
 # 	    "voted": <bool (shows if current user voted ot not)>,
 # 	    "can_vote": <bool (shows if current user can vote this post)>,
-# 	    "comments": <array of primary keys of comments>
+#       "can_be_edited": <bool>,
+#       "can_be_deleted": <bool>,
+#       "comments_count": <int>
 #   }
 class ArtworkAPIView(generics.RetrieveAPIView):
 	permission_classes = (permissions.AllowAny,)
@@ -154,17 +170,20 @@ class CreateArtworkAPIView(generics.CreateAPIView):
 			if key not in data:
 				return self._bad_request('missing `{}` field'.format(key))
 
-		images = data.pop('images')
+		data.pop('images')
+		images = request.data.getlist('images')
 		if len(images) == 0:
 			return self._bad_request('at least one image is required')
 
-		tags_pks = data.getlist('tags', [])
+		data.pop('tags')
+		tags_pks = request.data.getlist('tags', [])
 		if not ensure_tags_exist(tags_pks):
 			return self._bad_request('at least one tag is required')
 
 		data['author'] = request.user.pk
 		full_data = QueryDict(mutable=True)
 		full_data.update(**data)
+		full_data.setlist('tags', tags_pks)
 		request._full_data = full_data
 		resp = super(CreateArtworkAPIView, self).create(request, *args, **kwargs)
 		images = self.ensure_images_exist(images, resp.data['id'])
@@ -191,6 +210,14 @@ class DeleteArtworkAPIView(generics.DestroyAPIView):
 		IsAuthenticated & ModifyArtworkPermission,
 	)
 
+	def destroy(self, request, *args, **kwargs):
+		instance = self.get_object()
+		author = instance.author
+		self.perform_destroy(instance)
+		author.recalculate_rating()
+		author.save()
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 # /api/v1/artworks/<pk>/edit
 # paths args:
@@ -209,11 +236,13 @@ class EditArtworkAPIView(generics.UpdateAPIView):
 	)
 
 	def update(self, request, *args, **kwargs):
-		if not ensure_tags_exist(request.data.getlist('tags', [])):
-			return Response(
-				data={'message': 'at least one tag is required'},
-				status=400
-			)
+		if isinstance(request.data, QueryDict):
+			if not ensure_tags_exist(request.data.getlist('tags', [])):
+				if 'tags' in request.data:
+					request.data.pop('tags')
+		else:
+			if 'tags' in request.data:
+				request.data.pop('tags')
 
 		return super(EditArtworkAPIView, self).update(request, *args, **kwargs)
 
