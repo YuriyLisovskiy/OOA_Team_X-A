@@ -156,6 +156,9 @@ class DeactivateSelfAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixi
 		if not user.check_password(validated_data['password']):
 			raise exceptions.ValidationError('Password is incorrect.')
 
+		if not user.is_active:
+			raise exceptions.ValidationError('Account is already deactivated')
+
 		user.is_active = False
 		user.save()
 		return Response(status=200)
