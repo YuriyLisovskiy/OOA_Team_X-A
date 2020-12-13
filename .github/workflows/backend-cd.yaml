@@ -84,7 +84,6 @@ jobs:
     - name: Publish an Application
       run: |
         cd StudArt/ && \
-        rm -rf .gitignore && \
         gcloud builds submit --tag=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/studart-backend && \
         gcloud run deploy studart-backend \
                           --image=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/studart-backend \
