@@ -20,9 +20,9 @@ DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.postgresql_psycopg2',
 		'HOST': os.getenv('DATABASE_HOST', ''),
-		'NAME': os.getenv('DEFAULT_DATABASE_NAME', ''),
-		'USER': os.getenv('DEFAULT_DATABASE_USER', ''),
-		'PASSWORD': os.getenv('DEFAULT_DATABASE_PASSWORD', ''),
+		'NAME': os.getenv('DATABASE_NAME', ''),
+		'USER': os.getenv('DATABASE_USER', ''),
+		'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
 		'OPTIONS': {
 			'sslmode': os.getenv('DATABASE_SSL_MODE', ''),
 			'sslrootcert': str(DB_CERT_DIR / 'server-ca.pem'),
@@ -48,3 +48,4 @@ GCLOUD_BUCKET = 'https://storage.googleapis.com/{}'.format(
 )
 
 MEDIA_URL = '{}/{}'.format(GCLOUD_BUCKET, GS_LOCATION)
+STATIC_URL = '{}/static'.format(GCLOUD_BUCKET)

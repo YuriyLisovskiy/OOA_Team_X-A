@@ -1,0 +1,112 @@
+name: Web API CD
+
+on:
+  push:
+    branches:
+      - release
+
+env:
+  DATABASE_HOST: "${{ secrets.DATABASE_IP }}"
+  DATABASE_SSL_MODE: "${{ secrets.DATABASE_SSL_MODE }}"
+  DATABASE_NAME: "${{ secrets.DATABASE_NAME }}"
+  DATABASE_USER: "${{ secrets.DATABASE_USER }}"
+  DATABASE_PASSWORD: "${{ secrets.DATABASE_PASSWORD }}"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Setup Required Packages
+      run: |
+        sudo apt-get install libpq-dev python3-dev
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Set up Google CLI
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: 'latest'
+        service_account_key: ${{ secrets.CREDENTIALS_BASE64_GCLOUD_GITHUB_ACTIONS }}
+        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+        export_default_credentials: true
+
+    - name: Generate Certificates
+      run: |
+        cd StudArt/ && mkdir ./cert/ && \
+        echo "${{ secrets.SSL_GCLOUD_CLIENT_CERT_PEM }}" > ./cert/client-cert.pem && \
+        test -e ./cert/client-cert.pem && echo ./cert/client-cert.pem file created successfully || echo Failed to create ./cert/client-cert.pem && \
+        echo "${{ secrets.SSL_GCLOUD_CLIENT_KEY_PEM }}" > ./cert/client-key.pem && \
+        test -e ./cert/client-key.pem && echo ./cert/client-key.pem file created successfully || echo Failed to create ./cert/client-key.pem && \
+        chmod 0600 ./cert/client-key.pem && \
+        echo "${{ secrets.SSL_GCLOUD_SERVER_CA_PEM }}" > ./cert/server-ca.pem && \
+        test -e ./cert/server-ca.pem && echo ./cert/server-ca.pem file created successfully || echo Failed to create ./cert/server-ca.pem
+
+    - name: Generate Local Settings
+      run: |
+        mv StudArt/StudArt/production_settings.py StudArt/StudArt/local_settings.py && \
+        test -e StudArt/StudArt/local_settings.py && echo StudArt/StudArt/local_settings.py file exists || echo StudArt/StudArt/local_settings.py file not found && \
+        cat StudArt/StudArt/local_settings.py
+
+    - name: Collect and Sync Static Files
+      run: |
+	cd StudArt/ && \
+        python3 manage.py collectstatic && \
+        gsutil ls -b gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} || gsutil mb -p ${{ secrets.GCLOUD_PROJECT_ID }} gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} && \
+        gsutil defacl set public-read gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} && \
+        gsutil -m rsync -r ./static-root gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }}/static/
+
+    - name: Add Current Machine IP Address to Google Cloud PostgreSQL Database
+      run: |
+        CURRENT_IP=$(curl ifconfig.me) && \
+        gcloud sql instances patch ${{ secrets.DATABASE_INSTANCE }} -q --authorized-networks=$CURRENT_IP
+
+    - name: Apply Migrations to Databases
+      run: |
+        cd StudArt/ && \
+        python3 manage.py migrate
+
+    - name: Check Source Tree
+      run: |
+        sudo apt-get install tree && \
+        cd StudArt/ && \
+        tree
+
+    - name: Publish an Application
+      run: |
+        cd StudArt/ && \
+        rm -rf .gitignore && \
+        gcloud builds submit --tag=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/studart-backend && \
+        gcloud run deploy studart-backend \
+                          --image=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/studart-backend \
+                          --platform=managed \
+                          --region=us-central1 \
+                          --set-cloudsql-instances=^~^${{ secrets.DATABASE_INSTANCE }} \
+                          --set-env-vars="^~^\
+                              DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}~\
+                              DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}~\
+                              DJANGO_SECRET_ADMIN_URL=${{ secrets.DJANGO_SECRET_ADMIN_URL }}~\
+                              DATABASE_HOST=${{ secrets.DATABASE_HOST }}~\
+                              DATABASE_SSL_MODE=${{ secrets.DATABASE_SSL_MODE }}~\
+                              DATABASE_NAME=${{ secrets.DATABASE_NAME }}~\
+                              DATABASE_USER=${{ secrets.DATABASE_USER }}~\
+                              DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}~\
+                              GCLOUD_STATIC_FILES_BUCKET=${{ secrets.GCLOUD_STATIC_FILES_BUCKET }}~\
+                              CORS_ORIGIN_WHITELIST=${{ secrets.CORS_ORIGIN_WHITELIST }}~\
+                              GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID }}~\
+                              GCLOUD_MEDIA_FILES_DIR=${{ secrets.GCLOUD_MEDIA_FILES_DIR }}\
+                          " \
+                          --memory=1Gi \
+                          --cpu=1 \
+                          --timeout=300 \
+                          --concurrency=50
+
