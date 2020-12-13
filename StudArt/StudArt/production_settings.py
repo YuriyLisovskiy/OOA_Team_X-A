@@ -32,9 +32,13 @@ DATABASES = {
 	}
 }
 
-CORS_ORIGIN_WHITELIST = [
-	origin.strip('\n').strip() for origin in os.getenv('CORS_ORIGIN_WHITELIST', '').split('\n')
-]
+whitelist = os.getenv('CORS_ORIGIN_WHITELIST', '')
+if whitelist != '':
+	CORS_ORIGIN_WHITELIST = [
+		origin.strip('\n').strip() for origin in whitelist.split('\n')
+	]
+else:
+	CORS_ORIGIN_WHITELIST = []
 
 PROJECT_ID = os.getenv('GCLOUD_PROJECT_ID', '')
 
