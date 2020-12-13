@@ -4,7 +4,7 @@ import {getErrorMessage} from "../../utils/misc";
 import SpinnerComponent from "../Spinner";
 import ArtworksListComponent from "../artwork/List";
 import TagBadgeComponent from "../TagBadge";
-import NotFound from "../errors";
+import Errors from "../Errors";
 import {Link} from "react-router-dom";
 
 export default class ProfileComponent extends Component {
@@ -58,17 +58,19 @@ export default class ProfileComponent extends Component {
 						}
 					});
 
-					UserService.getSubscriptions(userId, 1, (data, err) => {
-						if (err) {
-							// TODO:
-							alert(getErrorMessage(err));
-						}
-						else {
-							this.setState({
-								subscriptions: data.results
-							});
-						}
-					});
+					if (user.show_subscriptions) {
+						UserService.getSubscriptions(userId, 1, (data, err) => {
+							if (err) {
+								// TODO:
+								alert(getErrorMessage(err));
+							}
+							else {
+								this.setState({
+									subscriptions: data.results
+								});
+							}
+						});
+					}
 				}
 			});
 		}
@@ -149,7 +151,7 @@ export default class ProfileComponent extends Component {
 		return <div className="container">
 			{
 				this.state.loading ? (<SpinnerComponent/>) : (
-					this.state.notFound ? (<NotFound/>) : (
+					this.state.notFound ? (<Errors.NotFound/>) : (
 						<div className="row">
 							<div className="col-md-4">
 								<div className="mx-auto text-center text-muted mb-2">PROFILE</div>
@@ -209,11 +211,15 @@ export default class ProfileComponent extends Component {
 									</div>
 								}
 								{
-									(this.state.currentUser.id === user.id || user.show_rating) &&
+									((
+										this.state.currentUser && this.state.currentUser.id === user.id
+									) || user.show_rating) &&
 									<h5 className="float-right">Rating: {user.rating}</h5>
 								}
 								{
-									(this.state.currentUser.id === user.id || (
+									((
+										this.state.currentUser && this.state.currentUser.id === user.id
+									) || (
 										user.show_full_name && user.first_name && user.last_name
 									)) &&
 									<h5 className="mb-2">{user.first_name} {user.last_name}</h5>
@@ -235,7 +241,9 @@ export default class ProfileComponent extends Component {
 								}
 								{
 									(
-										this.state.currentUser.id === user.id || user.show_subscriptions
+										(
+											this.state.currentUser && this.state.currentUser.id === user.id
+										) || user.show_subscriptions
 									) && this.state.subscriptions.length > 0 &&
 									<div>
 										<div className="text-muted text-center mt-4 mb-1 muted-border-bottom">

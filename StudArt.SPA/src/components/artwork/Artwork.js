@@ -8,7 +8,7 @@ import {getErrorMessage} from "../../utils/misc";
 import CommentInputComponent from "./CommentInput";
 import TagBadgeComponent from "../TagBadge";
 import ImagePreviewComponent from "./ImagePreview";
-import NotFound from "../errors";
+import Errors from "../Errors";
 import CommentComponent from "./Comment";
 
 export default class ArtworkComponent extends Component {
@@ -214,7 +214,7 @@ export default class ArtworkComponent extends Component {
 	render() {
 		let post = this.state.post;
 		return (
-			this.state.notFound ? (<NotFound/>) : (
+			this.state.notFound ? (<Errors.NotFound/>) : (
 				<div>
 					{!post ? (
 						<div className="row">

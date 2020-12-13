@@ -9,7 +9,7 @@ import HomeComponent from "./components/Home";
 import ArtworkComponent from "./components/artwork/Artwork";
 import CreateArtworkComponent from "./components/artwork/Create";
 import IndexComponent from "./components/Index";
-import NotFound from "./components/errors";
+import Errors from "./components/Errors";
 import SettingsComponent from "./components/user/settings/Settings";
 import UserService from "./services/user";
 import LoginComponent from "./components/user/Login";
@@ -198,35 +198,15 @@ export default class App extends Component {
 			</nav>
 			<div className="container mt-3 w-65">
 				<Switch>
-					{
-						user && <Route path='/new/artwork' component={CreateArtworkComponent} />
-					}
+					<Route path='/new/artwork' component={CreateArtworkComponent} />
 					<Route path='/profile/me' component={MyProfileComponent} />
 					<Route path='/profile/:id' component={ProfileComponent} />
 					<Route path='/artwork/:id' component={ArtworkComponent} />
 					{this._makeSubSettingRoute('account')}
 					{this._makeSubSettingRoute('profile')}
 					{this._makeSubSettingRoute('privacy-and-safety')}
-					{/*<Route path='/settings/account' render={*/}
-					{/*	(routeProps) => <SettingsComponent {...routeProps}*/}
-					{/*	                                   updateAvatar={this._onUpdateAvatar}*/}
-					{/*	                                   updateFullName={this._onUpdateFullName}*/}
-					{/*	                                   activeKey="account"/>*/}
-					{/*} />*/}
-					{/*<Route path='/settings/profile' render={*/}
-					{/*	(routeProps) => <SettingsComponent {...routeProps}*/}
-					{/*	                                   updateAvatar={this._onUpdateAvatar}*/}
-					{/*	                                   updateFullName={this._onUpdateFullName}*/}
-					{/*	                                   activeKey="profile"/>*/}
-					{/*} />*/}
-					{/*<Route path='/settings/privacy-and-safety' render={*/}
-					{/*	(routeProps) => <SettingsComponent {...routeProps}*/}
-					{/*	                                   updateAvatar={this._onUpdateAvatar}*/}
-					{/*	                                   updateFullName={this._onUpdateFullName}*/}
-					{/*	                                   activeKey="privacy-and-safety"/>*/}
-					{/*} />*/}
 					<Route path='/artworks' component={HomeComponent} />
-					<Route path='/page-not-found' component={NotFound} />
+					<Route path='/page-not-found' component={Errors.NotFound} />
 					<Route path={['/', '/home']} component={IndexComponent} />
 				</Switch>
 			</div>

@@ -1,5 +1,5 @@
 import BaseService from "./base";
-import UserService from "./user"
+import UserService from "./user";
 
 class AuthService extends BaseService {
 

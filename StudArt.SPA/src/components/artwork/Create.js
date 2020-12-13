@@ -4,6 +4,7 @@ import ImagePreviewComponent from "./ImagePreview";
 import ArtworkService from "../../services/artwork";
 import {getErrorMessage} from "../../utils/misc";
 import "../../styles/common.css";
+import Errors from "../Errors";
 
 export default class CreateArtworkComponent extends Component {
 
@@ -169,7 +170,10 @@ export default class CreateArtworkComponent extends Component {
 	}
 
 	render() {
-		return (
+		let user = ArtworkService.getCurrentUser();
+		return !user ? (
+			<Errors.NotFound/>
+		) : (
 			<div>
 				<div className="row">
 					<div className="col-sm-12">
@@ -235,7 +239,7 @@ export default class CreateArtworkComponent extends Component {
 									<span>Tags: </span>
 									{this.state.tags.map((tag) =>
 										<TagBadgeComponent className="mx-1" key={tag} text={tag}
-										          onClickRemove={this._onClickRemoveTag}/>)}
+										                   onClickRemove={this._onClickRemoveTag}/>)}
 								</div>
 							</div>
 						}
