@@ -59,7 +59,7 @@ jobs:
 
     - name: Collect and Sync Static Files
       run: |
-	cd StudArt/ && \
+        cd StudArt/ && \
         python3 manage.py collectstatic && \
         gsutil ls -b gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} || gsutil mb -p ${{ secrets.GCLOUD_PROJECT_ID }} gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} && \
         gsutil defacl set public-read gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} && \
