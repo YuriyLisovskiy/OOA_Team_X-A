@@ -19,7 +19,7 @@ class EditSelfEmailAPITestCase(APIFactoryTestCase):
 	def test_EditValid(self):
 		request = self.request_factory.put(reverse('api_v1:core:edit_self_email'), {
 			'password': 'qwerty',
-			'email': 'q@q.q'
+			'email': 'q@q.com'
 		})
 		force_authenticate(request, self.user)
 		response = self.view(request)

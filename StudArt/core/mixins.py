@@ -1,4 +1,5 @@
 from django.http import QueryDict
+from rest_framework import exceptions
 from rest_framework.response import Response
 
 
@@ -50,7 +51,10 @@ class APIViewValidationMixin:
 
 	def validate_data(self, request):
 		data = request.data.dict() if isinstance(request.data, QueryDict) else request.data
-		for validator in self.validators:
-			validator(data)
+		try:
+			for validator in self.validators:
+				validator(data)
+		except exceptions.ValidationError as exc:
+			return exc
 
 		return data

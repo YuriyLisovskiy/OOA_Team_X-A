@@ -1,6 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework import generics, permissions, exceptions
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -101,6 +102,9 @@ class EditSelfEmailAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixin
 
 	def update(self, request, *args, **kwargs):
 		validated_data = self.validate_data(request)
+		if isinstance(validated_data, exceptions.ValidationError):
+			return Response({'detail': validated_data.detail}, status=validated_data.status_code)
+
 		instance = self.get_object()
 		if not instance.check_password(validated_data['password']):
 			raise exceptions.NotAuthenticated('Password is incorrect.')
@@ -131,6 +135,9 @@ class EditSelfPasswordAPIView(APIView, UpdateUserModelMixin, APIViewValidationMi
 
 	def put(self, request, *args, **kwargs):
 		validated_data = self.validate_data(request)
+		if isinstance(validated_data, exceptions.ValidationError):
+			return Response({'detail': validated_data.detail}, status=validated_data.status_code)
+
 		user = self.get_object()
 		if not user.check_password(validated_data['old_password']):
 			raise exceptions.ValidationError('Current password is incorrect.')
@@ -152,7 +159,11 @@ class DeactivateSelfAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixi
 	)
 
 	def put(self, request, *args, **kwargs):
-		validated_data = self.validate_data(request)
+		result = self.validate_data(request)
+		if isinstance(result, exceptions.ValidationError):
+			raise result
+
+		validated_data = result
 		user = self.get_object()
 		if not user.check_password(validated_data['password']):
 			raise exceptions.ValidationError('Password is incorrect.')
@@ -323,8 +334,11 @@ class TopNMostUsedTagsForUser(generics.ListAPIView):
 		request = self.request
 		user_pk = self.kwargs.get('pk', request.user.pk)
 		try:
-			limit = int(request.data.get('limit', self.default_limit))
+			limit = int(request.GET.get('limit', self.default_limit))
 		except ValueError:
+			limit = self.default_limit
+
+		if limit < 0:
 			limit = self.default_limit
 
 		user = UserModel.objects.filter(pk=user_pk)

@@ -1,5 +1,3 @@
-import json
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import force_authenticate
@@ -26,8 +24,8 @@ class TopNMostUsedTagsForUserTestCase(APIFactoryTestCase):
 		self.assertEqual(len(response.data), 3)
 	
 	def test_GetTop0MostUsedTagsForUser(self):
-		request = self.request_factory.get(reverse('api_v1:core:most_used_tags_for_user', args=[1]), {
-			'limit': '0'
+		request = self.request_factory.get(reverse('api_v1:core:most_used_tags_for_user', args=[1]), data={
+			'limit': 0
 		})
 		force_authenticate(request, self.user)
 		response = self.view(request, pk=1)
@@ -36,7 +34,7 @@ class TopNMostUsedTagsForUserTestCase(APIFactoryTestCase):
 	
 	def test_GetTopNeg3MostUsedTagsForUser(self):
 		request = self.request_factory.get(reverse('api_v1:core:most_used_tags_for_user', args=[1]), {
-			'limit': '-3'
+			'limit': -3
 		})
 		force_authenticate(request, self.user)
 		response = self.view(request, pk=1)
