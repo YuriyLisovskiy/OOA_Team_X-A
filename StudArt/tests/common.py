@@ -19,6 +19,7 @@ class APIFactoryTestCase(APITestCase):
 		UserModel.objects.create(username='User3', email='mail3@mail.com', )
 		UserModel.objects.create(username='User4', email='mail4@mail.com', )
 		UserModel.objects.create(username='admin', email='admin@mail.com', is_superuser=True)
+		UserModel.objects.create(username='banned', is_active=False)
 		UserModel.objects.get(username='User3').blocked_users.set([UserModel.objects.get(username='User')])
 		UserModel.objects.get(username='User4').subscriptions.set([UserModel.objects.get(username='User')])
 		TagModel.objects.create(text='tag1')
