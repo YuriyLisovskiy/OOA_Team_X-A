@@ -239,7 +239,12 @@ class UserSubscriptionsAPIView(generics.ListAPIView):
 		if not user.exists():
 			raise NotFound('user not found')
 
-		return user.first().subscriptions.all().order_by('-subscriptions')
+		user = user.first()
+		subs = user.subscriptions
+		if user.show_subscriptions:
+			return subs.all().order_by('-subscriptions')
+
+		return subs.none()
 
 
 # /api/v1/core/users/self/blacklist
