@@ -1,5 +1,5 @@
 import json
-#todo redo
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import force_authenticate
@@ -18,7 +18,7 @@ class EditSelfPasswordAPITestCase(APIFactoryTestCase):
 		self.user_3 = User.objects.get(username='User3')
 	
 	def test_EditValid(self):
-		request = self.request_factory.put(reverse('api_v1:core:edit_self_email'), {
+		request = self.request_factory.put(reverse('api_v1:core:edit_self_password'), {
 			'old_password': 'qwerty',
 			'new_password': 'qqqqqqqq'
 		})
@@ -27,7 +27,7 @@ class EditSelfPasswordAPITestCase(APIFactoryTestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 	
 	def test_EditValid2(self):
-		request = self.request_factory.put(reverse('api_v1:core:edit_self_email'), {
+		request = self.request_factory.put(reverse('api_v1:core:edit_self_password'), {
 			'old_password': '12345678',
 			'new_password': 'qqqqqqqq'
 		})
@@ -36,7 +36,7 @@ class EditSelfPasswordAPITestCase(APIFactoryTestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 	
 	def test_EditInvalidNew(self):
-		request = self.request_factory.put(reverse('api_v1:core:edit_self_email'), {
+		request = self.request_factory.put(reverse('api_v1:core:edit_self_password'), {
 			'old_password': 'qwerty',
 			'new_password': 'q'
 		})
@@ -45,7 +45,7 @@ class EditSelfPasswordAPITestCase(APIFactoryTestCase):
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 	
 	def test_EditInvalidPassword(self):
-		request = self.request_factory.put(reverse('api_v1:core:edit_self_email'), {
+		request = self.request_factory.put(reverse('api_v1:core:edit_self_password'), {
 			'old_password': 'qwer',
 			'new_password': 'qwerqwer'
 		})
@@ -54,7 +54,7 @@ class EditSelfPasswordAPITestCase(APIFactoryTestCase):
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 	
 	def test_EditUnauthenticated(self):
-		request = self.request_factory.put(reverse('api_v1:core:edit_self_email'), {
+		request = self.request_factory.put(reverse('api_v1:core:edit_self_password'), {
 			'old_password': 'qwerty',
 			'new_password': 'qwerqwer'
 		})
