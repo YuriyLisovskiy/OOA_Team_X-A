@@ -15,6 +15,9 @@ class BanningUserSerializer(serializers.ModelSerializer):
 		if request.user.id == instance.id:
 			raise ValidationError('unable to ban or unban self')
 
+		if instance.is_banned == self._ban:
+			raise ValidationError('unable to {}ban user'.format('un' if not self._ban else ''))
+
 		instance.is_banned = self._ban
 		instance.save()
 		return instance

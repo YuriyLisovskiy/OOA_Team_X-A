@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from rest_framework.exceptions import NotFound, ValidationError
 
 from core.models import UserModel
@@ -25,6 +25,8 @@ class UserBlacklistSerializer(serializers.ModelSerializer):
 
 		if self._negate(instance.blocked_users.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
+		else:
+			raise exceptions.ValidationError('Unable to perform an operation')
 
 		instance.save()
 		return instance
@@ -58,6 +60,8 @@ class AuthorSubscriptionSerializer(serializers.ModelSerializer):
 
 		if self._negate(instance.subscriptions.filter(pk=obj.pk).exists()):
 			instance = self._modify(instance, obj)
+		else:
+			raise exceptions.ValidationError('Unable to perform an operation')
 
 		instance.save()
 		return instance

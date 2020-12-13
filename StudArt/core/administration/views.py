@@ -2,7 +2,7 @@ from rest_framework import generics
 
 from core.administration.serializers import BanUserSerializer, UnbanUserSerializer
 from core.models import UserModel
-from core.permissions import IsSuperUser, SelfBanPermission
+from core.permissions import IsSuperUser
 
 
 # /api/v1/core/admin/users/<pk>/ban
@@ -13,7 +13,7 @@ from core.permissions import IsSuperUser, SelfBanPermission
 # returns (success status - 200):
 #   {}
 class BanUserAPIView(generics.UpdateAPIView):
-	permission_classes = [IsSuperUser & SelfBanPermission]
+	permission_classes = (IsSuperUser,)
 	queryset = UserModel.objects.all()
 	serializer_class = BanUserSerializer
 
@@ -26,6 +26,6 @@ class BanUserAPIView(generics.UpdateAPIView):
 # returns (success status - 200):
 #   {}
 class UnbanUserAPIView(generics.UpdateAPIView):
-	permission_classes = [IsSuperUser & SelfBanPermission]
+	permission_classes = (IsSuperUser,)
 	queryset = UserModel.objects.all()
 	serializer_class = UnbanUserSerializer

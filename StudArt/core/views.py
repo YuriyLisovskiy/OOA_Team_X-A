@@ -1,6 +1,7 @@
 from django.core.validators import validate_email
 from rest_framework import generics, permissions, exceptions
 from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -156,6 +157,9 @@ class DeactivateSelfAPIView(APIView, UpdateUserModelMixin, APIViewValidationMixi
 		if not user.check_password(validated_data['password']):
 			raise exceptions.ValidationError('Password is incorrect.')
 
+		if not user.is_active:
+			raise exceptions.ValidationError('Account is already deactivated')
+
 		user.is_active = False
 		user.save()
 		return Response(status=200)
@@ -227,6 +231,7 @@ class UnsubscribeFromAuthorAPIView(APIView, UpdateUserModelMixin):
 # 	    ]
 #   }
 class UserSubscriptionsAPIView(generics.ListAPIView):
+	permission_classes = (AllowAny,)
 	serializer_class = UserDetailsSerializer
 	pagination_class = UserModelAllSetPagination
 
@@ -236,7 +241,12 @@ class UserSubscriptionsAPIView(generics.ListAPIView):
 		if not user.exists():
 			raise NotFound('user not found')
 
-		return user.first().subscriptions.all().order_by('-subscriptions')
+		user = user.first()
+		subs = user.subscriptions
+		if user.show_subscriptions:
+			return subs.all().order_by('-subscriptions')
+
+		return subs.none()
 
 
 # /api/v1/core/users/self/blacklist
@@ -304,6 +314,7 @@ class SelfUserAPIView(generics.RetrieveAPIView):
 #       ...
 #   ]
 class TopNMostUsedTagsForUser(generics.ListAPIView):
+	permission_classes = (AllowAny,)
 	serializer_class = TagDetailsSerializer
 	default_limit = 5
 	pagination_class = None
