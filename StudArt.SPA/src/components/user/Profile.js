@@ -141,6 +141,16 @@ export default class ProfileComponent extends Component {
 
 	render() {
 		let user = this.state.user;
+		let hasFirstAndLastName;
+		if (user) {
+			hasFirstAndLastName = ((
+				this.state.currentUser && this.state.currentUser.id === user.id
+			) || user.show_full_name) && user.first_name && user.last_name;
+		}
+		else {
+			hasFirstAndLastName = false;
+		}
+
 		return <div className="container">
 			{
 				this.state.loading ? (<SpinnerComponent/>) : (
@@ -205,11 +215,7 @@ export default class ProfileComponent extends Component {
 								}
 								<div className="row">
 									{
-										((
-											this.state.currentUser && this.state.currentUser.id === user.id
-										) || (
-											user.show_full_name && user.first_name && user.last_name
-										)) &&
+										hasFirstAndLastName &&
 										<div className="col-sm-7">
 											<h5 className="mb-2 text-left">{user.first_name} {user.last_name}</h5>
 										</div>
@@ -219,7 +225,7 @@ export default class ProfileComponent extends Component {
 											this.state.currentUser && this.state.currentUser.id === user.id
 										) || user.show_rating) &&
 										<div className="col-sm-5">
-											<h5 className="text-right">
+											<h5 className={"text-" + (hasFirstAndLastName ? "right" : "left")}>
 												Rating: {roundFloat(user.rating, 2)}
 											</h5>
 										</div>

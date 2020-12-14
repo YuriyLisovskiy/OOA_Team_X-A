@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 
-import "../../styles/artwork/artwork_preview.css"
 import {Link} from "react-router-dom";
 import TagBadgeComponent from "../TagBadge";
 import {getClassForTag, roundFloat} from "../../utils/misc";
+import "../../styles/artwork/artwork_preview.css";
 
 export default class ArtworkPreviewComponent extends Component {
 
