@@ -103,6 +103,7 @@ jobs:
                               DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}~\
                               DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}~\
                               DJANGO_SECRET_ADMIN_URL=${{ secrets.DJANGO_SECRET_ADMIN_URL }}~\
+                              DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}~\
                               DATABASE_HOST=${{ secrets.DATABASE_HOST }}~\
                               DATABASE_SSL_MODE=${{ secrets.DATABASE_SSL_MODE }}~\
                               DATABASE_NAME=${{ secrets.DATABASE_NAME }}~\
