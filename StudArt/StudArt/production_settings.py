@@ -11,8 +11,7 @@ ALLOWED_HOSTS = [
 	host.strip('\n').strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split('\n')
 ]
 
-# DEBUG = os.getenv('DJANGO_DEBUG', 'false').lower() == 'true'
-DEBUG = False
+DEBUG = os.getenv('DJANGO_DEBUG', 'false').lower() == 'true'
 
 DB_CERT_DIR = BASE_DIR / 'cert'
 
