@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import UserService from "../../services/user";
-import {getErrorMessage} from "../../utils/misc";
+import {getErrorMessage, roundFloat} from "../../utils/misc";
 import SpinnerComponent from "../Spinner";
 import ArtworksListComponent from "../artwork/List";
 import TagBadgeComponent from "../TagBadge";
@@ -203,20 +203,28 @@ export default class ProfileComponent extends Component {
 										}
 									</div>
 								}
-								{
-									((
-										this.state.currentUser && this.state.currentUser.id === user.id
-									) || user.show_rating) &&
-									<h5 className="float-right">Rating: {user.rating}</h5>
-								}
-								{
-									((
-										this.state.currentUser && this.state.currentUser.id === user.id
-									) || (
-										user.show_full_name && user.first_name && user.last_name
-									)) &&
-									<h5 className="mb-2">{user.first_name} {user.last_name}</h5>
-								}
+								<div className="row">
+									{
+										((
+											this.state.currentUser && this.state.currentUser.id === user.id
+										) || (
+											user.show_full_name && user.first_name && user.last_name
+										)) &&
+										<div className="col-sm-7">
+											<h5 className="mb-2 text-left">{user.first_name} {user.last_name}</h5>
+										</div>
+									}
+									{
+										((
+											this.state.currentUser && this.state.currentUser.id === user.id
+										) || user.show_rating) &&
+										<div className="col-sm-5">
+											<h5 className="text-right">
+												Rating: {roundFloat(user.rating, 2)}
+											</h5>
+										</div>
+									}
+								</div>
 								<h6>{user.username}</h6>
 								{
 									this.state.mostUsedTags && this.state.mostUsedTags.length > 0 &&
