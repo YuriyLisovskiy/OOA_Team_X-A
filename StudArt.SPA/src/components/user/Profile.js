@@ -64,25 +64,17 @@ export default class ProfileComponent extends Component {
 						});
 					}
 				});
-
-				console.log(user.show_subscriptions);
-
-				if (user.show_subscriptions) {
-					UserService.getSubscriptions(user.id, 1, (data, err) => {
-						if (err) {
-							// TODO:
-							alert(getErrorMessage(err));
-						}
-						else {
-
-							console.log(data);
-
-							this.setState({
-								subscriptions: data.results
-							});
-						}
-					});
-				}
+				UserService.getSubscriptions(user.id, 1, (data, err) => {
+					if (err) {
+						// TODO:
+						alert(getErrorMessage(err));
+					}
+					else {
+						this.setState({
+							subscriptions: data.results
+						});
+					}
+				});
 			}
 		});
 	}
