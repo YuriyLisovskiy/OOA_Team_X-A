@@ -65,6 +65,8 @@ export default class ProfileComponent extends Component {
 					}
 				});
 
+				console.log(user.show_subscriptions);
+
 				if (user.show_subscriptions) {
 					UserService.getSubscriptions(user.id, 1, (data, err) => {
 						if (err) {
@@ -72,6 +74,9 @@ export default class ProfileComponent extends Component {
 							alert(getErrorMessage(err));
 						}
 						else {
+
+							console.log(data);
+
 							this.setState({
 								subscriptions: data.results
 							});
@@ -247,9 +252,9 @@ export default class ProfileComponent extends Component {
 										</div>
 										{
 											this.state.subscriptions.map((user) => {
-												return <Link to={'/profile/' + user.id} className="float-left"
+												return <Link to={'/profile/' + user.id}
 												             key={user.id}>
-													<div className="text-muted profile-photo">
+													<div className="text-muted profile-photo mb-1">
 														<img src={user.avatar_link} alt="Avatar" className="avatar-picture mr-2"/>
 														<span className="d-inline">
 														{
