@@ -14,7 +14,7 @@ export default class ProfileComponent extends Component {
 		this.state = {
 			user: undefined,
 			loading: true,
-			currentUser: UserService.getCurrentUser(),
+			currentUser: props.currentUser ? props.currentUser : UserService.getCurrentUser(),
 			notFound: false,
 			subscriptions: [],
 			mostUsedTags: []
@@ -22,67 +22,63 @@ export default class ProfileComponent extends Component {
 	}
 
 	componentDidMount() {
-		let userId = null;
+		let getUserFunc;
 		if (this.props.match.params.id) {
-			userId = this.props.match.params.id;
+			getUserFunc = (handler) => UserService.getUser(this.props.match.params.id, handler);
 		}
 		else if (this.state.currentUser) {
-			userId = this.state.currentUser.id;
+			getUserFunc = (handler) => UserService.getMe(handler);
+		}
+		else {
+			getUserFunc = (handler) => {
+				this.setState({notFound: true});
+			};
 		}
 
-		if (userId) {
-			UserService.getUser(userId, (user, err) => {
-				if (err) {
-					if (err.response.status === 404) {
-						this.setState({
-							notFound: true,
-							loading: false
-						});
-					}
-					else {
+		getUserFunc((user, err) => {
+			if (err) {
+				if (err.response.status === 404) {
+					this.setState({
+						notFound: true,
+						loading: false
+					});
+				}
+				else {
+					// TODO:
+					alert(getErrorMessage(err));
+				}
+			}
+			else {
+				this.setState({
+					user: user,
+					loading: false
+				});
+				UserService.getMostUsedTagsForAuthor(user.id, 5, (tags, err) => {
+					if (err) {
 						// TODO:
 						alert(getErrorMessage(err));
 					}
-				}
-				else {
-					this._setLoadedUser(user);
-					UserService.getMostUsedTagsForAuthor(userId, 5, (tags, err) => {
+					else {
+						this.setState({
+							mostUsedTags: tags
+						});
+					}
+				});
+
+				if (user.show_subscriptions) {
+					UserService.getSubscriptions(user.id, 1, (data, err) => {
 						if (err) {
 							// TODO:
 							alert(getErrorMessage(err));
 						}
 						else {
 							this.setState({
-								mostUsedTags: tags
+								subscriptions: data.results
 							});
 						}
 					});
-
-					if (user.show_subscriptions) {
-						UserService.getSubscriptions(userId, 1, (data, err) => {
-							if (err) {
-								// TODO:
-								alert(getErrorMessage(err));
-							}
-							else {
-								this.setState({
-									subscriptions: data.results
-								});
-							}
-						});
-					}
 				}
-			});
-		}
-		else {
-			this.props.history.push('/');
-		}
-	}
-
-	_setLoadedUser = (user) => {
-		this.setState({
-			user: user,
-			loading: false
+			}
 		});
 	}
 
@@ -226,7 +222,7 @@ export default class ProfileComponent extends Component {
 								}
 								<h6>{user.username}</h6>
 								{
-									this.state.mostUsedTags.length > 0 &&
+									this.state.mostUsedTags && this.state.mostUsedTags.length > 0 &&
 									<div className="mt-4">
 										<div className="text-muted text-center mb-1 muted-border-bottom">
 											<small>MOST USED TAGS</small>
