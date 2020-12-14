@@ -52,6 +52,14 @@ jobs:
         echo "${{ secrets.SSL_GCLOUD_SERVER_CA_PEM }}" > ./cert/server-ca.pem && \
         test -e ./cert/server-ca.pem && echo ./cert/server-ca.pem file created successfully || echo Failed to create ./cert/server-ca.pem
 
+    - name: Generate Credentials
+      run: |
+        cd StudArt/ && \
+        echo ${{ secrets.CREDENTIALS_BASE64_GCLOUD_WEB_API_MEDIA }} > web-api-media.json.base64 && \
+        base64 --decode web-api-media.json.base64 > web-api-media.json && \
+        rm -rf web-api-media.json.base64 && \
+        test -e ./web-api-media.json && echo ./web-api-media.json file created successfully || echo Failed to create ./web-api-media.json
+
     - name: Generate Local Settings
       run: |
         mv StudArt/StudArt/production_settings.py StudArt/StudArt/local_settings.py && \

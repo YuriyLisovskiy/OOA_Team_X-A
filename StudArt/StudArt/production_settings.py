@@ -53,3 +53,7 @@ GCLOUD_BUCKET = 'https://storage.googleapis.com/{}'.format(
 
 MEDIA_URL = '{}/{}'.format(GCLOUD_BUCKET, GS_LOCATION)
 STATIC_URL = '{}/static/'.format(GCLOUD_BUCKET)
+
+WEB_API_MEDIA_CREDENTIALS = str(BASE_DIR / 'web-api-media.json')
+if os.path.exists(WEB_API_MEDIA_CREDENTIALS):
+	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = WEB_API_MEDIA_CREDENTIALS
