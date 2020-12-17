@@ -5,7 +5,6 @@ import SpinnerComponent from "../Spinner";
 import ArtworksListComponent from "../artwork/List";
 import TagBadgeComponent from "../TagBadge";
 import Errors from "../Errors";
-import {Link} from "react-router-dom";
 
 export default class ProfileComponent extends Component {
 
@@ -18,26 +17,53 @@ export default class ProfileComponent extends Component {
 			notFound: false,
 			subscriptions: [],
 			mostUsedTags: []
-		}
+		};
+		this._artworksListRef = React.createRef();
 	}
 
 	componentDidMount() {
-		let getUserFunc;
+		let userId;
+		let isMe = false;
 		if (this.props.match.params.id) {
-			getUserFunc = (handler) => UserService.getUser(this.props.match.params.id, handler);
+			userId = this.props.match.params.id;
 		}
 		else if (this.state.currentUser) {
-			getUserFunc = (handler) => UserService.getMe(handler);
+			isMe = true;
+			userId = this.state.currentUser.id;
 		}
 		else {
-			getUserFunc = (handler) => {
-				this.setState({notFound: true});
-			};
+			userId = null;
 		}
 
-		getUserFunc((user, err) => {
+		this._loadUser(userId, isMe);
+	}
+
+	_loadUser = (id, isMe = false) => {
+		// let getUserFunc;
+		// if (this.props.match.params.id) {
+		// 	getUserFunc = (handler) => UserService.getUser(this.props.match.params.id, handler);
+		// }
+		// else if (this.state.currentUser) {
+		// 	getUserFunc = (handler) => UserService.getMe(handler);
+		// }
+		// else {
+		// 	getUserFunc = (handler) => {
+		// 		this.setState({notFound: true});
+		// 	};
+		// }
+
+		if (!id) {
+			this.setState({notFound: true});
+			return;
+		}
+
+		if (!isMe) {
+			this.props.history.push('/profile/' + id);
+		}
+
+		UserService.getUser(id, (user, err) => {
 			if (err) {
-				if (err.response.status === 404) {
+				if (err.response && err.response.status === 404) {
 					this.setState({
 						notFound: true,
 						loading: false
@@ -53,6 +79,10 @@ export default class ProfileComponent extends Component {
 					user: user,
 					loading: false
 				});
+				if (this._artworksListRef.current) {
+					this._artworksListRef.current.reloadList([user.username]);
+				}
+
 				UserService.getMostUsedTagsForAuthor(user.id, 5, (tags, err) => {
 					if (err) {
 						// TODO:
@@ -93,6 +123,12 @@ export default class ProfileComponent extends Component {
 					});
 				}
 			});
+		}
+	}
+
+	_onClickLoadUser = (id) => {
+		return e => {
+			this._loadUser(id);
 		}
 	}
 
@@ -258,23 +294,22 @@ export default class ProfileComponent extends Component {
 										</div>
 										{
 											this.state.subscriptions.map((user) => {
-												return <Link to={'/profile/' + user.id}
-												             key={user.id}>
-													<div className="text-muted profile-photo mb-1">
-														<img src={user.avatar_link} alt="Avatar" className="avatar-picture mr-2"/>
-														<span className="d-inline">
+												return <div key={user.id}
+												            className="underline-on-hover cursor-pointer text-muted profile-photo mb-1"
+												            onClick={this._onClickLoadUser(user.id)}>
+													<img src={user.avatar_link} alt="Avatar" className="avatar-picture mr-2"/>
+													<span className="d-inline">
 														{
 															user.first_name && user.last_name &&
 															<span>{user.first_name} {user.last_name} [</span>
 														}
-															{user.username}
-															{
-																user.first_name && user.last_name &&
-																"]"
-															}
+														{user.username}
+														{
+															user.first_name && user.last_name &&
+															"]"
+														}
 													</span>
-													</div>
-												</Link>;
+												</div>;
 											})
 										}
 									</div>
@@ -286,7 +321,8 @@ export default class ProfileComponent extends Component {
 								</div>
 								{
 									user &&
-									<ArtworksListComponent columnsCount={2}
+									<ArtworksListComponent ref={this._artworksListRef}
+									                       columnsCount={2}
 									                       filterAuthors={[user.username]}
 									                       clickOnPreviewTag={false}/>
 								}
