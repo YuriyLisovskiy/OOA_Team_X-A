@@ -1,0 +1,40 @@
+name: React App CD
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Generate Env
+      run: |
+        cd StudArt.SPA/ && \
+        echo "API_URL_BASE=${{ secrets.WEB_API_HOST }}" > ./production.env && \
+        test -e ./production.env && echo ./production.env file created successfully || echo Failed to create ./production.env
+
+    - name: Set up Google CLI
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: 'latest'
+        service_account_key: ${{ secrets.CREDENTIALS_BASE64_GCLOUD_GITHUB_ACTIONS }}
+        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+        export_default_credentials: true
+
+    - name: Publish an Application
+      run: |
+        cd StudArt.SPA/ && \
+        gcloud builds submit --tag=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/studart-frontend && \
+        gcloud run deploy studart-frontend \
+                          --image=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/studart-frontend \
+                          --platform=managed \
+                          --region=us-central1 \
+                          --memory=1Gi \
+                          --cpu=1 \
+                          --timeout=300 \
+                          --concurrency=50
+

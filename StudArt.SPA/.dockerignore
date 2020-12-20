@@ -1,0 +1,9 @@
+Dockerfile*
+
+# Git/Github stuff
+.git
+.github
+
+# Project stuff
+.idea/
+README.md

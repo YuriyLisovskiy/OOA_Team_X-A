@@ -1,0 +1,73 @@
+.cursor-pointer {
+	cursor: pointer;
+}
+
+.select-none {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.btn-underline {
+	cursor: pointer;
+}
+
+.btn-underline:hover {
+	text-decoration: underline;
+}
+
+.muted-btn {
+	color: #6c757d;
+	cursor: pointer;
+}
+
+.btn-danger-hover:hover {
+	color: #dc3545;
+}
+
+.btn-success-hover:hover {
+	color: #28a745;
+}
+
+.btn-secondary-hover:hover {
+	color: #494f54;
+}
+
+.w-65 {
+	width: 65%;
+}
+
+.image-container {
+	display: inline;
+	position: relative;
+	text-align: center;
+}
+
+.image-text-top-right {
+	position: absolute;
+	bottom: 130%;
+	right: 5%;
+	mix-blend-mode: difference;
+	color: white;
+}
+
+.w-30 {
+	width: 30%;
+}
+
+.min-w-300 {
+	min-width: 300px;
+}
+
+.w-25 {
+	width: 25%;
+}
+
+.min-w-250 {
+	min-width: 250px;
+}
+
+.muted-border-bottom {
+	border-bottom: 1px solid #c9cace
+}
