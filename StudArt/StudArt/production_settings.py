@@ -11,8 +11,7 @@ ALLOWED_HOSTS = [
 	host.strip('\n').strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split('\n')
 ]
 
-# DEBUG = os.getenv('DJANGO_DEBUG', 'false').lower() == 'true'
-DEBUG = False
+DEBUG = os.getenv('DJANGO_DEBUG', 'false').lower() == 'true'
 
 DB_CERT_DIR = BASE_DIR / 'cert'
 
@@ -32,9 +31,13 @@ DATABASES = {
 	}
 }
 
-CORS_ORIGIN_WHITELIST = [
-	origin.strip('\n').strip() for origin in os.getenv('CORS_ORIGIN_WHITELIST', '').split('\n')
-]
+whitelist = os.getenv('CORS_ORIGIN_WHITELIST', '')
+if whitelist != '':
+	CORS_ORIGIN_WHITELIST = [
+		origin.strip('\n').strip() for origin in whitelist.split('\n')
+	]
+else:
+	CORS_ORIGIN_WHITELIST = []
 
 PROJECT_ID = os.getenv('GCLOUD_PROJECT_ID', '')
 
@@ -48,4 +51,8 @@ GCLOUD_BUCKET = 'https://storage.googleapis.com/{}'.format(
 )
 
 MEDIA_URL = '{}/{}'.format(GCLOUD_BUCKET, GS_LOCATION)
-STATIC_URL = '{}/static'.format(GCLOUD_BUCKET)
+STATIC_URL = '{}/static/'.format(GCLOUD_BUCKET)
+
+WEB_API_MEDIA_CREDENTIALS = str(BASE_DIR / 'web-api-media.json')
+if os.path.exists(WEB_API_MEDIA_CREDENTIALS):
+	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = WEB_API_MEDIA_CREDENTIALS

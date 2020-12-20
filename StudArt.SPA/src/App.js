@@ -13,9 +13,9 @@ import Errors from "./components/Errors";
 import SettingsComponent from "./components/user/settings/Settings";
 import UserService from "./services/user";
 import LoginComponent from "./components/user/Login";
-import MyProfileComponent from "./components/user/MyProfile";
 
 import dotenv from "dotenv";
+import MyProfileComponent from "./components/user/MyProfile";
 
 export default class App extends Component {
 
@@ -164,7 +164,7 @@ export default class App extends Component {
 											<div className="dropdown-divider"/>
 										</div>
 									}
-									<Link to="/profile/me" className="dropdown-item">
+									<Link to={"/profile/me"} className="dropdown-item">
 										<i className="fa fa-user-circle-o" aria-hidden="true"/> My Profile
 									</Link>
 									<Link to="/settings/account" className="dropdown-item">

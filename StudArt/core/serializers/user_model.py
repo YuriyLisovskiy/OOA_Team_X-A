@@ -10,6 +10,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 	avatar_link = serializers.SerializerMethodField()
 	is_subscribed = serializers.SerializerMethodField()
 	is_blocked = serializers.SerializerMethodField()
+	is_banned = serializers.SerializerMethodField()
 
 	def __init__(self, *args, **kwargs):
 		super(UserDetailsSerializer, self).__init__(*args, **kwargs)
@@ -33,6 +34,10 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 	def get_is_blocked(self, obj):
 		ok, request = self._is_authenticated()
 		return ok and request.user.id != obj.id and request.user.blocked_users.filter(pk=obj.pk).exists()
+
+	@staticmethod
+	def get_is_banned(obj):
+		return not obj.is_active
 
 	class Meta:
 		model = UserModel

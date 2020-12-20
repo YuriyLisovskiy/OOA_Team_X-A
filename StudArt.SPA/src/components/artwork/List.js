@@ -40,6 +40,19 @@ export default class ArtworksListComponent extends Component {
 		window.removeEventListener("scroll", this._onScroll);
 	}
 
+	reloadList = (filterAuthors) => {
+		this.setState({
+			filterAuthors: filterAuthors
+		});
+		this._loadArtworks(
+			null,
+			this._columnsCount,
+			this.state.filterTags,
+			this.state.filterAuthors,
+			this.state.filterBySubscriptions
+		);
+	}
+
 	searchByTags = (tags) => {
 		this.setState({
 			filterTags: tags

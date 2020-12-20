@@ -29,6 +29,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd StudArt/ && \
         python3 -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
@@ -51,6 +52,14 @@ jobs:
         echo "${{ secrets.SSL_GCLOUD_SERVER_CA_PEM }}" > ./cert/server-ca.pem && \
         test -e ./cert/server-ca.pem && echo ./cert/server-ca.pem file created successfully || echo Failed to create ./cert/server-ca.pem
 
+    - name: Generate Credentials
+      run: |
+        cd StudArt/ && \
+        echo ${{ secrets.CREDENTIALS_BASE64_GCLOUD_WEB_API_MEDIA }} > web-api-media.json.base64 && \
+        base64 --decode web-api-media.json.base64 > web-api-media.json && \
+        rm -rf web-api-media.json.base64 && \
+        test -e ./web-api-media.json && echo ./web-api-media.json file created successfully || echo Failed to create ./web-api-media.json
+
     - name: Generate Local Settings
       run: |
         mv StudArt/StudArt/production_settings.py StudArt/StudArt/local_settings.py && \
@@ -59,7 +68,7 @@ jobs:
 
     - name: Collect and Sync Static Files
       run: |
-	cd StudArt/ && \
+        cd StudArt/ && \
         python3 manage.py collectstatic && \
         gsutil ls -b gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} || gsutil mb -p ${{ secrets.GCLOUD_PROJECT_ID }} gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} && \
         gsutil defacl set public-read gs://${{ secrets.GCLOUD_STATIC_FILES_BUCKET }} && \
@@ -94,6 +103,7 @@ jobs:
                               DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}~\
                               DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}~\
                               DJANGO_SECRET_ADMIN_URL=${{ secrets.DJANGO_SECRET_ADMIN_URL }}~\
+                              DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}~\
                               DATABASE_HOST=${{ secrets.DATABASE_HOST }}~\
                               DATABASE_SSL_MODE=${{ secrets.DATABASE_SSL_MODE }}~\
                               DATABASE_NAME=${{ secrets.DATABASE_NAME }}~\

@@ -60,3 +60,14 @@ export const requiredFieldError = (field) => {
 
 	return undefined;
 }
+
+export const roundFloat = (val, precision) => {
+	precision = Math.max(precision, 1);
+	let number = 1;
+	while (precision > 0) {
+		number *= 10;
+		precision--;
+	}
+
+	return Math.round(val * number + Number.EPSILON) / number;
+}

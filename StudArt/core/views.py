@@ -254,7 +254,7 @@ class UserSubscriptionsAPIView(generics.ListAPIView):
 
 		user = user.first()
 		subs = user.subscriptions
-		if user.show_subscriptions:
+		if self.request.user.pk == user.pk or user.show_subscriptions:
 			return subs.all().order_by('-subscriptions')
 
 		return subs.none()

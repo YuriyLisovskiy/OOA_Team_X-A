@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 
-import "../../styles/artwork/artwork_preview.css"
 import {Link} from "react-router-dom";
 import TagBadgeComponent from "../TagBadge";
-import {getClassForTag} from "../../utils/misc";
+import {getClassForTag, roundFloat} from "../../utils/misc";
+import "../../styles/artwork/artwork_preview.css";
 
 export default class ArtworkPreviewComponent extends Component {
 
@@ -31,7 +31,7 @@ export default class ArtworkPreviewComponent extends Component {
 							<i role="button"
 							   className="select-none fa fa-lg fa-star d-inline mr-2"
 							   aria-hidden="true"
-							   data-voted={post.voted ? "voted" : ""}> {post.points}</i>
+							   data-voted={post.voted ? "voted" : ""}> {roundFloat(post.points, 2)}</i>
 						}
 						<Link to={'/artwork/' + post.id} className="text-muted d-inline">
 							<div className="d-inline select-none">

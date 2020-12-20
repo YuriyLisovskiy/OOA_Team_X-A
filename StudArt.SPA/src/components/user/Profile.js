@@ -1,11 +1,10 @@
 import React, {Component} from "react";
 import UserService from "../../services/user";
-import {getErrorMessage} from "../../utils/misc";
+import {getErrorMessage, roundFloat} from "../../utils/misc";
 import SpinnerComponent from "../Spinner";
 import ArtworksListComponent from "../artwork/List";
 import TagBadgeComponent from "../TagBadge";
 import Errors from "../Errors";
-import {Link} from "react-router-dom";
 
 export default class ProfileComponent extends Component {
 
@@ -14,75 +13,99 @@ export default class ProfileComponent extends Component {
 		this.state = {
 			user: undefined,
 			loading: true,
-			currentUser: UserService.getCurrentUser(),
+			currentUser: props.currentUser ? props.currentUser : UserService.getCurrentUser(),
 			notFound: false,
 			subscriptions: [],
 			mostUsedTags: []
-		}
+		};
+		this._artworksListRef = React.createRef();
 	}
 
 	componentDidMount() {
-		let userId = null;
+		let userId;
+		let isMe = false;
 		if (this.props.match.params.id) {
 			userId = this.props.match.params.id;
 		}
 		else if (this.state.currentUser) {
+			isMe = true;
 			userId = this.state.currentUser.id;
 		}
+		else {
+			userId = null;
+		}
 
-		if (userId) {
-			UserService.getUser(userId, (user, err) => {
-				if (err) {
-					if (err.response.status === 404) {
-						this.setState({
-							notFound: true,
-							loading: false
-						});
-					}
-					else {
+		this._loadUser(userId, isMe);
+	}
+
+	_loadUser = (id, isMe = false) => {
+		// let getUserFunc;
+		// if (this.props.match.params.id) {
+		// 	getUserFunc = (handler) => UserService.getUser(this.props.match.params.id, handler);
+		// }
+		// else if (this.state.currentUser) {
+		// 	getUserFunc = (handler) => UserService.getMe(handler);
+		// }
+		// else {
+		// 	getUserFunc = (handler) => {
+		// 		this.setState({notFound: true});
+		// 	};
+		// }
+
+		if (!id) {
+			this.setState({notFound: true});
+			return;
+		}
+
+		if (!isMe) {
+			this.props.history.push('/profile/' + id);
+		}
+
+		UserService.getUser(id, (user, err) => {
+			if (err) {
+				if (err.response && err.response.status === 404) {
+					this.setState({
+						notFound: true,
+						loading: false
+					});
+				}
+				else {
+					// TODO:
+					alert(getErrorMessage(err));
+				}
+			}
+			else {
+				this.setState({
+					user: user,
+					loading: false
+				});
+				if (this._artworksListRef.current) {
+					this._artworksListRef.current.reloadList([user.username]);
+				}
+
+				UserService.getMostUsedTagsForAuthor(user.id, 5, (tags, err) => {
+					if (err) {
 						// TODO:
 						alert(getErrorMessage(err));
 					}
-				}
-				else {
-					this._setLoadedUser(user);
-					UserService.getMostUsedTagsForAuthor(userId, 5, (tags, err) => {
-						if (err) {
-							// TODO:
-							alert(getErrorMessage(err));
-						}
-						else {
-							this.setState({
-								mostUsedTags: tags
-							});
-						}
-					});
-
-					if (user.show_subscriptions) {
-						UserService.getSubscriptions(userId, 1, (data, err) => {
-							if (err) {
-								// TODO:
-								alert(getErrorMessage(err));
-							}
-							else {
-								this.setState({
-									subscriptions: data.results
-								});
-							}
+					else {
+						this.setState({
+							mostUsedTags: tags
 						});
 					}
-				}
-			});
-		}
-		else {
-			this.props.history.push('/');
-		}
-	}
-
-	_setLoadedUser = (user) => {
-		this.setState({
-			user: user,
-			loading: false
+				});
+				UserService.getSubscriptions(user.id, 1, (data, err) => {
+					if (err) {
+						// TODO:
+						alert(getErrorMessage(err));
+					}
+					else {
+						this.setState({
+							subscriptions: data.results
+						});
+					}
+				});
+			}
 		});
 	}
 
@@ -100,6 +123,12 @@ export default class ProfileComponent extends Component {
 					});
 				}
 			});
+		}
+	}
+
+	_onClickLoadUser = (id) => {
+		return e => {
+			this._loadUser(id);
 		}
 	}
 
@@ -148,6 +177,16 @@ export default class ProfileComponent extends Component {
 
 	render() {
 		let user = this.state.user;
+		let hasFirstAndLastName;
+		if (user) {
+			hasFirstAndLastName = ((
+				this.state.currentUser && this.state.currentUser.id === user.id
+			) || user.show_full_name) && user.first_name && user.last_name;
+		}
+		else {
+			hasFirstAndLastName = false;
+		}
+
 		return <div className="container">
 			{
 				this.state.loading ? (<SpinnerComponent/>) : (
@@ -210,23 +249,27 @@ export default class ProfileComponent extends Component {
 										}
 									</div>
 								}
-								{
-									((
-										this.state.currentUser && this.state.currentUser.id === user.id
-									) || user.show_rating) &&
-									<h5 className="float-right">Rating: {user.rating}</h5>
-								}
-								{
-									((
-										this.state.currentUser && this.state.currentUser.id === user.id
-									) || (
-										user.show_full_name && user.first_name && user.last_name
-									)) &&
-									<h5 className="mb-2">{user.first_name} {user.last_name}</h5>
-								}
+								<div className="row">
+									{
+										hasFirstAndLastName &&
+										<div className="col-sm-7">
+											<h5 className="mb-2 text-left">{user.first_name} {user.last_name}</h5>
+										</div>
+									}
+									{
+										((
+											this.state.currentUser && this.state.currentUser.id === user.id
+										) || user.show_rating) &&
+										<div className="col-sm-5">
+											<h5 className={"text-" + (hasFirstAndLastName ? "right" : "left")}>
+												Rating: {roundFloat(user.rating, 2)}
+											</h5>
+										</div>
+									}
+								</div>
 								<h6>{user.username}</h6>
 								{
-									this.state.mostUsedTags.length > 0 &&
+									this.state.mostUsedTags && this.state.mostUsedTags.length > 0 &&
 									<div className="mt-4">
 										<div className="text-muted text-center mb-1 muted-border-bottom">
 											<small>MOST USED TAGS</small>
@@ -251,23 +294,22 @@ export default class ProfileComponent extends Component {
 										</div>
 										{
 											this.state.subscriptions.map((user) => {
-												return <Link to={'/profile/' + user.id} className="float-left"
-												             key={user.id}>
-													<div className="text-muted profile-photo">
-														<img src={user.avatar_link} alt="Avatar" className="avatar-picture mr-2"/>
-														<span className="d-inline">
+												return <div key={user.id}
+												            className="underline-on-hover cursor-pointer text-muted profile-photo mb-1"
+												            onClick={this._onClickLoadUser(user.id)}>
+													<img src={user.avatar_link} alt="Avatar" className="avatar-picture mr-2"/>
+													<span className="d-inline">
 														{
 															user.first_name && user.last_name &&
 															<span>{user.first_name} {user.last_name} [</span>
 														}
-															{user.username}
-															{
-																user.first_name && user.last_name &&
-																"]"
-															}
+														{user.username}
+														{
+															user.first_name && user.last_name &&
+															"]"
+														}
 													</span>
-													</div>
-												</Link>;
+												</div>;
 											})
 										}
 									</div>
@@ -279,7 +321,8 @@ export default class ProfileComponent extends Component {
 								</div>
 								{
 									user &&
-									<ArtworksListComponent columnsCount={2}
+									<ArtworksListComponent ref={this._artworksListRef}
+									                       columnsCount={2}
 									                       filterAuthors={[user.username]}
 									                       clickOnPreviewTag={false}/>
 								}

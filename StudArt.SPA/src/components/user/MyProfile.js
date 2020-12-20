@@ -1,17 +1,20 @@
 import ProfileComponent from "./Profile";
 import UserProfile from "../../services/user";
 import Errors from "../Errors";
+import {Component} from "react";
 
-export default class MyProfileComponent extends ProfileComponent {
+export default class MyProfileComponent extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
-			user: UserProfile.getCurrentUser()
+			currentUser: UserProfile.getCurrentUser()
 		};
 	}
 
 	render() {
-		return this.state.user ? super.render() : <Errors.NotFound/>;
+		return this.state.currentUser ? (
+			<ProfileComponent currentUser={this.state.currentUser} {...this.props}/>
+		) : <Errors.NotFound/>;
 	}
 }

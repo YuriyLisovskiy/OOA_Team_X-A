@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 import AuthService from "../../services/auth";
 import ArtworkService from "../../services/artwork";
 import CommentService from "../../services/comment";
-import {getErrorMessage} from "../../utils/misc";
+import {getErrorMessage, roundFloat} from "../../utils/misc";
 import CommentInputComponent from "./CommentInput";
 import TagBadgeComponent from "../TagBadge";
 import ImagePreviewComponent from "./ImagePreview";
@@ -266,7 +266,9 @@ export default class ArtworkComponent extends Component {
 												(!post.can_vote || post.voted) ? (
 													<i className="select-none fa fa-lg fa-star"
 													   aria-hidden="true"
-													   data-voted={post.voted ? "voted" : ""}> {post.points}</i>
+													   data-voted={post.voted ? "voted" : ""}> {
+													   	roundFloat(post.points, 2)
+													   }</i>
 												) : (
 													<div className="input-group input-group-sm mb-3">
 														<select className="form-control"
